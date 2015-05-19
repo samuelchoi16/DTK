@@ -269,30 +269,6 @@ Dataset::operator DcmDataset*(void) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Dataset::registerCodecs(void)
-{
-	DcmRLEEncoderRegistration::registerCodecs();
-	DJEncoderRegistration::registerCodecs();
-	DJLSEncoderRegistration::registerCodecs();
-
-	DcmRLEDecoderRegistration::registerCodecs();
-	DJDecoderRegistration::registerCodecs();
-	DJLSDecoderRegistration::registerCodecs();
-}
-
-void Dataset::unregisterCodecs(void)
-{
-	DcmRLEEncoderRegistration::cleanup();
-	DJEncoderRegistration::cleanup();
-	DJLSEncoderRegistration::cleanup();
-
-	DcmRLEDecoderRegistration::cleanup();
-	DJDecoderRegistration::cleanup();
-	DJLSDecoderRegistration::cleanup();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDatasetPtrList)
 {
 	Status stat;
@@ -308,9 +284,9 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 	const Dataset* mwlDatasetPtr;
 
 	String mwlPatientId_0, mwlAccessionNo_0, mwlStudyInstanceUID_0;
-	stat = mwlDatasetPtr_0->getValue(DCM_PatientID, mwlPatientId_0);
-	stat = mwlDatasetPtr_0->getValue(DCM_AccessionNumber, mwlAccessionNo_0);
-	stat = mwlDatasetPtr_0->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID_0);
+	stat = mwlDatasetPtr_0->getString(DCM_PatientID, mwlPatientId_0);
+	stat = mwlDatasetPtr_0->getString(DCM_AccessionNumber, mwlAccessionNo_0);
+	stat = mwlDatasetPtr_0->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID_0);
 
 	std::list<String> mwlStudyInstanceUIDList;
 	mwlStudyInstanceUIDList.push_back(mwlStudyInstanceUID_0);
@@ -319,9 +295,9 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 		mwlDatasetPtr = *i;
 
 		String mwlPatientId, mwlAccessionNumber, mwlStudyInstanceUID;
-		stat = mwlDatasetPtr->getValue(DCM_PatientID, mwlPatientId);
-		stat = mwlDatasetPtr->getValue(DCM_AccessionNumber, mwlAccessionNumber);
-		stat = mwlDatasetPtr->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID);
+		stat = mwlDatasetPtr->getString(DCM_PatientID, mwlPatientId);
+		stat = mwlDatasetPtr->getString(DCM_AccessionNumber, mwlAccessionNumber);
+		stat = mwlDatasetPtr->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID);
 
 		if (mwlPatientId_0 != mwlPatientId) {
 			return EC_IllegalParameter;
@@ -362,8 +338,8 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 	stat = copyValueFrom(DCM_PatientBirthDate, mwlDatasetPtr_0);
 	stat = copyValueFrom(DCM_PatientSex, mwlDatasetPtr_0);
 
-	stat = putValue(DCM_AccessionNumber, accessionNo);
-	stat = putValue(DCM_StudyInstanceUID, studyInstanceUID);
+	stat = putString(DCM_AccessionNumber, accessionNo);
+	stat = putString(DCM_StudyInstanceUID, studyInstanceUID);
 
 	Item refStudyItem;
 	for(std::list<String>::iterator i = mwlStudyInstanceUIDList.begin(); i != mwlStudyInstanceUIDList.end(); i++) {
@@ -374,7 +350,7 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 		mwlDatasetPtr = *i;
 
 		String mwlStudyInstanceUID;
-		stat = mwlDatasetPtr->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID);
+		stat = mwlDatasetPtr->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID);
 
 		Item sourceItem, targetItem;
 		stat = mwlDatasetPtr->getItem(DCM_ScheduledProcedureStepSequence, sourceItem);
@@ -390,7 +366,7 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 			stat = targetItem.copyValueFrom(DCM_ScheduledProcedureStepDescription, &sourceItem);
 			stat = targetItem.copyValueFrom(DCM_ScheduledProtocolCodeSequence, &sourceItem);
 			stat = targetItem.copyValueFrom(DCM_AccessionNumber, mwlDatasetPtr);
-			stat = targetItem.putValue(DCM_StudyInstanceUID, studyInstanceUID);
+			stat = targetItem.putString(DCM_StudyInstanceUID, studyInstanceUID);
 			stat = targetItem.putRefSOP(DCM_ReferencedStudySequence, refStudyItem, UID_RETIRED_DetachedStudyManagementSOPClass, mwlStudyInstanceUID);	// FIXME: SOP Class UID to confirm
 		}
 	}
@@ -412,17 +388,17 @@ Status Dataset::prepareMPPSFromMWL(const std::list<Dataset*> mwlDatasetPtrList)
 	const Dataset* mwlDatasetPtr;
 
 	String mwlPatientId_0, mwlAccessionNo_0, mwlStudyInstanceUID_0;
-	stat = mwlDatasetPtr_0->getValue(DCM_PatientID, mwlPatientId_0);
-	stat = mwlDatasetPtr_0->getValue(DCM_AccessionNumber, mwlAccessionNo_0);
-	stat = mwlDatasetPtr_0->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID_0);
+	stat = mwlDatasetPtr_0->getString(DCM_PatientID, mwlPatientId_0);
+	stat = mwlDatasetPtr_0->getString(DCM_AccessionNumber, mwlAccessionNo_0);
+	stat = mwlDatasetPtr_0->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID_0);
 
 	for(i++; i != mwlDatasetPtrList.cend(); i++) {
 		mwlDatasetPtr = *i;
 
 		String mwlPatientId, mwlAccessionNumber, mwlStudyInstanceUID;
-		stat = mwlDatasetPtr->getValue(DCM_PatientID, mwlPatientId);
-		stat = mwlDatasetPtr->getValue(DCM_AccessionNumber, mwlAccessionNumber);
-		stat = mwlDatasetPtr->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID);
+		stat = mwlDatasetPtr->getString(DCM_PatientID, mwlPatientId);
+		stat = mwlDatasetPtr->getString(DCM_AccessionNumber, mwlAccessionNumber);
+		stat = mwlDatasetPtr->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID);
 
 		if (mwlPatientId_0 != mwlPatientId) {
 			return EC_IllegalParameter;
@@ -456,7 +432,7 @@ Status Dataset::prepareMPPSFromMWL(const std::list<Dataset*> mwlDatasetPtrList)
 		mwlDatasetPtr = *i;
 
 		String mwlStudyInstanceUID;
-		stat = mwlDatasetPtr->getValue(DCM_StudyInstanceUID, mwlStudyInstanceUID);
+		stat = mwlDatasetPtr->getString(DCM_StudyInstanceUID, mwlStudyInstanceUID);
 
 		Item sourceItem, targetItem, refStudyItem;
 		stat = mwlDatasetPtr->getItem(DCM_ScheduledProcedureStepSequence, sourceItem);
@@ -466,7 +442,7 @@ Status Dataset::prepareMPPSFromMWL(const std::list<Dataset*> mwlDatasetPtrList)
 		stat = putItem(DCM_ScheduledStepAttributesSequence, targetItem, pos);
 		{
 			stat = targetItem.copyValueFrom(DCM_AccessionNumber, mwlDatasetPtr);
-			stat = targetItem.putValue(DCM_StudyInstanceUID, studyInstanceUID);
+			stat = targetItem.putString(DCM_StudyInstanceUID, studyInstanceUID);
 			stat = targetItem.putRefSOP(DCM_ReferencedStudySequence, refStudyItem, UID_RETIRED_DetachedStudyManagementSOPClass, mwlStudyInstanceUID);	// FIXME: SOP Class UID to confirm
 			stat = targetItem.copyValueFrom(DCM_RequestedProcedureID, mwlDatasetPtr);
 			stat = targetItem.copyValueFrom(DCM_RequestedProcedureDescription, mwlDatasetPtr);
@@ -551,9 +527,9 @@ Status Dataset::prepareMPPS2FromCompositeIOD(const Dataset* datasetPtr)
 	Sint32 seriesIndex, instanceIndex;
 	String str;
 
-	status = datasetPtr->getValue(DCM_SeriesInstanceUID, seriesInstanceUID);
+	status = datasetPtr->getString(DCM_SeriesInstanceUID, seriesInstanceUID);
 	for(seriesIndex = 0; getItem(DCM_PerformedSeriesSequence, seriesItem, seriesIndex).good(); seriesIndex++) {
-		status = seriesItem.getValue(DCM_SeriesInstanceUID, str);
+		status = seriesItem.getString(DCM_SeriesInstanceUID, str);
 		if (str.compare(seriesInstanceUID) == 0)
 			goto series_done;
 	}
@@ -568,11 +544,11 @@ Status Dataset::prepareMPPS2FromCompositeIOD(const Dataset* datasetPtr)
 	}
 
 series_done:
-	status = datasetPtr->getValue(DCM_SOPClassUID, sopClassUID);
-	status = datasetPtr->getValue(DCM_SOPInstanceUID, sopInstanceUID);
+	status = datasetPtr->getString(DCM_SOPClassUID, sopClassUID);
+	status = datasetPtr->getString(DCM_SOPInstanceUID, sopInstanceUID);
 	if (UIDHelper::isImageSOPClassUID(sopClassUID)) {
 		for(instanceIndex = 0; seriesItem.getItem(DCM_ReferencedImageSequence, instanceItem, instanceIndex).good(); instanceIndex++) {
-			status = instanceItem.getValue(DCM_ReferencedSOPInstanceUID, str);
+			status = instanceItem.getString(DCM_ReferencedSOPInstanceUID, str);
 			if (str.compare(sopInstanceUID) == 0)
 				goto instance_done;
 		}
@@ -582,7 +558,7 @@ series_done:
 		status = instanceItem.copyValueFrom(DCM_ReferencedSOPInstanceUID, datasetPtr, DCM_SOPInstanceUID);
 	} else {
 		for(instanceIndex = 0; seriesItem.getItem(DCM_ReferencedNonImageCompositeSOPInstanceSequence, instanceItem, instanceIndex).good(); instanceIndex++) {
-			status = instanceItem.getValue(DCM_ReferencedSOPInstanceUID, str);
+			status = instanceItem.getString(DCM_ReferencedSOPInstanceUID, str);
 			if (str.compare(sopInstanceUID) == 0)
 				goto instance_done;
 		}
@@ -601,8 +577,8 @@ Status Dataset::prepareStorageCommitmentFromCompositeIOD(const Dataset* datasetP
 	Status stat;
 
 	String sopClassUID, sopInstanceUID;
-	stat = datasetPtr->getValue(DCM_SOPClassUID, sopClassUID);
-	stat = datasetPtr->getValue(DCM_SOPInstanceUID, sopInstanceUID);
+	stat = datasetPtr->getString(DCM_SOPClassUID, sopClassUID);
+	stat = datasetPtr->getString(DCM_SOPInstanceUID, sopInstanceUID);
 
 	Item item;
 	stat = putRefSOP(DCM_ReferencedSOPSequence, item, sopClassUID, sopInstanceUID);

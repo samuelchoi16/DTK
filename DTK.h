@@ -29,72 +29,17 @@
 #include "dcmtk/dcmnet/diutil.h"
 
 #include <list>
+#include <QString>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define	QSTR_TO_DSTR(s)					(dcm::String((s).toStdString().c_str()))
+#define	DSTR_TO_QSTR(s)					(QString((s).c_str()))
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define	DTK_VERSION_2_0_0_0				_T("2.0.0.0")
 #define	DTK_VERSION						DTK_VERSION_2_0_0_0
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define	ITEM_POS_FIRST					(0)
-#define	ITEM_POS_LAST					(-1)
-#define	ITEM_POS_APPEND					(-2)
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define	DTK_NLS_AUTO					(-1)
-#define	DTK_NLS_OFF						0
-
-#define	DTK_NLS_ISO_IR_6				0
-#define	DTK_NLS_ISO_IR_100				1
-#define	DTK_NLS_ISO_IR_101				2
-#define	DTK_NLS_ISO_IR_109				3
-#define	DTK_NLS_ISO_IR_110				4
-#define	DTK_NLS_ISO_IR_148				5
-#define	DTK_NLS_ISO_IR_144				6
-#define	DTK_NLS_ISO_IR_127				7
-#define	DTK_NLS_ISO_IR_126				8
-#define	DTK_NLS_ISO_IR_138				9
-#define	DTK_NLS_ISO_IR_166				10
-#define	DTK_NLS_ISO_IR_149				11
-#define	DTK_NLS_ISO_IR_13				12
-#define	DTK_NLS_ISO_IR_14				13
-#define	DTK_NLS_ISO_IR_87				14
-#define	DTK_NLS_ISO_IR_159				15
-#define	DTK_NLS_ISO_IR_192				16
-
-#define	DTK_NLS_COUNT					17
-
-#define	DTK_NLS_ISO_2022_IR_6_87		(DTK_NLS_ISO_IR_6 | DTK_NLS_ISO_IR_87 << 8)
-										// Japanese: ISO 646 + JIS X 0208
-#define	DTK_NLS_ISO_2022_IR_13_87		(DTK_NLS_ISO_IR_13 | DTK_NLS_ISO_IR_87 << 8)
-										// Japanese: JIS X 0201 + JIS X 0208
-#define	DTK_NLS_ISO_2022_IR_13_87_159	(DTK_NLS_ISO_IR_13 | DTK_NLS_ISO_IR_87 << 8 | DTK_NLS_ISO_IR_159 << 16)
-										// Japanese: JIS X 0201 + JIS X 0208 + JIS X 0212)
-#define	DTK_NLS_ISO_2022_IR_6_149		(DTK_NLS_ISO_IR_6 | DTK_NLS_ISO_IR_149 << 8)
-										// Korean: ISO 646 + KS X 1001
-
-#define	DTK_NLS_DEFAULT					DTK_NLS_ISO_IR_6
-#define	DTK_NLS_LATIN1					DTK_NLS_ISO_IR_100
-#define	DTK_NLS_LATIN2					DTK_NLS_ISO_IR_101
-#define	DTK_NLS_LATIN3					DTK_NLS_ISO_IR_109
-#define	DTK_NLS_LATIN4					DTK_NLS_ISO_IR_110
-#define	DTK_NLS_LATIN5					DTK_NLS_ISO_IR_148
-#define	DTK_NLS_CYRILLIC				DTK_NLS_ISO_IR_144
-#define	DTK_NLS_ARABIC					DTK_NLS_ISO_IR_127
-#define	DTK_NLS_GREEK					DTK_NLS_ISO_IR_126
-#define	DTK_NLS_HEBREW					DTK_NLS_ISO_IR_138
-#define	DTK_NLS_THAI					DTK_NLS_ISO_IR_166
-#define	DTK_NLS_KOREAN					DTK_NLS_ISO_2022_IR_6_149
-#define	DTK_NLS_JAPANESE0				DTK_NLS_ISO_IR_13
-#define	DTK_NLS_JAPANESE1				DTK_NLS_ISO_2022_IR_6_87
-#define	DTK_NLS_JAPANESE2				DTK_NLS_ISO_2022_IR_13_87
-#define	DTK_NLS_JAPANESE3				DTK_NLS_ISO_2022_IR_13_87_159
-#define	DTK_NLS_JAPANESE				DTK_NLS_JAPANESE2
-#define	DTK_NLS_UNICODE_UTF8			DTK_NLS_ISO_IR_192
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,11 +59,10 @@ namespace dcm {
 	typedef OFCondition					Status;
 	typedef OFString					String;
 	typedef DcmTag						Tag;
+	typedef	std::list<Tag>				TagList;
 
 	class Logger;
-//	class Status;
 	class NLS;
-//	class Tag;
 
 	class AppEntity;
 
@@ -171,65 +115,81 @@ namespace dcm {
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	Status
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	class DTKSHARED_EXPORT Status : public OFCondition
-	{
-	public:
-		Status(void);
-		Status(const OFCondition& cond);
-		Status(const OFConditionConst& cond);
-		virtual ~Status(void);
-
-		Uint16 code(void) const;
-		String text(void) const;
-		bool isOK(void) const;
-	};
-*/
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	NLS
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	class DTKSHARED_EXPORT NLS
 	{
-	/*
 	protected:
-		std::string _s;
+		struct CharacterSet {
+			String	name1;
+			String	name2;
+			String	escapeSequence;
+		};
+
+		static const CharacterSet _characterSets[];
 
 	public:
-		String(void);
-		String(const char ch);
-		String(const char* psz);
-		String(const std::string& ostr);
-		String(const OFString& ostr);
+		static const int AUTO		= -1;
+		static const int OFF		= 0;
 
-		const String& operator=(char ch);
-		const String& operator=(const char* psz);
-		const String& operator=(const std::string& ostr);
-		const String& operator=(const OFString& ostr);
+		static const int ISO_IR_6	= 0;
+		static const int ISO_IR_100	= 1;
+		static const int ISO_IR_101	= 2;
+		static const int ISO_IR_109	= 3;
+		static const int ISO_IR_110	= 4;
+		static const int ISO_IR_144	= 5;
+		static const int ISO_IR_127	= 6;
+		static const int ISO_IR_126	= 7;
+		static const int ISO_IR_138	= 8;
+		static const int ISO_IR_148	= 9;
+		static const int ISO_IR_166	= 10;
+		static const int ISO_IR_149	= 11;
+		static const int ISO_IR_13	= 12;
+		static const int ISO_IR_14	= 13;
+		static const int ISO_IR_87	= 14;
+		static const int ISO_IR_159	= 15;
+		static const int ISO_IR_58	= 16;
+		static const int ISO_IR_192	= 17;
+		static const int GB18030	= 18;
 
-		operator const char*() const;
-		operator const OFString() const;
+		static const int ISO_2022_IR_13_87	= (ISO_IR_13 | ISO_IR_87 << 8);
+										// Japanese: JIS X 0201 + JIS X 0208
+		static const int ISO_2022_IR_6_149	= (ISO_IR_6 | ISO_IR_149 << 8);
+										// Korean: ISO 646 + KS X 1001
+		static const int ISO_2022_IR_6_58	= (ISO_IR_6 | ISO_IR_58 << 8);
+										// Chinese: ISO 646 + GB2312
 
-		const char* toConstData() const;
+		static const int DEFAULT			= ISO_IR_6;
+		static const int LATIN1				= ISO_IR_100;
+		static const int LATIN2				= ISO_IR_101;
+		static const int LATIN3				= ISO_IR_109;
+		static const int LATIN4				= ISO_IR_110;
+		static const int CYRILLIC			= ISO_IR_144;
+		static const int ARABIC				= ISO_IR_127;
+		static const int GREEK				= ISO_IR_126;
+		static const int HEBREW				= ISO_IR_138;
+		static const int LATIN5				= ISO_IR_148;
+		static const int THAI				= ISO_IR_166;
+		static const int KOREAN				= ISO_2022_IR_6_149;
+		static const int JAPANESE			= ISO_2022_IR_13_87;
+		static const int CHINESE_GB2312		= ISO_2022_IR_6_58;
+		static const int CHINESE_GB18030	= GB18030;
+		static const int UNICODE_UTF8		= ISO_IR_192;
 
-		static String format(const String format, ...);
+		static int characterSetCount(void);
+		static String characterSetName1(int nls);
+		static String characterSetName2(int nls);
+		static String characterSetEscapeSequence(int nls);
 
-		size_t size() const;
-		bool isEmpty() const;
-		int operator==(const String& s) const;
-		int operator!=(const String& s) const;
-		int compare(const String& s) const;
-		String substr(size_t a, size_t b) const;
+		static String toLocal8Bit(const QString& istr, int nls);
+		static QString toUnicode(const String& istr, int nls);
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		String encode(int nls);
-		String decode(int nls = DTK_NLS_ISO_IR_6);
-*/
-	public:
-		static String encode(const String& str, int nls);
-		static String decode(const String& str, int nls = DTK_NLS_ISO_IR_6);
+		static String encode(const String& istr, int nls);
+		static String decode(const String& istr, int nls = ISO_IR_6);
+
+		static String encodeQ(const QString& istr, int nls);
+		static QString decodeQ(const String& istr, int nls = ISO_IR_6);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,50 +204,10 @@ namespace dcm {
 		DateTime(int year, int month, int day, int hour, int minute, int second);
 
 		String format(const String& format) const;
+		QString formatQ(const QString& format) const;
+
+		static DateTime currentDateTime();
 	};
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	Tag
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	class DTKSHARED_EXPORT Tag : public DcmTag
-	{
-	public:
-		Tag(void);
-		Tag(Uint16 g, Uint16 e);
-		Tag(const DcmTagKey& key);
-		Tag(const Tag& dcmTag);
-		~Tag(void);
-
-		Tag& operator=(const Tag& dcmTag);
-
-	//	void		SetVR(DcmEVR eVR);
-		DcmEVR		GetVR(void) const;
-		String	getVRName(void) const;
-
-	//	void	Set(const CDcmTag& dcmTag);
-	//	void	Set(Uint16 g, Uint16 e);
-	//	void	Get(Uint16* pg, Uint16* pe) const;
-	//	CString	GetTagName(void);
-
-	//	void	setPrivateCreator(const CString& strPrivCreator);
-	//	CString	getPrivateCreator(void) const;
-
-	//	void	lookupVRinDictionary(void);
-	//	bool	isSignable(void) const;
-	//	bool	isUnknownVR(void) const;
-
-	//	int operator==(const CDcmTag& dcmTag) const;
-	//	int operator!=(const CDcmTag& dcmTag) const;
-	//	int operator<(const CDcmTag& dcmTag) const;
-	//	int operator>(const CDcmTag& dcmTag) const;
-	//	int operator<=(const CDcmTag& dcmTag) const;
-	//	int operator>=(const CDcmTag& dcmTag) const;
-
-		String	toString() const;
-	};
-*/
-	typedef	std::list<Tag>				TagList;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	CDcmAppEntity
@@ -623,7 +543,7 @@ namespace dcm {
 		AppEntity* _appEntityPtr;
 		T_ASC_Parameters* _ascParamsPtr;
 		T_ASC_Association* _ascAssocPtr;
-	//	CMutex m_mtxAssoc;
+		QMutex _assocMutex;
 		int _maxPDUSize;
 
 	public:
@@ -638,7 +558,7 @@ namespace dcm {
 		Status getAssocInfo(AssociationInfo& assocInfo);
 
 		static Status verify(const String& localAETitle, const String& aetitle, const String& hostname, const Uint16 port, const Uint16 timeout = 15);
-	//	static Status verify(const QString& localAETitle, const QString& aetitle, const QString& hostname, const Uint16 port, const Uint16 timeout = 15);
+		static Status verify(const QString& localAETitle, const QString& aetitle, const QString& hostname, const Uint16 port, const Uint16 timeout = 15);
 
 	private:
 		Association(const Association&);					// do not allow pass-by-value
@@ -689,7 +609,7 @@ namespace dcm {
 		bool _started;
 		bool _stopped;
 		Uint32 _counter;
-	//	CMutex m_mtx;
+		QMutex _masterMutex;
 
 	public:
 		AssociationListenerMaster(AppEntity* appEntityPtr);
@@ -743,6 +663,10 @@ namespace dcm {
 		static int _DefaultNLS;
 
 	public:
+		static const int POS_FIRST = 0;
+		static const int POS_LAST = -1;
+		static const int POS_APPEND = -2;
+
 		Item(void);
 		Item(DcmItem* _dcmItemPtr);
 		Item(const Item& dcmItem);
@@ -751,14 +675,22 @@ namespace dcm {
 		Item& operator=(const Item& item);
 		Status copyFrom(const Item* sourceItemPtr);
 
-		Status set(DcmItem* _dcmItemPtr, int parentNLS = DTK_NLS_DEFAULT);
+		Status set(DcmItem* _dcmItemPtr, int parentNLS = NLS::DEFAULT);
 		Status clear(void);
+
+		Status print(const char* filename) const;
 		Status print(const String& filename) const;
+		Status print(const QString& filename) const;
+
+		Status printXML(const char* filename) const;
 		Status printXML(const String& filename) const;
+		Status printXML(const QString& filename) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Status putValue(const DcmTagKey& tag, const String& value, int nls = DTK_NLS_AUTO);
+		Status putString(const DcmTagKey& tag, const char* value, int nls = NLS::AUTO);
+		Status putString(const DcmTagKey& tag, const String& value, int nls = NLS::AUTO);
+		Status putString(const DcmTagKey& tag, const QString& value, int nls = NLS::AUTO);
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
 		Status putValue(const DcmTagKey& tag, Uint value, Uint32 pos = 0);
@@ -780,7 +712,8 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Status getValue(const DcmTagKey& tag, String& value, Sint32 pos = -1, int nls = DTK_NLS_AUTO) const;
+		Status getString(const DcmTagKey& tag, String& value, Sint32 pos = -1, int nls = NLS::AUTO) const;
+		Status getString(const DcmTagKey& tag, QString& value, Sint32 pos = -1, int nls = NLS::AUTO) const;
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
 		Status getValue(const DcmTagKey& tag, Uint& value, Uint32 pos = 0) const;
@@ -804,7 +737,7 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Status putItem(const DcmTagKey& tag, Item& item, Sint32 pos = ITEM_POS_APPEND);
+		Status putItem(const DcmTagKey& tag, Item& item, Sint32 pos = POS_APPEND);
 		Status getItem(const DcmTagKey& tag, Item& item, Sint32 pos = 0) const;
 		Sint32 getItemCount(const DcmTagKey& tag) const;
 
@@ -814,7 +747,7 @@ namespace dcm {
 		Status getPixelItem(const DcmTagKey& tag, Uint32 pos, Uint8*& dataPtr, Uint32* lengthPtr) const;
 		Sint32 getPixelItemCount(const DcmTagKey& tag) const;
 
-		DcmPixelSequence* GetPixelSequence(const DcmTagKey& tag) const;
+		DcmPixelSequence* getPixelSequence(const DcmTagKey& tag) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -827,22 +760,34 @@ namespace dcm {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Status putCode(const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning);
+		Status putCode(const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning);
 		Status getCode(String& codeValue, String& codingSchemeDesignator, String& codingSchemeVersion, String& codeMeaning) const;
+		Status getCode(QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning) const;
 
 		Status putCode(const DcmTagKey& tag, Item& item,
 						const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning,
-						Sint32 pos = ITEM_POS_APPEND);
+						Sint32 pos = POS_APPEND);
+		Status putCode(const DcmTagKey& tag, Item& item,
+						const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning,
+						Sint32 pos = POS_APPEND);
 		Status getCode(const DcmTagKey& tag, Item& item,
 						String& codeValue, String& codingSchemeDesignator, String& codingSchemeVersion, String& codeMeaning,
+						Sint32 pos = 0) const;
+		Status getCode(const DcmTagKey& tag, Item& item,
+						QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning,
 						Sint32 pos = 0) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Status putRefSOP(const String& sopClassUID, const String& sopInstanceUID);
+		Status putRefSOP(const QString& sopClassUID, const QString& sopInstanceUID);
 		Status getRefSOP(String& sopClassUID, String& sopInstanceUID) const;
+		Status getRefSOP(QString& sopClassUID, QString& sopInstanceUID) const;
 
-		Status putRefSOP(const DcmTagKey& tag, Item& item, const String& sopClassUID, const String& sopInstanceUID, Sint32 pos = ITEM_POS_APPEND);
+		Status putRefSOP(const DcmTagKey& tag, Item& item, const String& sopClassUID, const String& sopInstanceUID, Sint32 pos = POS_APPEND);
+		Status putRefSOP(const DcmTagKey& tag, Item& item, const QString& sopClassUID, const QString& sopInstanceUID, Sint32 pos = POS_APPEND);
 		Status getRefSOP(const DcmTagKey& tag, Item& item, String& sopClassUID, String& sopInstanceUID, Sint32 pos = 0) const;
+		Status getRefSOP(const DcmTagKey& tag, Item& item, QString& sopClassUID, QString& sopInstanceUID, Sint32 pos = 0) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
+QT       -= gui
 
 TARGET = DTK
 TEMPLATE = lib
 
-DEFINES += DTK_LIBRARY
+DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
 DEFINES -= UNICODE
 
 SOURCES += \
@@ -22,13 +22,12 @@ SOURCES += \
     Item.cpp \
     Message.cpp \
     MetaInfo.cpp \
-    String.cpp \
-    Tag.cpp \
-    Status.cpp \
     Service.cpp \
     UIDHelper.cpp \
     Logger.cpp \
-    DateTime.cpp
+    DateTime.cpp \
+    DTK.cpp \
+    NLS.cpp
 
 HEADERS += DTK.h\
     DTKinternal.h \

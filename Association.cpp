@@ -33,7 +33,7 @@ Association::~Association(void)
 
 Status Association::close()
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	OFCondition cond;
 	if (_ascAssocPtr)
@@ -48,7 +48,7 @@ Status Association::close()
 
 Status Association::sendMessage(dcm::Message& req)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	OFCondition cond;
 	T_ASC_PresentationContextID& pcId = req._pcId;
@@ -84,7 +84,7 @@ Status Association::sendMessage(dcm::Message& req)
 
 Status Association::receiveMessage(Message& rsp, int timeout)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	OFCondition cond;
 	T_ASC_PresentationContextID& pcId = rsp._pcId;
@@ -300,43 +300,12 @@ on_exit:
 
 	return dcmStat;
 }
-/*
+
 Status Association::verify(const QString& localAETitle, const QString& aetitle, const QString& hostname, const Uint16 port, const Uint16 timeout)
 {
-	if (localAETitle.isEmpty() || aetitle.isEmpty() || hostname.isEmpty())
-		return EC_IllegalParameter;
-
-	Status dcmStat;
-	AppEntity dcmAppEntity;
-	AssociationRequestor dcmRequestor(&dcmAppEntity);
-	CEchoRQ req;
-	Message rsp;
-
-	dcmStat = dcmAppEntity.init(localAETitle, NET_REQUESTOR, 0, timeout);
-	if (!dcmStat.good())
-		goto on_exit;
-
-	dcmStat = dcmRequestor.connect(aetitle, hostname, port);
-	if (!dcmStat.good())
-		goto on_exit;
-
-	dcmStat = dcmRequestor.sendMessage(req);
-	if (!dcmStat.good())
-		goto on_exit;
-
-	dcmStat = dcmRequestor.receiveMessage(rsp, 10);
-	if (!dcmStat.good())
-		goto on_exit;
-
-	_logger.log(OFLogger::INFO_LOG_LEVEL, "verified");
-
-on_exit:
-	dcmRequestor.close();
-	dcmAppEntity.exit();
-
-	return dcmStat;
+	return verify(QSTR_TO_DSTR(localAETitle), QSTR_TO_DSTR(aetitle), QSTR_TO_DSTR(hostname), port, timeout);
 }
-*/
+
 static void ProgressCallback(void *callbackContextPtr, Ulong byteCount)
 {
 	Message* messagePtr = reinterpret_cast<Message*>(callbackContextPtr);

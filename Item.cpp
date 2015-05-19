@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int Item::_DefaultNLS = DTK_NLS_DEFAULT;
+int Item::_DefaultNLS = NLS::DEFAULT;
 
 Item::Item(void)
 {
@@ -110,8 +110,19 @@ Status Item::set(DcmItem* dcmItemPtr, int parentNLS)
 Status Item::clear(void)
 {
 	OFCondition cond = _dcmItemPtr->clear();
-	_autoNLS = DTK_NLS_DEFAULT;
+	_autoNLS = NLS::DEFAULT;
 	return cond;
+}
+
+Status Item::print(const char* filename) const
+{
+	std::ofstream os;
+
+	os.open(filename);
+	_dcmItemPtr->print(os);
+	os.close();
+
+	return EC_Normal;
 }
 
 Status Item::print(const String& filename) const
@@ -125,6 +136,28 @@ Status Item::print(const String& filename) const
 	return EC_Normal;
 }
 
+Status Item::print(const QString& filename) const
+{
+	std::ofstream os;
+
+	os.open(filename.toStdString().c_str());
+	_dcmItemPtr->print(os);
+	os.close();
+
+	return EC_Normal;
+}
+
+Status Item::printXML(const char* filename) const
+{
+	std::ofstream os;
+
+	os.open(filename);
+	OFCondition cond = _dcmItemPtr->writeXML(os);
+	os.close();
+
+	return cond;
+}
+
 Status Item::printXML(const String& filename) const
 {
 	std::ofstream os;
@@ -136,12 +169,26 @@ Status Item::printXML(const String& filename) const
 	return cond;
 }
 
+Status Item::printXML(const QString& filename) const
+{
+	std::ofstream os;
+
+	os.open(filename.toStdString().c_str());
+	OFCondition cond = _dcmItemPtr->writeXML(os);
+	os.close();
+
+	return cond;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Status Item::putValue(const DcmTagKey& tag, const String& value, int nls)
+Status Item::putString(const DcmTagKey& tag, const char* value, int nls)
 {
 	// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 	String str;
+
+	if (value == NULL)
+		value = "";
 
 	switch(DcmTag(tag).getEVR())
 	{
@@ -151,7 +198,7 @@ Status Item::putValue(const DcmTagKey& tag, const String& value, int nls)
 	case EVR_LT :
 	case EVR_UT :
 	case EVR_PN :
-		str = NLS::encode(value.c_str(), (nls == DTK_NLS_AUTO) ? _autoNLS : nls);
+		str = NLS::encode(value, (nls == NLS::AUTO) ? _autoNLS : nls);
 		break;
 	default :
 		str = value;
@@ -159,6 +206,18 @@ Status Item::putValue(const DcmTagKey& tag, const String& value, int nls)
 	}
 
 	return _dcmItemPtr->putAndInsertString(tag, str.c_str());
+}
+
+Status Item::putString(const DcmTagKey& tag, const String& value, int nls)
+{
+	return putString(tag, value.c_str(), nls);
+}
+
+Status Item::putString(const DcmTagKey& tag, const QString& value, int nls)
+{
+	nls = (nls == NLS::AUTO) ? _autoNLS : nls;
+	String str = NLS::toLocal8Bit(value, nls);
+	return putString(tag, str, nls);
 }
 
 #define	PUT_VALUE(tag, value, pos) \
@@ -180,14 +239,14 @@ Status Item::putValue(const DcmTagKey& tag, const String& value, int nls)
 	default : \
 		String str, str2; \
 		char buffer[4000]; \
-		if ((pos) > 0 && getValue((tag), str2).good()) { \
+		if ((pos) > 0 && getString((tag), str2).good()) { \
 			sprintf(buffer, "%s\\%d", str2.c_str(), (value)); \
 			str = buffer; \
 		} else { \
 			sprintf(buffer, "%d", (value)); \
 			str = buffer; \
 		} \
-		return putValue((tag), str); \
+		return putString((tag), str); \
 	} \
 }
 
@@ -263,10 +322,10 @@ Status Item::putEmpty(const DcmTagKey& tag)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Status Item::getValue(const DcmTagKey& tag, String& value, Sint32 pos, int nls) const
+Status Item::getString(const DcmTagKey& tag, String& value, Sint32 pos, int nls) const
 {
 	OFCondition cond;
-	OFString ostr;
+	String ostr;
 
 	if (pos == -1) {
 		const char* valuePtr;
@@ -276,12 +335,23 @@ Status Item::getValue(const DcmTagKey& tag, String& value, Sint32 pos, int nls) 
 		cond = _dcmItemPtr->findAndGetOFString(tag, ostr, pos);
 	}
 
-	nls = (nls == DTK_NLS_AUTO) ? _autoNLS : nls;
+	nls = (nls == NLS::AUTO) ? _autoNLS : nls;
 	if (nls > 0)
 		value = NLS::decode(ostr, nls);
 	else
 		value = ostr;
 
+	return cond;
+}
+
+Status Item::getString(const DcmTagKey& tag, QString& value, Sint32 pos, int nls) const
+{
+	OFCondition cond;
+	String str;
+	nls = (nls == NLS::AUTO) ? _autoNLS : nls;
+
+	cond = getString(tag, str, pos, nls);
+	value = NLS::toUnicode(str, nls);
 	return cond;
 }
 
@@ -322,7 +392,7 @@ Status Item::getValue(const DcmTagKey& tag, String& value, Sint32 pos, int nls) 
 		break; \
 	default : \
 		String str; \
-		cond = getValue((tag), str, (pos)); \
+		cond = getString((tag), str, (pos)); \
 		(value) = atoi(str.c_str()); \
 		break; \
 	} \
@@ -445,7 +515,7 @@ CDcmStatus CDcmItem::putPixelItem(const DcmTagKey& tag, const CDcmPixelSequence&
 */
 Status Item::getPixelItem(const DcmTagKey& tag, Uint32 pos, Uint8*& dataPtr, Uint32* lengthPtr) const
 {
-	DcmPixelSequence* dcmPixelSequencePtr = GetPixelSequence(tag);
+	DcmPixelSequence* dcmPixelSequencePtr = getPixelSequence(tag);
 	if (dcmPixelSequencePtr == NULL)
 		return EC_IllegalParameter;
 
@@ -461,11 +531,11 @@ Status Item::getPixelItem(const DcmTagKey& tag, Uint32 pos, Uint8*& dataPtr, Uin
 
 Sint32 Item::getPixelItemCount(const DcmTagKey& tag) const
 {
-	DcmPixelSequence* dcmPixelSequencePtr = GetPixelSequence(tag);
+	DcmPixelSequence* dcmPixelSequencePtr = getPixelSequence(tag);
 	return dcmPixelSequencePtr ? dcmPixelSequencePtr->card() : -1;
 }
 
-DcmPixelSequence* Item::GetPixelSequence(const DcmTagKey& tag) const
+DcmPixelSequence* Item::getPixelSequence(const DcmTagKey& tag) const
 {
 	OFCondition cond;
 	DcmElement* dcmElementPtr = NULL;
@@ -499,10 +569,10 @@ Status Item::putDate(const DcmTagKey& tag, const DateTime& dt)
 	// DA, DT
 	switch(DcmTag(tag).getEVR()) {
 	case EVR_DA :
-		return putValue(tag, dt.format("%Y%m%d"));
+		return putString(tag, dt.format("%Y%m%d"));
 		break;
 	case EVR_DT :
-		return putValue(tag, dt.format("%Y%m%d%H%M%S"));
+		return putString(tag, dt.format("%Y%m%d%H%M%S"));
 		break;
 	default :
 		return EC_InvalidTag;
@@ -517,19 +587,19 @@ Status Item::getDate(const DcmTagKey& tag, DateTime& dt) const
 	// DA, TM, DT
 	switch(DcmTag(tag).getEVR()) {
 	case EVR_DA :
-		status = getValue(tag, str);
+		status = getString(tag, str);
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
 		break;
 	case EVR_TM :
-		status = getValue(tag, str);
+		status = getString(tag, str);
 		dt.tm_hour = atoi(str.substr(0, 2).c_str());
 		dt.tm_min = atoi(str.substr(2, 2).c_str());
 		dt.tm_sec = atoi(str.substr(4, 2).c_str());
 		break;
 	case EVR_DT :
-		status = getValue(tag, str);
+		status = getString(tag, str);
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
@@ -548,13 +618,13 @@ Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const Dat
 {
 	// DA
 	if (DcmTag(dtag).getEVR() == EVR_DA)
-		return putValue(dtag, dt.format("%Y%m%d"));
+		return putString(dtag, dt.format("%Y%m%d"));
 	else
 		return EC_InvalidTag;
 
 	// TM
 	if (DcmTag(ttag).getEVR() == EVR_TM)
-		return putValue(ttag, dt.format("%H%M%S"));
+		return putString(ttag, dt.format("%H%M%S"));
 	else
 		return EC_InvalidTag;
 }
@@ -567,14 +637,14 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime&
 
 	// DA, TM
 	if (DcmTag(dtag).getEVR() == EVR_DA) {
-		status = getValue(dtag, str);
+		status = getString(dtag, str);
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
 		ok = true;
 	}
 	if (DcmTag(ttag).getEVR() == EVR_TM) {
-		Status status2 = getValue(ttag, str);
+		Status status2 = getString(ttag, str);
 		dt.tm_hour = atoi(str.substr(0, 2).c_str());
 		dt.tm_min = atoi(str.substr(2, 2).c_str());
 		dt.tm_sec = atoi(str.substr(4, 2).c_str());
@@ -591,25 +661,55 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime&
 Status Item::putCode(const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning)
 {
 	Status status;
-	status = putValue(DCM_CodeValue, codeValue);
-	status = putValue(DCM_CodingSchemeDesignator, codingSchemeDesignator);
-	status = putValue(DCM_CodingSchemeVersion, codingSchemeVersion);
-	status = putValue(DCM_CodeMeaning, codeMeaning);
+	status = putString(DCM_CodeValue, codeValue);
+	status = putString(DCM_CodingSchemeDesignator, codingSchemeDesignator);
+	status = putString(DCM_CodingSchemeVersion, codingSchemeVersion);
+	status = putString(DCM_CodeMeaning, codeMeaning);
+	return status;
+}
+
+Status Item::putCode(const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning)
+{
+	Status status;
+	status = putString(DCM_CodeValue, codeValue);
+	status = putString(DCM_CodingSchemeDesignator, codingSchemeDesignator);
+	status = putString(DCM_CodingSchemeVersion, codingSchemeVersion);
+	status = putString(DCM_CodeMeaning, codeMeaning);
 	return status;
 }
 
 Status Item::getCode(String& codeValue, String& codingSchemeDesignator, String& codingSchemeVersion, String& codeMeaning) const
 {
 	Status status;
-	status = getValue(DCM_CodeValue, codeValue);
-	status = getValue(DCM_CodingSchemeDesignator, codingSchemeDesignator);
-	status = getValue(DCM_CodingSchemeVersion, codingSchemeVersion);
-	status = getValue(DCM_CodeMeaning, codeMeaning);
+	status = getString(DCM_CodeValue, codeValue);
+	status = getString(DCM_CodingSchemeDesignator, codingSchemeDesignator);
+	status = getString(DCM_CodingSchemeVersion, codingSchemeVersion);
+	status = getString(DCM_CodeMeaning, codeMeaning);
+	return status;
+}
+
+Status Item::getCode(QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning) const
+{
+	Status status;
+	status = getString(DCM_CodeValue, codeValue);
+	status = getString(DCM_CodingSchemeDesignator, codingSchemeDesignator);
+	status = getString(DCM_CodingSchemeVersion, codingSchemeVersion);
+	status = getString(DCM_CodeMeaning, codeMeaning);
 	return status;
 }
 
 Status Item::putCode(const DcmTagKey& tag, Item& item,
 					 const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning,
+					 Sint32 pos)
+{
+	Status status = putItem(tag, item, pos);
+	if (status.good())
+		status = item.putCode(codeValue, codingSchemeDesignator, codingSchemeVersion, codeMeaning);
+	return status;
+}
+
+Status Item::putCode(const DcmTagKey& tag, Item& item,
+					 const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning,
 					 Sint32 pos)
 {
 	Status status = putItem(tag, item, pos);
@@ -628,21 +728,47 @@ Status Item::getCode(const DcmTagKey& tag, Item& item,
 	return status;
 }
 
+Status Item::getCode(const DcmTagKey& tag, Item& item,
+					 QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning,
+					 Sint32 pos) const
+{
+	Status status = getItem(tag, item, pos);
+	if (status.good())
+		status = item.getCode(codeValue, codingSchemeDesignator, codingSchemeVersion, codeMeaning);
+	return status;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Item::putRefSOP(const String& sopClassUID, const String& sopInstanceUID)
 {
 	Status status;
-	status = putValue(DCM_ReferencedSOPClassUID, sopClassUID);
-	status = putValue(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
+	status = putString(DCM_ReferencedSOPClassUID, sopClassUID);
+	status = putString(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
+	return status;
+}
+
+Status Item::putRefSOP(const QString& sopClassUID, const QString& sopInstanceUID)
+{
+	Status status;
+	status = putString(DCM_ReferencedSOPClassUID, sopClassUID);
+	status = putString(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
 	return status;
 }
 
 Status Item::getRefSOP(String& sopClassUID, String& sopInstanceUID) const
 {
 	Status status;
-	status = getValue(DCM_ReferencedSOPClassUID, sopClassUID);
-	status = getValue(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
+	status = getString(DCM_ReferencedSOPClassUID, sopClassUID);
+	status = getString(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
+	return status;
+}
+
+Status Item::getRefSOP(QString& sopClassUID, QString& sopInstanceUID) const
+{
+	Status status;
+	status = getString(DCM_ReferencedSOPClassUID, sopClassUID);
+	status = getString(DCM_ReferencedSOPInstanceUID, sopInstanceUID);
 	return status;
 }
 
@@ -654,7 +780,23 @@ Status Item::putRefSOP(const DcmTagKey& tag, Item& item, const String& sopClassU
 	return status;
 }
 
+Status Item::putRefSOP(const DcmTagKey& tag, Item& item, const QString& sopClassUID, const QString& sopInstanceUID, Sint32 pos)
+{
+	Status status = putItem(tag, item, pos);
+	if (status.good())
+		status = item.putRefSOP(sopClassUID, sopInstanceUID);
+	return status;
+}
+
 Status Item::getRefSOP(const DcmTagKey& tag, Item& item, String& sopClassUID, String& sopInstanceUID, Sint32 pos) const
+{
+	Status status = getItem(tag, item, pos);
+	if (status.good())
+		status = item.getRefSOP(sopClassUID, sopInstanceUID);
+	return status;
+}
+
+Status Item::getRefSOP(const DcmTagKey& tag, Item& item, QString& sopClassUID, QString& sopInstanceUID, Sint32 pos) const
 {
 	Status status = getItem(tag, item, pos);
 	if (status.good())
@@ -785,8 +927,8 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 	case EVR_UL :
 	case EVR_US :
 	case EVR_UT :
-		status = sourceItemPtr->getValue(sourceTag, str);
-		status = putValue(tag, str);
+		status = sourceItemPtr->getString(sourceTag, str);
+		status = putString(tag, str);
 		break;
 	case EVR_SQ :
 		for(Sint32 pos = 0; (status = sourceItemPtr->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
@@ -836,19 +978,19 @@ Status Item::setNLS(int nls)
 	Uint nls3 = (nls >> 16) & 0xFF;
 	String str;
 
-	if (nls1 >= DTK_NLS_COUNT || nls2 >= DTK_NLS_COUNT || nls3 >= DTK_NLS_COUNT)
+	if (nls1 >= NLS::characterSetCount() || nls2 >= NLS::characterSetCount() || nls3 >= NLS::characterSetCount())
 		return EC_IllegalParameter;
 
 	if ((nls2 == 0) && (nls3 == 0)) {
 		if (nls1)
-			str = _ISO_IR[nls1];
+			str = NLS::characterSetName1(nls1);
 	} else {
 		if (nls1)
-			str = _ISO_2022[nls1];
+			str = NLS::characterSetName2(nls1);
 		if (nls2)
-			str = str + "\\" + _ISO_2022[nls2];
+			str = str + "\\" + NLS::characterSetName2(nls2);
 		if (nls3)
-			str = str + "\\" + _ISO_2022[nls3];
+			str = str + "\\" + NLS::characterSetName2(nls3);
 	}
 
 	if (str.size() > 0) {
@@ -861,20 +1003,20 @@ Status Item::setNLS(int nls)
 Status Item::getNLS(int& nls) const
 {
 	OFCondition cond1, cond2, cond3;
-	OFString nls1, nls2, nls3;
+	String nls1, nls2, nls3;
 	nls = 0;
 
 	// NLS component 1
 	cond1 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls1, 0);
 	if (cond1.good() && nls1.size() > 0) {
-		for(int i = 0; i < DTK_NLS_COUNT; i++) {
-			if (nls1.compare(_ISO_IR[i]) == 0) {
+		for(int i = 0; i < NLS::characterSetCount(); i++) {
+			if (nls1.compare(NLS::characterSetName1(i)) == 0) {
 				nls = i;
 				break;
 			}
 		}
-		for(int i = 0; i < DTK_NLS_COUNT; i++) {
-			if (nls1.compare(_ISO_2022[i]) == 0) {
+		for(int i = 0; i < NLS::characterSetCount(); i++) {
+			if (nls1.compare(NLS::characterSetName2(i)) == 0) {
 				nls = i;
 				break;
 			}
@@ -884,8 +1026,8 @@ Status Item::getNLS(int& nls) const
 	// NLS component 2
 	cond2 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls2, 1);
 	if (cond2.good() && nls2.size() > 0) {
-		for(int i = 0; i < DTK_NLS_COUNT; i++) {
-			if (nls2.compare(_ISO_2022[i]) == 0) {
+		for(int i = 0; i < NLS::characterSetCount(); i++) {
+			if (nls2.compare(NLS::characterSetName2(i)) == 0) {
 				nls |= (i << 8);
 				break;
 			}
@@ -895,8 +1037,8 @@ Status Item::getNLS(int& nls) const
 	// NLS component 3
 	cond3 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls3, 2);
 	if (cond3.good() && nls3.size() > 0) {
-		for(int i = 0; i < DTK_NLS_COUNT; i++) {
-			if (nls3.compare(_ISO_2022[i]) == 0) {
+		for(int i = 0; i < NLS::characterSetCount(); i++) {
+			if (nls3.compare(NLS::characterSetName2(i)) == 0) {
 				nls |= (i << 16);
 				break;
 			}

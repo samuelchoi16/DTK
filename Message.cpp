@@ -220,8 +220,8 @@ CEchoRSP::CEchoRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 CStoreRQ::CStoreRQ(Dataset* datasetPtr)
 	: Message(datasetPtr)
 {
-	datasetPtr->getValue(DCM_SOPClassUID, _sopClassUID);
-	datasetPtr->getValue(DCM_SOPInstanceUID, _sopInstanceUID);
+	datasetPtr->getString(DCM_SOPClassUID, _sopClassUID);
+	datasetPtr->getString(DCM_SOPInstanceUID, _sopInstanceUID);
 
 	CommandField = DIMSE_C_STORE_RQ;
 	SAFE_COPY(msg.CStoreRQ.AffectedSOPClassUID, _sopClassUID.c_str());

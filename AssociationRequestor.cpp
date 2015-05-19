@@ -28,7 +28,7 @@ AssociationRequestor::~AssociationRequestor(void)
 
 Status AssociationRequestor::connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	char localAddress[256], remoteAddress[256];
 	gethostname(localAddress, sizeof(localAddress)-1);

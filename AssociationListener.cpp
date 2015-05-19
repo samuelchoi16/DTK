@@ -26,7 +26,7 @@ AssociationListener::~AssociationListener(void)
 
 Status AssociationListener::listen(int timeout)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 	OFCondition cond, cond2;
 	T_ASC_Network* ascNetworkPtr = reinterpret_cast<T_ASC_Network*>(_appEntityPtr->getInternal());
 
@@ -91,7 +91,7 @@ Status AssociationListener::listen(int timeout)
 
 Status AssociationListener::accept(const ServiceList& dcmServiceList)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);
+	QMutexLocker locker(&_assocMutex);
 	OFCondition cond;
 
 //	OnAcceptPresentationContext();
@@ -118,7 +118,7 @@ Status AssociationListener::accept(const ServiceList& dcmServiceList)
 
 Status AssociationListener::reject(void)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	T_ASC_RejectParameters ascRejectParams = {
 		ASC_RESULT_REJECTEDPERMANENT,
@@ -134,7 +134,7 @@ Status AssociationListener::reject(void)
 
 Status AssociationListener::abort(void)
 {
-//	CSingleLock sgl(&m_mtxAssoc, TRUE);	// FIXME
+	QMutexLocker locker(&_assocMutex);
 
 	OFCondition cond = ASC_abortAssociation(_ascAssocPtr);
 	close();
@@ -287,15 +287,15 @@ void AssociationListenerWorker::run(void)
 {
 //	LOG_MESSAGE(4, LOG_DEBUG, _T("AssocWorker.run: started."));
 
-//	_masterPtr->m_mtx.Lock();
+	_masterPtr->_masterMutex.lock();
 	_masterPtr->_counter++;
-//	_masterPtr->m_mtx.Unlock();
+	_masterPtr->_masterMutex.unlock();
 
 	onlisten();
 
-//	_masterPtr->m_mtx.Lock();
+	_masterPtr->_masterMutex.lock();
 	_masterPtr->_counter--;
-//	_masterPtr->m_mtx.Unlock();
+	_masterPtr->_masterMutex.unlock();
 
 	delete this;
 
