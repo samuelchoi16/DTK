@@ -12,8 +12,7 @@ public:
 
 DTKInit::DTKInit(void)
 {
-	if (DCM_BASIC_SCU_SERVICE_LIST.size() == 0)
-	{
+	if (DCM_BASIC_SCU_SERVICE_LIST.size() == 0) {
 		Service::addVerificationService(DCM_BASIC_SCU_SERVICE_LIST);
 
 		Service::addStorageSCUServices(DCM_BASIC_SCU_SERVICE_LIST);
@@ -27,19 +26,18 @@ DTKInit::DTKInit(void)
 		Service::addColorPrintService(DCM_BASIC_SCU_SERVICE_LIST);
 	}
 
-	if (DCM_BASIC_SCP_SERVICE_LIST.size() == 0)
-	{
-		Service::addVerificationService(DCM_BASIC_SCU_SERVICE_LIST);
+	if (DCM_BASIC_SCP_SERVICE_LIST.size() == 0) {
+		Service::addVerificationService(DCM_BASIC_SCP_SERVICE_LIST);
 
-		Service::addStorageSCPServices(DCM_BASIC_SCU_SERVICE_LIST);
-		Service::addStorageCommitmentSCPService(DCM_BASIC_SCU_SERVICE_LIST);
+		Service::addStorageSCPServices(DCM_BASIC_SCP_SERVICE_LIST);
+		Service::addStorageCommitmentSCPService(DCM_BASIC_SCP_SERVICE_LIST);
 
-		Service::addQueryRetrieveService(DCM_BASIC_SCU_SERVICE_LIST);
-		Service::addMWLService(DCM_BASIC_SCU_SERVICE_LIST);
-		Service::addMPPSService(DCM_BASIC_SCU_SERVICE_LIST);
+		Service::addQueryRetrieveService(DCM_BASIC_SCP_SERVICE_LIST);
+		Service::addMWLService(DCM_BASIC_SCP_SERVICE_LIST);
+		Service::addMPPSService(DCM_BASIC_SCP_SERVICE_LIST);
 
-		Service::addGrayscalePrintService(DCM_BASIC_SCU_SERVICE_LIST);
-		Service::addColorPrintService(DCM_BASIC_SCU_SERVICE_LIST);
+		Service::addGrayscalePrintService(DCM_BASIC_SCP_SERVICE_LIST);
+		Service::addColorPrintService(DCM_BASIC_SCP_SERVICE_LIST);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////

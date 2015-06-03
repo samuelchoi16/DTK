@@ -1,6 +1,5 @@
 #include "DTK.h"
 #include "DTKinternal.h"
-#include <QDateTime>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -37,11 +36,6 @@ String DateTime::format(const String& format) const
 		return buffer;
 	else
 		return "";
-}
-
-QString DateTime::formatQ(const QString& format) const
-{
-	return QDateTime(QDate(tm_year + 1900, tm_mon + 1, tm_mday), QTime(tm_hour, tm_min, tm_sec)).toString(format);
 }
 
 DateTime DateTime::currentDateTime()

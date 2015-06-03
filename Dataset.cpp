@@ -20,7 +20,7 @@ Dataset::Dataset(void)
 	if (_created)
 		delete _dcmItemPtr;
 
-	_created = TRUE;
+	_created = true;
 	_dcmItemPtr = new DcmDataset;
 
 	setAutoNLS(_DefaultNLS);
@@ -40,7 +40,7 @@ Dataset::Dataset(const Dataset& dataset)
 	if (_created)
 		delete _dcmItemPtr;
 
-	_created = TRUE;
+	_created = true;
 	_dcmItemPtr = new DcmDataset(*dynamic_cast<DcmDataset*>(dataset._dcmItemPtr));
 
 	int nls;
@@ -155,7 +155,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepre
 	if (cond.bad())
 		return cond;
 /*
-	while(pDcmDataset->search(DCM_PixelData, resultStack, ESM_afterStackTop, OFTrue).good())
+	while(pDcmDataset->search(DCM_PixelData, resultStack, ESM_afterStackTop, OFtrue).good())
 	{
 		if (resultStack.top()->ident() == EVR_PixelData)
 		{
@@ -170,8 +170,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepre
 	DcmEVR vr = dcmElementPtr->ident();
 	dcmPixelDataPtr = dynamic_cast<DcmPixelData*>(dcmElementPtr);
 
-	if (DcmXfer(ts).isEncapsulated())
-	{
+	if (DcmXfer(ts).isEncapsulated()) {
 		DcmPixelSequence* dcmPixelSeqPtr;
 		DcmPixelItem* dcmPixelItemPtr;
 		Uint32 fragmentIndex, fragmentCount;
@@ -184,45 +183,34 @@ Status Dataset::getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepre
 
 		cond = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, 0);	// to read basic offset table
 		fragmentSize = dcmPixelItemPtr->getLength();
-		if (fragmentSize == 0)						// without basic offset table
-		{
+		if (fragmentSize == 0) {							// without basic offset table
 			basicOffsetTables = NULL;
-		}
-		else if (fragmentSize == 4 * frameCount)	// with basic offset table
-		{
+		} else if (fragmentSize == 4 * frameCount) {		// with basic offset table
 			cond = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
 			basicOffsetTables = reinterpret_cast<Uint32*>(fragmentDataPtr);
-		}
-		else										// invalid basic offset table
-		{
+		} else {											// invalid basic offset table
 			// FIXME
 		}
 
 		Uint32 nOffset = 0;
 		frameIndex = 0;
-		for(fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++)
-		{
+		for(fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++) {
 			cond = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, fragmentIndex);
 			fragmentSize = dcmPixelItemPtr->getLength();
 			cond = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
 
-			if (basicOffsetTables == NULL)
-			{
+			if (basicOffsetTables == NULL) {
 				frameIndex++;
 				assert(frameIndex == fragmentIndex);
 //				LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: encapsulated: frame(%d): size=%d, data=%08x"), nFrameIndex, nFragmentSize, pFragmentData);
-			}
-			else
-			{
+			} else {
 				if (basicOffsetTables[frameIndex] == nOffset)
 					frameIndex++;
 				nOffset += (8 + fragmentSize);
 //				LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: encapsulated: frame(%d:%d): size=%d, data=%08x"), nFrameIndex, nFragmentIndex, nFragmentSize, pFragmentData);
 			}
 		}
-	}
-	else
-	{
+	} else {
 		Uint8* pPixelData;
 		Uint32 nFrameSize;
 
@@ -233,8 +221,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepre
 		assert(nPixelDataLength == nFrameSize * frameCount);
 
 		Uint8* pFrameData = pPixelData;
-		for(frameIndex = 0; frameIndex < frameCount;frameIndex++)
-		{
+		for(frameIndex = 0; frameIndex < frameCount;frameIndex++) {
 //			LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: unencapsulated: frame(%d): size=%d, data=%08x"), nFrameIndex+1, nFrameSize, pFrameData);
 			pFrameData += nFrameSize;
 		}
@@ -369,6 +356,8 @@ Status Dataset::prepareCompositeIODFromMWL(const std::list<dcm::Dataset *> mwlDa
 			stat = targetItem.putString(DCM_StudyInstanceUID, studyInstanceUID);
 			stat = targetItem.putRefSOP(DCM_ReferencedStudySequence, refStudyItem, UID_RETIRED_DetachedStudyManagementSOPClass, mwlStudyInstanceUID);	// FIXME: SOP Class UID to confirm
 		}
+
+		stat = copyValueFrom(DCM_PerformedProcedureCodeSequence, &sourceItem, DCM_ScheduledProtocolCodeSequence);
 	}
 
 	return EC_Normal;

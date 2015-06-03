@@ -44,9 +44,9 @@ bool UIDHelper::isImageSOPClassUID(const String& strSOPClassUID)
 {
 	for(int i = 0; i < numberOfDcmImageSOPClassUIDs; i++) {
 		if (strSOPClassUID.compare((dcmImageSOPClassUIDs[i])) == 0)
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 String UIDHelper::generateUID(const String& uidRoot)

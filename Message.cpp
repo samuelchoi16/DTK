@@ -48,7 +48,7 @@ void Message::setIDs(T_ASC_Association* ascAssocPtr)
 	_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, sopClassUID.c_str());
 	if (_pcId > 0)
 		return;
-/*
+
 	// check BasicGrayscalePrintManagementMetaSOPClass
 	if (sopClassUID == UID_BasicFilmSessionSOPClass ||
 		sopClassUID == UID_BasicFilmBoxSOPClass ||
@@ -56,7 +56,7 @@ void Message::setIDs(T_ASC_Association* ascAssocPtr)
 		sopClassUID == UID_PrinterSOPClass)
 	{
 		sopClassUID = UID_BasicGrayscalePrintManagementMetaSOPClass;
-		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, sopClassUID);
+		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, sopClassUID.c_str());
 		if (_pcId > 0)
 			return;
 	}
@@ -68,11 +68,10 @@ void Message::setIDs(T_ASC_Association* ascAssocPtr)
 		sopClassUID == UID_PrinterSOPClass)
 	{
 		sopClassUID = UID_BasicColorPrintManagementMetaSOPClass;
-		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, sopClassUID);
+		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, sopClassUID.c_str());
 		if (_pcId > 0)
 			return;
 	}
-*/
 }
 
 String Message::getCommandName(void) const
@@ -282,7 +281,6 @@ CFindRQ::CFindRQ(const dcm::String& sopClassUID, Dataset* datasetPtr)
 
 void CFindRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.CFindRQ.MessageID = ascAssocPtr->nextMsgID++;
 }
@@ -322,7 +320,6 @@ CGetRQ::CGetRQ(const String& sopClassUID, Dataset* datasetPtr)
 
 void CGetRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.CGetRQ.MessageID = ascAssocPtr->nextMsgID++;
 }
@@ -383,7 +380,6 @@ CMoveRQ::CMoveRQ(const String& sopClassUID, const String& destination, Dataset* 
 
 void CMoveRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.CMoveRQ.MessageID = ascAssocPtr->nextMsgID++;
 }
@@ -462,7 +458,6 @@ NEventReportRQ::NEventReportRQ(const String& sopClassUID, const String& sopInsta
 
 void NEventReportRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.NEventReportRQ.MessageID = ascAssocPtr->nextMsgID++;
 }
@@ -570,7 +565,6 @@ NSetRQ::NSetRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset*
 
 void NSetRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.NSetRQ.MessageID = ascAssocPtr->nextMsgID++;
 }
@@ -617,7 +611,6 @@ NActionRQ::NActionRQ(const String& sopClassUID, const String& sopInstanceUID, Ui
 
 void NActionRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.NActionRQ.MessageID	= ascAssocPtr->nextMsgID++;
 }
@@ -673,7 +666,6 @@ NCreateRQ::NCreateRQ(const String& sopClassUID, const String& sopInstanceUID, Da
 
 void NCreateRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.NCreateRQ.MessageID	= ascAssocPtr->nextMsgID++;
 }
@@ -719,7 +711,6 @@ NDeleteRQ::NDeleteRQ(const String& sopClassUID, const String& sopInstanceUID, Da
 
 void NDeleteRQ::setIDs(T_ASC_Association* ascAssocPtr)
 {
-//	nPCid = ASC_findAcceptedPresentationContextID(pAscAssoc, m_strSOPClassUID.c_str());
 	Message::setIDs(ascAssocPtr);
 	msg.NDeleteRQ.MessageID	= ascAssocPtr->nextMsgID++;
 }

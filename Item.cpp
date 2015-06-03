@@ -19,7 +19,7 @@ int Item::_DefaultNLS = NLS::DEFAULT;
 
 Item::Item(void)
 {
-	_created = TRUE;
+	_created = true;
 	_dcmItemPtr = new DcmItem;
 
 	Status dcmStat;
@@ -28,7 +28,7 @@ Item::Item(void)
 
 Item::Item(DcmItem* dcmItemPtr)
 {
-	_created = FALSE;
+	_created = false;
 	_dcmItemPtr = dcmItemPtr;
 
 	int nNLS;
@@ -40,7 +40,7 @@ Item::Item(DcmItem* dcmItemPtr)
 
 Item::Item(const Item& dcmItem)
 {
-	_created = TRUE;
+	_created = true;
 	_dcmItemPtr = new DcmItem(*dcmItem._dcmItemPtr);
 
 	int nNLS;
@@ -94,7 +94,7 @@ Status Item::set(DcmItem* dcmItemPtr, int parentNLS)
 {
 	if (_created)
 		delete _dcmItemPtr;
-	_created = FALSE;
+	_created = false;
 	_dcmItemPtr = dcmItemPtr;
 
 	int nNLS;
@@ -444,39 +444,39 @@ Status Item::getValue(const DcmTagKey& tag, Uint8& value, Uint32 pos) const
 	return _dcmItemPtr->findAndGetUint8(tag, value, pos);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Uint8*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Uint8*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint8Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetUint8Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint16Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetUint16Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint32Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetUint32Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetSint16Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetSint16Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetSint32Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetSint32Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetFloat32Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetFloat32Array(tag, valuePtr, countPtr);
 }
 
-Status Item::getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* lengthPtr) const
+Status Item::getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetFloat64Array(tag, valuePtr, lengthPtr);
+	return _dcmItemPtr->findAndGetFloat64Array(tag, valuePtr, countPtr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -579,27 +579,48 @@ Status Item::putDate(const DcmTagKey& tag, const DateTime& dt)
 	}
 }
 
+Status Item::putDate(const DcmTagKey& tag, const QDateTime& qdt)
+{
+	// DA, DT
+	switch(DcmTag(tag).getEVR()) {
+	case EVR_DA :
+		return putString(tag, qdt.toString("yyyyMMdd"));
+		break;
+	case EVR_DT :
+		return putString(tag, qdt.toString("HHmmss"));
+		break;
+	default :
+		return EC_InvalidTag;
+	}
+}
+
 Status Item::getDate(const DcmTagKey& tag, DateTime& dt) const
 {
-	Status status;
+	Status stat;
 	String str;
 
 	// DA, TM, DT
 	switch(DcmTag(tag).getEVR()) {
 	case EVR_DA :
-		status = getString(tag, str);
+		stat = getString(tag, str);
+		if (str.length() < 8)
+			return EC_InvalidStream;
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
 		break;
 	case EVR_TM :
-		status = getString(tag, str);
+		stat = getString(tag, str);
+		if (str.length() < 6)
+			return EC_InvalidStream;
 		dt.tm_hour = atoi(str.substr(0, 2).c_str());
 		dt.tm_min = atoi(str.substr(2, 2).c_str());
 		dt.tm_sec = atoi(str.substr(4, 2).c_str());
 		break;
 	case EVR_DT :
-		status = getString(tag, str);
+		stat = getString(tag, str);
+		if (str.length() < 14)
+			return EC_InvalidStream;
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
@@ -611,7 +632,40 @@ Status Item::getDate(const DcmTagKey& tag, DateTime& dt) const
 		return EC_InvalidTag;
 	}
 
-	return status;
+	return stat;
+}
+
+Status Item::getDate(const DcmTagKey& tag, QDateTime& qdt) const
+{
+	Status stat;
+	String str;
+
+	// DA, TM, DT
+	switch(DcmTag(tag).getEVR()) {
+	case EVR_DA :
+		stat = getString(tag, str);
+		if (str.length() < 8)
+			return EC_InvalidStream;
+		qdt.setDate(QDate(atoi(str.substr(0, 4).c_str()), atoi(str.substr(4, 2).c_str()), atoi(str.substr(6, 2).c_str())));
+		break;
+	case EVR_TM :
+		stat = getString(tag, str);
+		if (str.length() < 6)
+			return EC_InvalidStream;
+		qdt.setTime(QTime(atoi(str.substr(0, 2).c_str()), atoi(str.substr(2, 2).c_str()), atoi(str.substr(4, 2).c_str())));
+		break;
+	case EVR_DT :
+		stat = getString(tag, str);
+		if (str.length() < 14)
+			return EC_InvalidStream;
+		qdt.setDate(QDate(atoi(str.substr(0, 4).c_str()), atoi(str.substr(4, 2).c_str()), atoi(str.substr(6, 2).c_str())));
+		qdt.setTime(QTime(atoi(str.substr(8, 2).c_str()), atoi(str.substr(10, 2).c_str()), atoi(str.substr(12, 2).c_str())));
+		break;
+	default :
+		return EC_InvalidTag;
+	}
+
+	return stat;
 }
 
 Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const DateTime& dt)
@@ -629,6 +683,21 @@ Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const Dat
 		return EC_InvalidTag;
 }
 
+Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const QDateTime& qdt)
+{
+	// DA
+	if (DcmTag(dtag).getEVR() == EVR_DA)
+		return putString(dtag, qdt.toString("yyyyMMdd"));
+	else
+		return EC_InvalidTag;
+
+	// TM
+	if (DcmTag(ttag).getEVR() == EVR_TM)
+		return putString(ttag, qdt.toString("HHmmss"));
+	else
+		return EC_InvalidTag;
+}
+
 Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime& dt) const
 {
 	Status status;
@@ -638,16 +707,47 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime&
 	// DA, TM
 	if (DcmTag(dtag).getEVR() == EVR_DA) {
 		status = getString(dtag, str);
+		if (str.length() < 8)
+			return EC_InvalidStream;
 		dt.tm_year = atoi(str.substr(0, 4).c_str());
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
 		ok = true;
 	}
 	if (DcmTag(ttag).getEVR() == EVR_TM) {
-		Status status2 = getString(ttag, str);
+		getString(ttag, str);
+		if (str.length() < 6)
+			return EC_InvalidStream;
 		dt.tm_hour = atoi(str.substr(0, 2).c_str());
 		dt.tm_min = atoi(str.substr(2, 2).c_str());
 		dt.tm_sec = atoi(str.substr(4, 2).c_str());
+		ok = true;
+	}
+	if (!ok)
+		return EC_InvalidTag;
+
+	return status;
+}
+
+Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime& qdt) const
+{
+	Status status;
+	String str;
+	bool ok = false;
+
+	// DA, TM
+	if (DcmTag(dtag).getEVR() == EVR_DA) {
+		status = getString(dtag, str);
+		if (str.length() < 8)
+			return EC_InvalidStream;
+		qdt.setDate(QDate(atoi(str.substr(0, 4).c_str()), atoi(str.substr(4, 2).c_str()), atoi(str.substr(6, 2).c_str())));
+		ok = true;
+	}
+	if (DcmTag(ttag).getEVR() == EVR_TM) {
+		getString(ttag, str);
+		if (str.length() < 6)
+			return EC_InvalidStream;
+		qdt.setTime(QTime(atoi(str.substr(0, 2).c_str()), atoi(str.substr(2, 2).c_str()), atoi(str.substr(4, 2).c_str())));
 		ok = true;
 	}
 	if (!ok)
@@ -890,9 +990,13 @@ Status Item::getTagList(TagList& tagList) const
 
 Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmTagKey sourceTag)
 {
-	Status status;
+	Status stat;
 	String str;
 	Item subItemSource, subItemTarget;
+	const Sint16* s16Ptr = NULL;
+	const Uint16* u16Ptr = NULL;
+	const Sint32* s32Ptr = NULL;
+	const Uint32* u32Ptr = NULL;
 	const Uint8* obPtr = NULL;
 	const Uint16* owPtr = NULL;
 	const Float32* ofPtr = NULL;
@@ -919,43 +1023,59 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 	case EVR_LT :
 	case EVR_PN :
 	case EVR_SH :
-	case EVR_SL :
-	case EVR_SS :
 	case EVR_ST :
 	case EVR_TM :
 	case EVR_UI :
-	case EVR_UL :
-	case EVR_US :
 	case EVR_UT :
-		status = sourceItemPtr->getString(sourceTag, str);
-		status = putString(tag, str);
+		stat = sourceItemPtr->getString(sourceTag, str);
+		stat = putString(tag, str);
+		break;
+	case EVR_SL :
+		sourceItemPtr->getValue(sourceTag, s32Ptr, &length);
+		for(int i = 0; i < length; i++) {
+			stat = putValue(tag, s32Ptr[i], i);
+		}
+		break;
+	case EVR_SS :
+		sourceItemPtr->getValue(sourceTag, s16Ptr, &length);
+		stat = putValue(tag, s16Ptr, length);
+		break;
+	case EVR_UL :
+		sourceItemPtr->getValue(sourceTag, u32Ptr, &length);
+		for(int i = 0; i < length; i++) {
+			stat = putValue(tag, u32Ptr[i], i);
+		}
+		break;
+	case EVR_US :
+		sourceItemPtr->getValue(sourceTag, u16Ptr, &length);
+		stat = putValue(tag, u16Ptr, length);
 		break;
 	case EVR_SQ :
-		for(Sint32 pos = 0; (status = sourceItemPtr->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
-			status = putItem(tag, subItemTarget, pos);
+		for(Sint32 pos = 0; (stat = sourceItemPtr->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
+			stat = putItem(tag, subItemTarget, pos);
 			TagList tagList;
-			status = subItemSource.getTagList(tagList);
+			stat = subItemSource.getTagList(tagList);
 			for(TagList::iterator ti = tagList.begin(); ti != tagList.end(); ti++)
-				status = subItemTarget.copyValueFrom(*ti, &subItemSource);
+				stat = subItemTarget.copyValueFrom(*ti, &subItemSource);
 		}
 		break;
 	case EVR_OB :
-		status = sourceItemPtr->getValue(sourceTag, obPtr, &length);
-		status = putValue(tag, obPtr, length);
+		stat = sourceItemPtr->getValue(sourceTag, obPtr, &length);
+		stat = putValue(tag, obPtr, length);
 		break;
 	case EVR_OW :
-		status = sourceItemPtr->getValue(sourceTag, owPtr, &length);
-		status = putValue(tag, owPtr, length);
+		stat = sourceItemPtr->getValue(sourceTag, owPtr, &length);
+		stat = putValue(tag, owPtr, length);
 		break;
 	case EVR_OF :
-		status = sourceItemPtr->getValue(sourceTag, ofPtr, &length);
-		status = putValue(tag, ofPtr, length);
+		stat = sourceItemPtr->getValue(sourceTag, ofPtr, &length);
+		stat = putValue(tag, ofPtr, length);
 		break;
 	default :
-		status = EC_IllegalParameter;
+		stat = EC_IllegalParameter;
 		break;
 	}
-	return status;
+	return stat;
 }
 
 Status Item::removeValue(const DcmTagKey& tag)

@@ -3,20 +3,21 @@
 
 #include "DTK_global.h"
 
+#include "dcmtk/oflog/oflog.h"
 #include "dcmtk/oflog/config.h"
 #include "dcmtk/oflog/appender.h"
 #include "dcmtk/oflog/fstreams.h"
 #include "dcmtk/oflog/helpers/property.h"
 #include "dcmtk/oflog/helpers/timehelp.h"
 
-#include "dcmtk/ofstd/ofstd.h"				/* for OFStandard */
-#include "dcmtk/ofstd/ofconapp.h"			/* for OFConsoleApplication */
-#include "dcmtk/ofstd/ofcmdln.h"			/* for OFCommandLine */
+#include "dcmtk/ofstd/ofstd.h"
+#include "dcmtk/ofstd/ofconapp.h"
+#include "dcmtk/ofstd/ofcmdln.h"
 #include "dcmtk/ofstd/ofstream.h"
 
-#include "dcmtk/dcmdata/dctk.h"				/* for various dcmdata headers */
-#include "dcmtk/dcmdata/dcuid.h"			/* for dcmtk version name */
-#include "dcmtk/dcmdata/dcrledrg.h"			/* for DcmRLEDecoderRegistration */
+#include "dcmtk/dcmdata/dctk.h"
+#include "dcmtk/dcmdata/dcuid.h"
+#include "dcmtk/dcmdata/dcrledrg.h"
 #include "dcmtk/dcmdata/dcpxitem.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcdict.h"
@@ -30,10 +31,12 @@
 
 #include <list>
 #include <QString>
+#include <QDateTime>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define	QSTR_TO_DSTR(s)					(dcm::String((s).toStdString().c_str()))
+#define	QSTR_TO_CSTR(s)					((s).toStdString().c_str())
+#define	QSTR_TO_DSTR(s)					(dcm::String(QSTR_TO_CSTR((s))))
 #define	DSTR_TO_QSTR(s)					(QString((s).c_str()))
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,12 +59,12 @@ namespace dcm {
 	typedef	unsigned long				Ulong;
 	typedef signed long					Slong;
 
+	typedef OFLogger					Logger;
 	typedef OFCondition					Status;
 	typedef OFString					String;
 	typedef DcmTag						Tag;
 	typedef	std::list<Tag>				TagList;
 
-	class Logger;
 	class NLS;
 
 	class AppEntity;
@@ -103,16 +106,6 @@ namespace dcm {
 	class Dataset;
 	class File;
 	class Dir;
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	Logger
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	class DTKSHARED_EXPORT Logger : public OFLogger
-	{
-	public:
-		Logger(const dcmtk::log4cplus::Logger& base);
-	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	NLS
@@ -204,7 +197,6 @@ namespace dcm {
 		DateTime(int year, int month, int day, int hour, int minute, int second);
 
 		String format(const String& format) const;
-		QString formatQ(const QString& format) const;
 
 		static DateTime currentDateTime();
 	};
@@ -222,7 +214,6 @@ namespace dcm {
 
 	protected:
 		String _aetitle;
-	//	QString _aetitle1;
 		T_ASC_Network* _ascNetworkPtr;
 
 	public:
@@ -230,12 +221,10 @@ namespace dcm {
 		virtual ~AppEntity(void);
 
 		Status init(const String& aetitle, const T_ASC_NetworkRole ascRole, const int listenerPort, const int timeout);
-	//	Status init(const QString& aetitle, const T_ASC_NetworkRole ascRole, const int listenerPort, const int timeout);
 		Status exit(void);
 
 		String getAETitle(void) const;
-	//	QString getAETitle1(void) const;
-		void* getInternal(void);
+		T_ASC_Network* getInternal(void);
 
 	#ifdef	_DEBUG
 		static void	internalTest(void);
@@ -520,12 +509,12 @@ namespace dcm {
 
 		String respondingAETitle;
 
-		Uint32 maxPDUSizeOfThis;
+		Uint32 maxPDUSizeOfMine;
 		Uint32 maxPDUSizeOfPeer;
 
 		AssociationInfo(void)
 		{
-			maxPDUSizeOfThis = 0;
+			maxPDUSizeOfMine = 0;
 			maxPDUSizeOfPeer = 0;
 		}
 	};
@@ -537,7 +526,7 @@ namespace dcm {
 	class DTKSHARED_EXPORT Association
 	{
 	protected:
-		static dcmtk::log4cplus::Logger _logger;
+		static Logger _logger;
 
 	protected:
 		AppEntity* _appEntityPtr;
@@ -572,12 +561,14 @@ namespace dcm {
 	class DTKSHARED_EXPORT AssociationRequestor :
 		public Association
 	{
+	protected:
+		static Logger _logger;
+
 	public:
 		AssociationRequestor(AppEntity* appEntityPtr);
 		virtual ~AssociationRequestor(void);
 
 		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
-	//	Status	connect(const QString& calledAETitle, const QString& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -587,6 +578,9 @@ namespace dcm {
 	class DTKSHARED_EXPORT AssociationListener :
 		public Association
 	{
+	protected:
+		static Logger _logger;
+
 	public:
 		AssociationListener(AppEntity* appEntityPtr);
 		virtual ~AssociationListener(void);
@@ -606,6 +600,7 @@ namespace dcm {
 		public OFThread
 	{
 	protected:
+		static Logger _logger;
 		bool _started;
 		bool _stopped;
 		Uint32 _counter;
@@ -635,6 +630,7 @@ namespace dcm {
 		public OFThread
 	{
 	protected:
+		static Logger _logger;
 		AssociationListenerMaster* _masterPtr;
 
 	public:
@@ -728,12 +724,12 @@ namespace dcm {
 		Status getValue(const DcmTagKey& tag, Uint8& value, Uint32 pos = 0) const;						// OB
 		Status getValue(const DcmTagKey& tag, const Uint8*& valuePtr, Ulong* lengthPtr = NULL) const;	// OB
 
-		Status getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* lengthPtr = NULL) const;	// AT, OW, US/SS, OB/OW
-		Status getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* lengthPtr = NULL) const;	// UL
-		Status getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* lengthPtr = NULL) const;	// AT, OW, US/SS, OB/OW
-		Status getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* lengthPtr = NULL) const;	// SL
-		Status getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* lengthPtr = NULL) const;	// FL
-		Status getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* lengthPtr = NULL) const;	// FD
+		Status getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* countPtr = NULL) const;	// AT, OW, US/SS, OB/OW
+		Status getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* countPtr = NULL) const;	// UL
+		Status getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* countPtr = NULL) const;	// AT, OW, US/SS, OB/OW
+		Status getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* countPtr = NULL) const;	// SL
+		Status getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* countPtr = NULL) const;	// FL
+		Status getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* countPtr = NULL) const;	// FD
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -752,10 +748,14 @@ namespace dcm {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Status putDate(const DcmTagKey& tag, const DateTime& dt);								// DA, DT
+		Status putDate(const DcmTagKey& tag, const QDateTime& qdt);								// DA, DT
 		Status getDate(const DcmTagKey& tag, DateTime& dt) const;								// DA, DT
+		Status getDate(const DcmTagKey& tag, QDateTime& qdt) const;								// DA, DT
 
 		Status putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const DateTime& dt);	// DA, TM
+		Status putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const QDateTime& qdt);	// DA, TM
 		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime& dt) const;	// DA, TM
+		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime& qdt) const;	// DA, TM
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

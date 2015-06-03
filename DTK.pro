@@ -24,7 +24,6 @@ SOURCES += \
     MetaInfo.cpp \
     Service.cpp \
     UIDHelper.cpp \
-    Logger.cpp \
     DateTime.cpp \
     DTK.cpp \
     NLS.cpp
@@ -44,9 +43,9 @@ unix: {
 }
 win32: {
 	CONFIG += warn_off dll
-	INCLUDEPATH += "D:\Programs\DCMTK-3.6.1_20150217-VS12_MD\include" "D:\Sources\DICOM\DCMTK\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\include"
-	LIBS += -L"D:\Programs\DCMTK-3.6.1_20150217-VS12_MD\lib" -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet \
-			-L"D:\Sources\DICOM\DCMTK\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\lib" -lzlib_d \
+	INCLUDEPATH += "..\dcmtk-3.6.1_20150217-VS12_MD.debug\include" "..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\include"
+	LIBS += -L"..\dcmtk-3.6.1_20150217-VS12_MD.debug\lib" -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet \
+			-L"..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\lib" -lzlib_d \
 			wsock32.lib netapi32.lib
 }
 
