@@ -1,3 +1,19 @@
+/*
+ *
+ *  Copyright (C) 2015, IRM Inc.
+ *  All rights reserved.  See LICENSE file for details.
+ *
+ *  This software and supporting documentation were developed by
+ *		IRM Inc., Korea.
+ *  through the contract with
+ *		Seoul National University Bundang Hospital
+ *  under the support of
+ *		Ministry of Trade, Industry and Energy, Republic of Korea.
+ *
+ *  Author:  Samuel Choi (samuelchoi@irm.kr)
+ *
+ */
+
 #ifndef DTK_GLOBAL_H
 #define DTK_GLOBAL_H
 
@@ -8,11 +24,5 @@
 #else
 #  define DTKSHARED_EXPORT Q_DECL_IMPORT
 #endif
-/*
-#if defined(DTK_LIBRARY)
-#  define DTKSHARED_EXPORT __declspec(dllexport)
-#else
-#  define DTKSHARED_EXPORT __declspec(dllimport)
-#endif
-*/
+
 #endif // DTK_GLOBAL_H

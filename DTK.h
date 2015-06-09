@@ -1,3 +1,19 @@
+/*
+ *
+ *  Copyright (C) 2015, IRM Inc.
+ *  All rights reserved.  See LICENSE file for details.
+ *
+ *  This software and supporting documentation were developed by
+ *		IRM Inc., Korea.
+ *  through the contract with
+ *		Seoul National University Bundang Hospital
+ *  under the support of
+ *		Ministry of Trade, Industry and Energy, Republic of Korea.
+ *
+ *  Author:  Samuel Choi (samuelchoi@irm.kr)
+ *
+ */
+
 #ifndef DTK_H
 #define DTK_H
 
@@ -37,6 +53,7 @@
 
 #define	QSTR_TO_CSTR(s)					((s).toStdString().c_str())
 #define	QSTR_TO_DSTR(s)					(dcm::String(QSTR_TO_CSTR((s))))
+#define	DSTR_TO_CSTR(s)					((s).c_str())
 #define	DSTR_TO_QSTR(s)					(QString((s).c_str()))
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +79,7 @@ namespace dcm {
 	typedef OFLogger					Logger;
 	typedef OFCondition					Status;
 	typedef OFString					String;
+	typedef std::list<String>			StringList;
 	typedef DcmTag						Tag;
 	typedef	std::list<Tag>				TagList;
 
@@ -105,6 +123,7 @@ namespace dcm {
 	class MetaInfo;
 	class Dataset;
 	class File;
+	class DirRecord;
 	class Dir;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -934,11 +953,45 @@ namespace dcm {
 		MetaInfo& metaInfo(void);
 		Dataset& dataset(void);
 
-		class MetaInfo* getFileMetaInfo(void);
-		class Dataset* getDataset(void);
+		MetaInfo* getFileMetaInfo(void);
+		Dataset* getDataset(void);
+
+		const MetaInfo* getFileMetaInfo(void) const;
+		const Dataset* getDataset(void) const;
 
 		DcmFileFormat* getDcmFileFormat(void) const;
 		operator DcmFileFormat*(void) const;
+	};
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	DirRecord
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class DTKSHARED_EXPORT DirRecord :
+		public Item
+	{
+	protected:
+		String _fileId;
+
+	public:
+		DirRecord(void);
+		DirRecord(DcmDirectoryRecord* dcmDirRecordPtr);
+		DirRecord(const DirRecord& dirRecord);
+		virtual ~DirRecord(void);
+
+		Status setFileId(const String& fileId);
+		Status getFileId(String& fileId) const;
+		String fileId(void) const;
+
+		Status putRecord(const E_DirRecType recordType, const String& fileId, DirRecord& subRecord);
+		Status getRecord(const E_DirRecType recordType, const File &file, DirRecord& subRecord);
+
+		Status copyValue(const File &file);
+
+		E_DirRecType getRecordType(void);
+
+		static E_DirRecType getRecordTypeFromSOPClass(const String& sopClassUID);
+		static String getRecordTypeName(const E_DirRecType recordType);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -946,20 +999,27 @@ namespace dcm {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	class DTKSHARED_EXPORT Dir
-		: public DicomDirInterface
 	{
 	protected:
+		static Logger _logger;
+		DcmDicomDir* _dcmDirPtr;
+		String _baseDir;
+		StringList _sourceFileList;
+		StringList _targetFileList;
 
 	public:
 		Dir(void);
-	//	CDcmDir(const CDcmDir& dcmDir);
+		Dir(const String& dicomdir);
 		virtual ~Dir(void);
 
-	//	CDcmDir& operator=(const CDcmDir& dcmDir);
+		Status getRootRecord(DirRecord& rootRecord);
+		OFCondition addFile(const String &filename);
 
+		OFCondition save(const E_EncodingType encodingType = EET_UndefinedLength, const E_GrpLenEncoding groupLength = EGL_withoutGL);
 
-	//	CDcmStatus AddDcmFile(const CString& strFile);
-		Status save(void);
+		Status print(const String& filename);
+
+		String generateFileId(void);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////

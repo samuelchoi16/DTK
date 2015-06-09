@@ -1,14 +1,18 @@
-/************************************************************************
+/*
  *
- *	Copyright (c) 2007-2012, Samuel W. Choi
- *	All Rights Reserved
+ *  Copyright (C) 2015, IRM Inc.
+ *  All rights reserved.  See LICENSE file for details.
  *
- *	$Workfile: dcmAppEntity.cpp $
- *	$Author: Pcc7510 $
- *	$Date: 08-10-08 11:28a $
- *	$Revision: 3 $
+ *  This software and supporting documentation were developed by
+ *		IRM Inc., Korea.
+ *  through the contract with
+ *		Seoul National University Bundang Hospital
+ *  under the support of
+ *		Ministry of Trade, Industry and Energy, Republic of Korea.
  *
- ************************************************************************/
+ *  Author:  Samuel Choi (samuelchoi@irm.kr)
+ *
+ */
 
 #include "DTK.h"
 #include "DTKinternal.h"

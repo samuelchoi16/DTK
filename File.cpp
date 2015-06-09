@@ -1,14 +1,18 @@
-/************************************************************************
+/*
  *
- *	Copyright (c) 2007-2012, Samuel W. Choi
- *	All Rights Reserved
+ *  Copyright (C) 2015, IRM Inc.
+ *  All rights reserved.  See LICENSE file for details.
  *
- *	$Workfile: DcmFile.cpp $
- *	$Author: Samuelchoi $
- *	$Date: 07-07-02 10:27a $
- *	$Revision: 7 $
+ *  This software and supporting documentation were developed by
+ *		IRM Inc., Korea.
+ *  through the contract with
+ *		Seoul National University Bundang Hospital
+ *  under the support of
+ *		Ministry of Trade, Industry and Energy, Republic of Korea.
  *
- ************************************************************************/
+ *  Author:  Samuel Choi (samuelchoi@irm.kr)
+ *
+ */
 
 #include "DTK.h"
 #include "DTKinternal.h"
@@ -19,22 +23,24 @@ File::File(void)
 {
 	_dcmFileFormatPtr = new DcmFileFormat;
 
-	int nNLS;
-	Status dcmStat;
-	dcmStat = Dataset::getDefaultNLS(nNLS);
-	dcmStat = _dataset.set(_dcmFileFormatPtr->getDataset(), nNLS);
-	dcmStat = _dataset.setNLS(nNLS);
+	Status stat = _metaInfo.set(_dcmFileFormatPtr->getMetaInfo());
+
+	int nls;
+	stat = Dataset::getDefaultNLS(nls);
+	stat = _dataset.set(_dcmFileFormatPtr->getDataset(), nls);
+	stat = _dataset.setNLS(nls);
 }
 
 File::File(const File& file)
 {
 	_dcmFileFormatPtr = new DcmFileFormat(*file._dcmFileFormatPtr);
 
-	int nNLS;
-	Status dcmStat;
-	dcmStat = file._dataset.getNLS(nNLS);
-	dcmStat = _dataset.set(_dcmFileFormatPtr->getDataset(), nNLS);
-	dcmStat = _dataset.setNLS(nNLS);
+	Status stat = _metaInfo.set(_dcmFileFormatPtr->getMetaInfo());
+
+	int nls;
+	stat = file._dataset.getNLS(nls);
+	stat = _dataset.set(_dcmFileFormatPtr->getDataset(), nls);
+	stat = _dataset.setNLS(nls);
 }
 
 File::~File(void)
@@ -51,10 +57,12 @@ File& File::operator=(const File& file)
 
 	_dcmFileFormatPtr = new DcmFileFormat(*file._dcmFileFormatPtr);
 
+	Status stat = _metaInfo.set(_dcmFileFormatPtr->getMetaInfo());
+
 	int nls;
 	if (file._dataset.getNLS(nls).good()) {
-		_dataset.set(_dcmFileFormatPtr->getDataset(), nls);
-		_dataset.setNLS(nls);
+		stat = _dataset.set(_dcmFileFormatPtr->getDataset(), nls);
+		stat = _dataset.setNLS(nls);
 	}
 
 	return *this;
@@ -127,6 +135,16 @@ MetaInfo* File::getFileMetaInfo(void)
 }
 
 Dataset* File::getDataset(void)
+{
+	return &_dataset;
+}
+
+const MetaInfo* File::getFileMetaInfo(void) const
+{
+	return &_metaInfo;
+}
+
+const Dataset* File::getDataset(void) const
 {
 	return &_dataset;
 }
