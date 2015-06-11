@@ -19,6 +19,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Logger Dataset::_logger = Logger::getInstance("dcm.Dataset");
+
 Dataset::Dataset(void)
 {
 	if (_created)
@@ -101,13 +103,13 @@ Status Dataset::load(const String& filename,
 {
 	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
 	assert(dcmDatasetPtr != NULL);
-	OFCondition cond = dcmDatasetPtr->loadFile(filename, readXfer, groupLength, maxReadLength);
+	Status stat = dcmDatasetPtr->loadFile(filename, readXfer, groupLength, maxReadLength);
 
 	int nls;
 	if (getNLS(nls).good())
 		setAutoNLS(nls);
 
-	return cond;
+	return stat;
 }
 
 Status Dataset::save(const String& filename,
@@ -120,114 +122,149 @@ Status Dataset::save(const String& filename,
 {
 	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
 	assert(dcmDatasetPtr != NULL);
-	return dcmDatasetPtr->saveFile(filename, writeXfer, encodingType, groupLength, padEncoding, padLength, subPadLength);
+
+	E_TransferSyntax transferSyntax = (writeXfer == EXS_Unknown) ? getTransferSyntax() : writeXfer;
+	Status stat = setTransferSyntax(transferSyntax);
+	if (stat.bad())
+		return stat;
+
+	return dcmDatasetPtr->saveFile(filename, transferSyntax, encodingType, groupLength, padEncoding, padLength, subPadLength);
 }
 
-Status Dataset::setTransferSyntax(E_TransferSyntax ts, DcmRepresentationParameter* dcmRepParamPtr)
+Status Dataset::setTransferSyntax(E_TransferSyntax transferSyntax, DcmRepresentationParameter* dcmRepParamPtr)
 {
 	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
 	assert(dcmDatasetPtr != NULL);
-	return dcmDatasetPtr->chooseRepresentation(ts, dcmRepParamPtr);
+	Status stat = dcmDatasetPtr->chooseRepresentation(transferSyntax, dcmRepParamPtr);
+	if (stat.good())
+		dcmDatasetPtr->removeAllButCurrentRepresentations();
+	return stat;
 }
 
-E_TransferSyntax Dataset::getOriginalTransferSyntax(void) const
+E_TransferSyntax Dataset::getTransferSyntax(void) const
 {
+	DcmDataset* dcmDatasetPtr= dynamic_cast<DcmDataset*>(_dcmItemPtr);
+	assert(dcmDatasetPtr != NULL);
+	return dcmDatasetPtr->getCurrentXfer();
+}
+
+Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPtr)
+{
+	Status stat;
 	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
 	assert(dcmDatasetPtr != NULL);
-	return dcmDatasetPtr->getOriginalXfer();
-}
 
-E_TransferSyntax Dataset::getCurrentTransferSyntax(void) const
-{
-	DcmDataset* pDcmDataset = dynamic_cast<DcmDataset*>(_dcmItemPtr);
-	assert(pDcmDataset != NULL);
-	return pDcmDataset->getOriginalXfer();
-}
+	Uint32 frameCount;
+	stat = getValue(DCM_NumberOfFrames, frameCount);
+	if (stat.bad())
+		frameCount = 1;
 
-Status Dataset::getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepresentationParameter* dcmRepParamPtr)
-{
-	OFCondition cond;
-	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
-	DcmStack resultStack;
 	DcmElement* dcmElementPtr = NULL;
-	DcmPixelData* dcmPixelDataPtr = NULL;
-	Uint32 frameIndex, frameCount;
+	stat = dcmDatasetPtr->findAndGetElement(tag, dcmElementPtr);
+	if (stat.bad())
+		return stat;
 
-	Status dcmStat = getValue(DCM_NumberOfFrames, frameCount);
+	DcmPixelData* dcmPixelDataPtr = dynamic_cast<DcmPixelData*>(dcmElementPtr);
+	E_TransferSyntax transferSyntax = getTransferSyntax();
+	if (DcmXfer(transferSyntax).isEncapsulated()) {
+		DcmPixelSequence* dcmPixelSeqPtr = NULL;
+		stat = dcmPixelDataPtr->getEncapsulatedRepresentation(transferSyntax, NULL, dcmPixelSeqPtr);
+		if (stat.bad())
+			return EC_InvalidStream;
 
-	cond = dcmDatasetPtr->chooseRepresentation(ts, dcmRepParamPtr);
-	if (cond.bad())
-		return cond;
-/*
-	while(pDcmDataset->search(DCM_PixelData, resultStack, ESM_afterStackTop, OFtrue).good())
-	{
-		if (resultStack.top()->ident() == EVR_PixelData)
-		{
-			pDcmPixelData = static_cast<DcmPixelData *>(resultStack.top());
-			break;
-		}
-	}
-*/
-	cond = dcmDatasetPtr->findAndGetElement(tag, dcmElementPtr);
-	if (cond.bad())
-		return cond;
-	DcmEVR vr = dcmElementPtr->ident();
-	dcmPixelDataPtr = dynamic_cast<DcmPixelData*>(dcmElementPtr);
-
-	if (DcmXfer(ts).isEncapsulated()) {
-		DcmPixelSequence* dcmPixelSeqPtr;
-		DcmPixelItem* dcmPixelItemPtr;
-		Uint32 fragmentIndex, fragmentCount;
-		Uint32* basicOffsetTables;
-		Uint32 fragmentSize;
+		DcmPixelItem* dcmPixelItemPtr = NULL;
+		Ulong fragmentCount = dcmPixelSeqPtr->card();
+		Uint32 fragmentSize = 0;
 		Uint8* fragmentDataPtr = NULL;
 
-		dcmPixelDataPtr->getEncapsulatedRepresentation(ts, dcmRepParamPtr, dcmPixelSeqPtr);
-		fragmentCount = dcmPixelSeqPtr->card();
+		// first item: basic offset table
+		Uint32* basicOffsetTable = NULL;
 
-		cond = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, 0);	// to read basic offset table
+		stat = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, 0);	// to read basic offset table
+		if (stat.bad())
+			return EC_InvalidBasicOffsetTable;
+
 		fragmentSize = dcmPixelItemPtr->getLength();
 		if (fragmentSize == 0) {							// without basic offset table
-			basicOffsetTables = NULL;
+			basicOffsetTable = NULL;
+			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: encapsulated: no basic offset table");
 		} else if (fragmentSize == 4 * frameCount) {		// with basic offset table
-			cond = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
-			basicOffsetTables = reinterpret_cast<Uint32*>(fragmentDataPtr);
+			stat = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
+			if (stat.bad())
+				return EC_InvalidBasicOffsetTable;
+
+			basicOffsetTable = reinterpret_cast<Uint32*>(fragmentDataPtr);
+			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: encapsulated: basic offset table (count=%d,size=%d,data=%08x)", frameCount, fragmentSize, fragmentDataPtr);
 		} else {											// invalid basic offset table
-			// FIXME
+			return EC_InvalidBasicOffsetTable;
 		}
 
-		Uint32 nOffset = 0;
-		frameIndex = 0;
-		for(fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++) {
-			cond = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, fragmentIndex);
-			fragmentSize = dcmPixelItemPtr->getLength();
-			cond = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
+		// from second to last items: encapsulated pixel data
+		Uint32 offset = 0;
+		Uint32 frameIndex = 0;
+		for(int fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++) {
+			stat = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, fragmentIndex);
+			if (stat.bad())
+				return EC_InvalidStream;
 
-			if (basicOffsetTables == NULL) {
+			fragmentSize = dcmPixelItemPtr->getLength();
+			stat = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
+			if (stat.bad())
+				return EC_InvalidStream;
+
+			if (basicOffsetTable == NULL) {
 				frameIndex++;
 				assert(frameIndex == fragmentIndex);
-//				LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: encapsulated: frame(%d): size=%d, data=%08x"), nFrameIndex, nFragmentSize, pFragmentData);
+
+				DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: encapsulated: frame(%d) (size=%d,data=%08x)", frameIndex, fragmentSize, fragmentDataPtr);
+				if (consumerPtr != NULL) {
+					if (!consumerPtr->onGetPixelData(true, frameIndex, fragmentSize, fragmentDataPtr, true, true))
+						return EC_ItemEnd;
+				}
 			} else {
-				if (basicOffsetTables[frameIndex] == nOffset)
+				bool begin = false;
+				if (basicOffsetTable[frameIndex] == offset) {
 					frameIndex++;
-				nOffset += (8 + fragmentSize);
-//				LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: encapsulated: frame(%d:%d): size=%d, data=%08x"), nFrameIndex, nFragmentIndex, nFragmentSize, pFragmentData);
+					begin = true;
+				}
+
+				offset += (8 + fragmentSize);
+
+				bool end = false;
+				if (((frameIndex < frameCount) && (basicOffsetTable[frameIndex] == offset)) ||
+						((frameIndex == frameCount) && (fragmentIndex == fragmentCount - 1))) {
+					end = true;
+				}
+
+				DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: encapsulated: frame(%d:%d) (size=%d,data=%08x)", frameIndex, fragmentIndex, fragmentSize, fragmentDataPtr);
+				if (consumerPtr != NULL) {
+					if (!consumerPtr->onGetPixelData(true, frameIndex, fragmentSize, fragmentDataPtr, begin, end))
+						return EC_ItemEnd;
+				}
 			}
 		}
 	} else {
-		Uint8* pPixelData;
-		Uint32 nFrameSize;
+		Uint8* pixelDataPtr = NULL;
+		stat = dcmPixelDataPtr->getUint8Array(pixelDataPtr);
+		if (stat.bad())
+			return EC_InvalidStream;
 
-		cond = dcmPixelDataPtr->getUint8Array(pPixelData);
-		cond = dcmPixelDataPtr->getUncompressedFrameSize(dcmDatasetPtr, nFrameSize);
+		Uint32 frameSize = 0;
+		stat = dcmPixelDataPtr->getUncompressedFrameSize(dcmDatasetPtr, frameSize);
 
-		Uint32 nPixelDataLength = dcmPixelDataPtr->getLength();
-		assert(nPixelDataLength == nFrameSize * frameCount);
+		Uint32 pixelDataSize = dcmPixelDataPtr->getLength();
+		if (pixelDataSize != frameSize * frameCount)
+			return EC_CorruptedData;
 
-		Uint8* pFrameData = pPixelData;
-		for(frameIndex = 0; frameIndex < frameCount;frameIndex++) {
-//			LOG_MESSAGE(4, LOG_DEBUG, _T("CDcmDataset::getPixelData: unencapsulated: frame(%d): size=%d, data=%08x"), nFrameIndex+1, nFrameSize, pFrameData);
-			pFrameData += nFrameSize;
+		Uint8* frameDataPtr = pixelDataPtr;
+		for(int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
+			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: uncompressed: frame(%d) (size=%d,data=%08x)", frameIndex+1, frameSize, frameDataPtr);
+			if (consumerPtr != NULL) {
+				if (!consumerPtr->onGetPixelData(false, frameIndex+1, frameSize, frameDataPtr, true, true))
+					return EC_ItemEnd;
+			}
+
+			frameDataPtr += frameSize;
 		}
 	}
 

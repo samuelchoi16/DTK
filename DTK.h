@@ -63,9 +63,9 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define	EXS_JPEGBaseline				EXS_JPEGProcess1TransferSyntax
-#define	EXS_JPEGExtended				EXS_JPEGProcess2_4TransferSyntax
-#define	EXS_JPEGLossless				EXS_JPEGProcess14SV1TransferSyntax
+#define	EXS_JPEGBaseline				EXS_JPEGProcess1
+#define	EXS_JPEGExtended				EXS_JPEGProcess2_4
+#define	EXS_JPEGLossless				EXS_JPEGProcess14SV1
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,6 +121,8 @@ namespace dcm {
 
 	class Item;
 	class MetaInfo;
+	class PixelDataProducer;
+	class PixelDataConsumer;
 	class Dataset;
 	class File;
 	class DirRecord;
@@ -857,12 +859,34 @@ namespace dcm {
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	PixelDataProducer
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class DTKSHARED_EXPORT PixelDataProducer
+	{
+	public:
+	};
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	PixelDataConsumer
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class DTKSHARED_EXPORT PixelDataConsumer
+	{
+	public:
+		virtual bool onGetPixelData(bool encapsulated, Uint32 frameNo, Uint32 dataSize, Uint8* dataPtr, bool begin, bool end) = 0;
+	};
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	Dataset
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	class DTKSHARED_EXPORT Dataset :
 		public Item
 	{
+	protected:
+		static Logger _logger;
+
 	public:
 		Dataset(void);
 		Dataset(DcmDataset* dcmDatasetPtr);
@@ -877,7 +901,7 @@ namespace dcm {
 					const E_GrpLenEncoding groupLength = EGL_noChange,
 					const Uint32 maxReadLength = DCM_MaxReadLength);
 		Status save(const String& strFilename,
-					const E_TransferSyntax writeXfer = EXS_LittleEndianExplicit,
+					const E_TransferSyntax writeXfer = EXS_Unknown,
 					const E_EncodingType encodingType = EET_UndefinedLength,
 					const E_GrpLenEncoding groupLength = EGL_recalcGL,
 					const E_PaddingEncoding padEncoding = EPD_noChange,
@@ -885,10 +909,9 @@ namespace dcm {
 					const Uint32 subPadLength = 0);
 
 		Status setTransferSyntax(E_TransferSyntax ts, DcmRepresentationParameter* dcmRepParamPtr = NULL);
-		E_TransferSyntax getOriginalTransferSyntax(void) const;
-		E_TransferSyntax getCurrentTransferSyntax(void) const;
+		E_TransferSyntax getTransferSyntax(void) const;
 
-		Status getPixelData(const DcmTagKey& tag, E_TransferSyntax ts, DcmRepresentationParameter* dcmRepParamPtr = NULL);
+		Status getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPtr);
 
 		static Status setDefaultNLS(int nNLS);
 		static Status getDefaultNLS(int& nNLS);
@@ -938,7 +961,7 @@ namespace dcm {
 					const Uint32 maxReadLength = DCM_MaxReadLength,
 					const E_FileReadMode readMode = ERM_autoDetect);
 		Status save(const String& strFilename,
-					const E_TransferSyntax writeXfer = EXS_LittleEndianExplicit,
+					const E_TransferSyntax writeXfer = EXS_Unknown,
 					const E_EncodingType encodingType = EET_UndefinedLength,
 					const E_GrpLenEncoding groupLength = EGL_recalcGL,
 					const E_PaddingEncoding padEncoding = EPD_noChange,
