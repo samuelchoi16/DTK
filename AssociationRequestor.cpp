@@ -31,7 +31,7 @@ AssociationRequestor::~AssociationRequestor(void)
 	if (_ascParamsPtr)
 		close();
 }
-
+/*
 Status AssociationRequestor::connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList)
 {
 	QMutexLocker locker(&_assocMutex);
@@ -40,10 +40,10 @@ Status AssociationRequestor::connect(const String& calledAETitle, const String& 
 	gethostname(localAddress, sizeof(localAddress)-1);
 	sprintf(remoteAddress, "%s:%d", hostname.c_str(), port);
 
-	OFCondition cond;
-	cond = ASC_createAssociationParameters(&_ascParamsPtr, _appEntityPtr->_maxPDUSize);
-	cond = ASC_setAPTitles(_ascParamsPtr, _appEntityPtr->getAETitle().c_str(), calledAETitle.c_str(), NULL);
-	cond = ASC_setPresentationAddresses(_ascParamsPtr, localAddress, remoteAddress);
+	Status stat;
+	stat = ASC_createAssociationParameters(&_ascParamsPtr, _appEntityPtr->_maxPDUSize);
+	stat = ASC_setAPTitles(_ascParamsPtr, _appEntityPtr->getAETitle().c_str(), calledAETitle.c_str(), NULL);
+	stat = ASC_setPresentationAddresses(_ascParamsPtr, localAddress, remoteAddress);
 
 //	OnProposePresentationContext();
 
@@ -55,18 +55,55 @@ Status AssociationRequestor::connect(const String& calledAETitle, const String& 
 			DcmXfer dcmXfer(*ti);
 			transferSyntaxes[count++] = dcmXfer.getXferID();
 		}
-		cond = ASC_addPresentationContext(_ascParamsPtr, pcId, si->_abstractSyntax.c_str(), transferSyntaxes, count, si->_role);
+		stat = ASC_addPresentationContext(_ascParamsPtr, pcId, si->_abstractSyntax.c_str(), transferSyntaxes, count, si->_role);
 		delete []transferSyntaxes;
 
 		pcId += 2;
 	}
 
 	T_ASC_Network* ascNetworkPtr = reinterpret_cast<T_ASC_Network*>(_appEntityPtr->getInternal());
-	cond = ASC_requestAssociation(ascNetworkPtr, _ascParamsPtr, &_ascAssocPtr);
+	stat = ASC_requestAssociation(ascNetworkPtr, _ascParamsPtr, &_ascAssocPtr);
 
 //	int iCount = ASC_countAcceptedPresentationContexts(m_pAscParams);
 
-	return cond;
+	return stat;
+}
+*/
+Status AssociationRequestor::connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList2& serviceList)
+{
+	QMutexLocker locker(&_assocMutex);
+
+	char localAddress[256], remoteAddress[256];
+	gethostname(localAddress, sizeof(localAddress)-1);
+	sprintf(remoteAddress, "%s:%d", hostname.c_str(), port);
+
+	Status stat;
+	stat = ASC_createAssociationParameters(&_ascParamsPtr, _appEntityPtr->_maxPDUSize);
+	stat = ASC_setAPTitles(_ascParamsPtr, _appEntityPtr->getAETitle().c_str(), calledAETitle.c_str(), NULL);
+	stat = ASC_setPresentationAddresses(_ascParamsPtr, localAddress, remoteAddress);
+
+//	OnProposePresentationContext();
+
+	int pcId = 1;
+	for(ServiceList::const_iterator si = serviceList.cbegin(); si != serviceList.cend(); si++) {
+		int count = 0;
+		const char** transferSyntaxes = new const char*[si->_transferSyntaxList.size()];
+		for(TransferSyntaxList::const_iterator ti = si->_transferSyntaxList.begin(); ti != si->_transferSyntaxList.end(); ti++) {
+			DcmXfer dcmXfer(*ti);
+			transferSyntaxes[count++] = dcmXfer.getXferID();
+		}
+		stat = ASC_addPresentationContext(_ascParamsPtr, pcId, si->_abstractSyntax.c_str(), transferSyntaxes, count, si->_role);
+		delete []transferSyntaxes;
+
+		pcId += 2;
+	}
+
+	T_ASC_Network* ascNetworkPtr = reinterpret_cast<T_ASC_Network*>(_appEntityPtr->getInternal());
+	stat = ASC_requestAssociation(ascNetworkPtr, _ascParamsPtr, &_ascAssocPtr);
+
+//	int iCount = ASC_countAcceptedPresentationContexts(m_pAscParams);
+
+	return stat;
 }
 /*
 void CDcmAssocRequestor::OnProposePresentationContext(void)	// FIXME...

@@ -82,6 +82,10 @@ namespace dcm {
 	typedef std::list<String>			StringList;
 	typedef DcmTag						Tag;
 	typedef	std::list<Tag>				TagList;
+	typedef E_TransferSyntax			TransferSyntax;
+	typedef std::list<TransferSyntax>	TransferSyntaxList;
+
+	class DTKInit;
 
 	class NLS;
 
@@ -112,6 +116,8 @@ namespace dcm {
 	class NDeleteRSP;
 
 	class Service;
+	typedef std::list<Service>			ServiceList;
+	class ServiceList2;
 	class AssociationInfo;
 	class Association;
 	class AssociationRequestor;
@@ -127,6 +133,25 @@ namespace dcm {
 	class File;
 	class DirRecord;
 	class Dir;
+
+	class UIDHelper;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	DTKInit
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class DTKInit
+	{
+	public:
+		DTKInit(void);
+		virtual ~DTKInit(void);
+
+		static ServiceList2 basicSCUServiceList;
+		static ServiceList2 basicSCPServiceList;
+	};
+
+#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::DTKInit::basicSCUServiceList
+#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::DTKInit::basicSCPServiceList
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	NLS
@@ -466,11 +491,8 @@ namespace dcm {
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	CDcmService
+	//	Service
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	typedef	std::list<E_TransferSyntax>	TransferSyntaxList;
-	typedef std::list<Service>			ServiceList;
 
 	class DTKSHARED_EXPORT Service
 	{
@@ -485,8 +507,8 @@ namespace dcm {
 			_role = ASC_SC_ROLE_DEFAULT;
 		}
 
-		void addBasicTransferSyntaxList(void);
-
+		void addBasicTransferSyntaxes(void);
+/*
 		static void addVerificationService(ServiceList& serviceList);
 
 		static void addStorageSCUServices(ServiceList& serviceList);
@@ -504,10 +526,56 @@ namespace dcm {
 
 		static ServiceList DcmBasicSCUServiceList;
 		static ServiceList DcmBasicSCPServiceList;
+*/
 	};
 
-	#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::Service::DcmBasicSCUServiceList
-	#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::Service::DcmBasicSCPServiceList
+//	#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::Service::DcmBasicSCUServiceList
+//	#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::Service::DcmBasicSCPServiceList
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	ServiceList
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class DTKSHARED_EXPORT ServiceList2
+	{
+	protected:
+		ServiceList _serviceList;
+
+	public:
+		ServiceList2(void);
+
+		void addService(const String& abstractSyntax, TransferSyntax transferSyntax);
+		void addService(const String& abstractSyntax, const TransferSyntaxList& transferSyntaxList);
+
+		void addAllStorageSCUServices(void);
+		void addAllStorageSCPServices(void);
+
+		void addAllQueryRetrieveServices(void);
+
+		void addMWLService(void);
+		void addMPPSService(void);
+
+		void addStorageCommitmentSCUService(void);
+		void addStorageCommitmentSCPService(void);
+
+		void addGrayscalePrintService(void);
+		void addColorPrintService(void);
+
+		ServiceList::size_type size() const
+		{
+			return _serviceList.size();
+		}
+
+		ServiceList::const_iterator cbegin() const
+		{
+			return _serviceList.cbegin();
+		}
+
+		ServiceList::const_iterator cend() const
+		{
+			return _serviceList.cend();
+		}
+	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	AssociationInfo
@@ -589,7 +657,8 @@ namespace dcm {
 		AssociationRequestor(AppEntity* appEntityPtr);
 		virtual ~AssociationRequestor(void);
 
-		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
+//		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
+		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList2& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -607,7 +676,8 @@ namespace dcm {
 		virtual ~AssociationListener(void);
 
 		Status	listen(const int nTimeout);
-		Status	accept(const ServiceList& dcmServiceList = DCM_BASIC_SCP_SERVICE_LIST);
+//		Status	accept(const ServiceList& dcmServiceList = DCM_BASIC_SCP_SERVICE_LIST);
+		Status	accept(const ServiceList2& serviceList = DCM_BASIC_SCP_SERVICE_LIST);
 		Status	reject(void);
 		Status	abort(void);
 	};
@@ -726,6 +796,7 @@ namespace dcm {
 		Status putValue(const DcmTagKey& tag, const Float64* valuePtr, Uint32 length);					// FD
 
 		Status putEmpty(const DcmTagKey& tag);
+		Status removeValue(const DcmTagKey& tag);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -754,20 +825,6 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Status putItem(const DcmTagKey& tag, Item& item, Sint32 pos = POS_APPEND);
-		Status getItem(const DcmTagKey& tag, Item& item, Sint32 pos = 0) const;
-		Sint32 getItemCount(const DcmTagKey& tag) const;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//	CDcmStatus	putPixelItem(const DcmTagKey& tag, const CDcmPixelSequence& dcmPixelSequence);
-		Status getPixelItem(const DcmTagKey& tag, Uint32 pos, Uint8*& dataPtr, Uint32* lengthPtr) const;
-		Sint32 getPixelItemCount(const DcmTagKey& tag) const;
-
-		DcmPixelSequence* getPixelSequence(const DcmTagKey& tag) const;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 		Status putDate(const DcmTagKey& tag, const DateTime& dt);								// DA, DT
 		Status putDate(const DcmTagKey& tag, const QDateTime& qdt);								// DA, DT
 		Status getDate(const DcmTagKey& tag, DateTime& dt) const;								// DA, DT
@@ -777,6 +834,12 @@ namespace dcm {
 		Status putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const QDateTime& qdt);	// DA, TM
 		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime& dt) const;	// DA, TM
 		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime& qdt) const;	// DA, TM
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status putItem(const DcmTagKey& tag, Item& item, Sint32 pos = POS_APPEND);
+		Status getItem(const DcmTagKey& tag, Item& item, Sint32 pos = 0) const;
+		Sint32 getItemCount(const DcmTagKey& tag) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -827,7 +890,6 @@ namespace dcm {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Status copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmTagKey sourceTag = DcmTagKey(0xffff, 0xffff));
-		Status removeValue(const DcmTagKey& tag);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -874,7 +936,7 @@ namespace dcm {
 	class DTKSHARED_EXPORT PixelDataConsumer
 	{
 	public:
-		virtual bool onGetPixelData(bool encapsulated, Uint32 frameNo, Uint32 dataSize, Uint8* dataPtr, bool begin, bool end) = 0;
+		virtual bool onGetPixelData(bool encapsulated, Uint32 frameNo, Uint32 dataSize, const Uint8* dataPtr, bool begin, bool end) = 0;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -908,21 +970,26 @@ namespace dcm {
 					const Uint32 padLength = 0,
 					const Uint32 subPadLength = 0);
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		Status setTransferSyntax(E_TransferSyntax ts, DcmRepresentationParameter* dcmRepParamPtr = NULL);
 		E_TransferSyntax getTransferSyntax(void) const;
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		Status getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPtr);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status deidentify(void);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		static Status setDefaultNLS(int nNLS);
 		static Status getDefaultNLS(int& nNLS);
 
 		DcmDataset* _getDcmDataset(void) const;
 		operator DcmDataset*(void) const;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		static void	registerCodecs(void);
-		static void	unregisterCodecs(void);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

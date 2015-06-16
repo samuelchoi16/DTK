@@ -19,21 +19,21 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ServiceList	Service::DcmBasicSCUServiceList;
-ServiceList	Service::DcmBasicSCPServiceList;
+//ServiceList	Service::DcmBasicSCUServiceList;
+//ServiceList	Service::DcmBasicSCPServiceList;
 
-void Service::addBasicTransferSyntaxList()
+void Service::addBasicTransferSyntaxes()
 {
 	_transferSyntaxList.push_back(EXS_LittleEndianExplicit);
 	_transferSyntaxList.push_back(EXS_BigEndianExplicit);
 	_transferSyntaxList.push_back(EXS_LittleEndianImplicit);
 }
-
+/*
 void Service::addVerificationService(ServiceList& serviceList)
 {
 	Service dcmService;
 	dcmService._abstractSyntax = UID_VerificationSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -44,7 +44,7 @@ void Service::addStorageSCUServices(ServiceList& serviceList)
 	{
 		Service dcmService;
 		dcmService._abstractSyntax = dcmShortSCUStorageSOPClassUIDs[nIndex];
-		dcmService.addBasicTransferSyntaxList();
+		dcmService.addBasicTransferSyntaxes();
 
 		serviceList.push_back(dcmService);
 	}
@@ -56,7 +56,7 @@ void Service::addStorageSCPServices(ServiceList& serviceList)
 	{
 		Service dcmService;
 		dcmService._abstractSyntax = dcmShortSCUStorageSOPClassUIDs[nIndex];
-		dcmService.addBasicTransferSyntaxList();
+		dcmService.addBasicTransferSyntaxes();
 
 		serviceList.push_back(dcmService);
 	}
@@ -67,7 +67,7 @@ void Service::addStorageCommitmentSCUService(ServiceList& serviceList)
 	Service dcmService;
 	dcmService._role = ASC_SC_ROLE_SCU;
 	dcmService._abstractSyntax = UID_StorageCommitmentPushModelSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -77,7 +77,7 @@ void Service::addStorageCommitmentSCPService(ServiceList& serviceList)
 	Service dcmService;
 	dcmService._role = ASC_SC_ROLE_SCP;
 	dcmService._abstractSyntax = UID_StorageCommitmentPushModelSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -97,7 +97,7 @@ void Service::addQueryRetrieveService(ServiceList& serviceList)
 	{
 		Service dcmService;
 		dcmService._abstractSyntax = dcmQRModels[nIndex];
-		dcmService.addBasicTransferSyntaxList();
+		dcmService.addBasicTransferSyntaxes();
 
 		serviceList.push_back(dcmService);
 	}
@@ -107,7 +107,7 @@ void Service::addMWLService(ServiceList& serviceList)
 {
 	Service dcmService;
 	dcmService._abstractSyntax = UID_FINDModalityWorklistInformationModel;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -116,7 +116,7 @@ void Service::addMPPSService(ServiceList& serviceList)
 {
 	Service dcmService;
 	dcmService._abstractSyntax = UID_ModalityPerformedProcedureStepSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -125,7 +125,7 @@ void Service::addGrayscalePrintService(ServiceList& serviceList)
 {
 	Service dcmService;
 	dcmService._abstractSyntax = UID_BasicGrayscalePrintManagementMetaSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
@@ -134,7 +134,8 @@ void Service::addColorPrintService(ServiceList& serviceList)
 {
 	Service dcmService;
 	dcmService._abstractSyntax = UID_BasicColorPrintManagementMetaSOPClass;
-	dcmService.addBasicTransferSyntaxList();
+	dcmService.addBasicTransferSyntaxes();
 
 	serviceList.push_back(dcmService);
 }
+*/

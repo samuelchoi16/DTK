@@ -19,6 +19,300 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define	D								(0x0001)
+#define	Z								(0x0002)
+#define	X								(0x0004)
+#define	K								(0x0008)
+#define	C								(0x0010)
+#define	U								(0x0020)
+
+#define	Z_D								(Z | D)
+#define	X_Z								(X | Z)
+#define	X_D								(X | D)
+#define	X_Z_D							(X | Z | D)
+#define	X_Z_U							(X | Z | U)
+
+struct AttributeConfidentiality {
+	DcmTagKey tag;
+	int basicProfileAction;
+};
+
+static AttributeConfidentiality attributeConfidentialityList[] = {
+	{	DCM_AccessionNumber,									Z	},
+	{	DCM_RETIRED_AcquisitionComments,						X	},
+	{	DCM_AcquisitionContextSequence,							X	},
+	{	DCM_AcquisitionDate,									X_Z	},
+	{	DCM_AcquisitionDateTime,								X_D	},
+	{	DCM_AcquisitionDeviceProcessingDescription,				X_D	},
+	{	DCM_AcquisitionProtocolDescription,						X	},
+	{	DCM_AcquisitionTime,									X_Z	},
+	{	DCM_ActualHumanPerformersSequence,						X	},
+	{	DCM_AdditionalPatientHistory,							X	},
+	{	DCM_RETIRED_AddressTrial,								X	},
+	{	DCM_AdmissionID,										X	},
+	{	DCM_AdmittingDate,										X	},
+	{	DCM_AdmittingDiagnosesCodeSequence,						X	},
+	{	DCM_AdmittingDiagnosesDescription,						X	},
+	{	DCM_AdmittingTime,										X	},
+	{	DCM_AffectedSOPInstanceUID,								X	},
+	{	DCM_Allergies,											X	},
+	{	DCM_RETIRED_Arbitrary,									X	},
+	{	DCM_AuthorObserverSequence,								X	},
+	{	DCM_BranchOfService,									X	},
+	{	DCM_CassetteID,											X	},
+	{	DCM_CommentsOnThePerformedProcedureStep,				X	},
+	{	DCM_ConcatenationUID,									U	},
+	{	DCM_ConfidentialityConstraintOnPatientDataDescription,	X	},
+	{	DCM_ContentCreatorName,									Z	},
+	{	DCM_ContentCreatorIdentificationCodeSequence,			X	},
+	{	DCM_ContentDate,										Z_D	},
+	{	DCM_ContentSequence,									X	},
+	{	DCM_ContentTime,										Z_D	},
+	{	DCM_ContextGroupExtensionCreatorUID,					U	},
+	{	DCM_ContrastBolusAgent,									Z_D	},
+	{	DCM_ContributionDescription,							X	},
+	{	DCM_CountryOfResidence,									X	},
+	{	DCM_CreatorVersionUID,									U	},
+	{	DCM_RETIRED_CurrentObserverTrial,						X	},
+	{	DCM_CurrentPatientLocation,								X	},
+	{	DCM_RETIRED_CurveData,									X	},
+	{	DCM_RETIRED_CurveDate,									X	},
+	{	DCM_RETIRED_CurveTime,									X	},
+	{	DCM_CustodialOrganizationSequence,						X	},
+	{	DCM_DataSetTrailingPadding,								X	},
+	{	DCM_DerivationDescription,								X	},
+	{	DCM_DetectorID,											X_D	},
+	{	DCM_DeviceSerialNumber,									X_Z_D	},
+	{	DCM_DeviceUID,											U	},
+	{	DCM_DigitalSignatureUID,								X	},
+	{	DCM_DigitalSignaturesSequence,							X	},
+	{	DCM_DimensionOrganizationUID,							U	},
+	{	DCM_RETIRED_DischargeDiagnosisDescription,				X	},
+	{	DCM_RETIRED_DistributionAddress,						X	},
+	{	DCM_RETIRED_DistributionName,							X	},
+	{	DCM_DoseReferenceUID,									U	},
+	{	DCM_EndAcquisitionDateTime,								X_D	},
+	{	DCM_EthnicGroup,										X	},
+	{	DCM_ExpectedCompletionDateTime,							X	},
+	{	DCM_FailedSOPInstanceUIDList,							U	},
+	{	DCM_FiducialUID,										U	},
+	{	DCM_RETIRED_FillerOrderNumberImagingServiceRequestRetired,	Z	},
+	{	DCM_FrameComments,										X	},
+	{	DCM_FrameOfReferenceUID,								U	},
+	{	DCM_GantryID,											X	},
+	{	DCM_GeneratorID,										X	},
+	{	DCM_GraphicAnnotationSequence,							D	},
+	{	DCM_HumanPerformerName,									X	},
+	{	DCM_HumanPerformerOrganization,							X	},
+	{	DCM_IconImageSequence,									X	},
+	{	DCM_RETIRED_IdentifyingComments,						X	},
+	{	DCM_ImageComments,										X	},
+	{	DCM_RETIRED_ImagePresentationComments,					X	},
+	{	DCM_ImagingServiceRequestComments,						X	},
+	{	DCM_RETIRED_Impressions,								X	},
+	{	DCM_InstanceCoercionDateTime,							X	},
+	{	DCM_InstanceCreatorUID,									U	},
+	{	DCM_InstitutionAddress,									X	},
+	{	DCM_InstitutionCodeSequence,							X_Z_D	},
+	{	DCM_InstitutionName,									X_Z_D	},
+	{	DCM_InstitutionalDepartmentName,						X	},
+	{	DCM_RETIRED_InsurancePlanIdentification,				X	},
+	{	DCM_IntendedRecipientsOfResultsIdentificationSequence,	X	},
+	{	DCM_RETIRED_InterpretationApproverSequence,				X	},
+	{	DCM_RETIRED_InterpretationAuthor,						X	},
+	{	DCM_RETIRED_InterpretationDiagnosisDescription,			X	},
+	{	DCM_RETIRED_InterpretationIDIssuer,						X	},
+	{	DCM_RETIRED_InterpretationRecorder,						X	},
+	{	DCM_RETIRED_InterpretationText,							X	},
+	{	DCM_RETIRED_InterpretationTranscriber,					X	},
+	{	DCM_IrradiationEventUID,								U	},
+	{	DCM_RETIRED_IssuerOfAdmissionID,						X	},
+	{	DCM_IssuerOfPatientID,									X	},
+	{	DCM_RETIRED_IssuerOfServiceEpisodeID,					X	},
+	{	DCM_RETIRED_LargePaletteColorLookupTableUID,			U	},
+	{	DCM_LastMenstrualDate,									X	},
+	{	DCM_MAC,												X	},
+	{	DCM_MediaStorageSOPInstanceUID,							U	},
+	{	DCM_MedicalAlerts,										X	},
+	{	DCM_MedicalRecordLocator,								X	},
+	{	DCM_MilitaryRank,										X	},
+	{	DCM_ModifiedAttributesSequence,							X	},
+	{	DCM_RETIRED_ModifiedImageDescription,					X	},
+	{	DCM_RETIRED_ModifyingDeviceID,							X	},
+	{	DCM_RETIRED_ModifyingDeviceManufacturer,				X	},
+	{	DCM_NameOfPhysiciansReadingStudy,						X	},
+	{	DCM_NamesOfIntendedRecipientsOfResults,					X	},
+	{	DCM_RETIRED_ObservationDateTrial,						X	},
+	{	DCM_RETIRED_ObservationSubjectUIDTrial,					U	},
+	{	DCM_RETIRED_ObservationTimeTrial,						X	},
+	{	DCM_ObservationUID,										U	},
+	{	DCM_Occupation,											X	},
+	{	DCM_OperatorIdentificationSequence,						X_D	},
+	{	DCM_OperatorsName,										X_Z_D	},
+	{	DCM_OriginalAttributesSequence,							X	},
+	{	DCM_OrderCallbackPhoneNumber,							X	},
+	{	DCM_OrderEnteredBy,										X	},
+	{	DCM_OrderEntererLocation,								X	},
+	{	DCM_OtherPatientIDs,									X	},
+	{	DCM_OtherPatientIDsSequence,							X	},
+	{	DCM_OtherPatientNames,									X	},
+	{	DCM_RETIRED_OverlayComments,							X	},
+	{	DCM_OverlayData,										X	},
+	{	DCM_RETIRED_OverlayDate,								X	},
+	{	DCM_RETIRED_OverlayTime,								X	},
+	{	DCM_PaletteColorLookupTableUID,							U	},
+	{	DCM_ParticipantSequence,								X	},
+	{	DCM_PatientAddress,										X	},
+	{	DCM_PatientComments,									X	},
+	{	DCM_PatientID,											Z	},
+	{	DCM_PatientSexNeutered,									X_Z	},
+	{	DCM_PatientState,										X	},
+	{	DCM_PatientTransportArrangements,						X	},
+	{	DCM_PatientAge,											X	},
+	{	DCM_PatientBirthDate,									Z	},
+	{	DCM_PatientBirthName,									X	},
+	{	DCM_PatientBirthTime,									X	},
+	{	DCM_PatientInstitutionResidence,						X	},
+	{	DCM_PatientInsurancePlanCodeSequence,					X	},
+	{	DCM_PatientMotherBirthName,								X	},
+	{	DCM_PatientName,										Z	},
+	{	DCM_PatientPrimaryLanguageCodeSequence,					X	},
+	{	DCM_PatientPrimaryLanguageModifierCodeSequence,			X	},
+	{	DCM_PatientReligiousPreference,							X	},
+	{	DCM_PatientSex,											Z	},
+	{	DCM_PatientSize,										X	},
+	{	DCM_PatientTelephoneNumbers,							X	},
+	{	DCM_PatientWeight,										X	},
+	{	DCM_PerformedLocation,									X	},
+	{	DCM_PerformedProcedureStepDescription,					X	},
+	{	DCM_PerformedProcedureStepEndDate,						X	},
+	{	DCM_PerformedProcedureStepEndDateTime,					X	},
+	{	DCM_PerformedProcedureStepEndTime,						X	},
+	{	DCM_PerformedProcedureStepID,							X	},
+	{	DCM_PerformedProcedureStepStartDate,					X	},
+	{	DCM_PerformedProcedureStepStartDateTime,				X	},
+	{	DCM_PerformedProcedureStepStartTime,					X	},
+	{	DCM_PerformedStationAETitle,							X	},
+	{	DCM_PerformedStationGeographicLocationCodeSequence,		X	},
+	{	DCM_PerformedStationName,								X	},
+	{	DCM_PerformedStationNameCodeSequence,					X	},
+	{	DCM_PerformingPhysicianIdentificationSequence,			X	},
+	{	DCM_PerformingPhysicianName,							X	},
+	{	DCM_PersonAddress,										X	},
+	{	DCM_PersonIdentificationCodeSequence,					D	},
+	{	DCM_PersonName,											D	},
+	{	DCM_PersonTelephoneNumbers,								X	},
+	{	DCM_RETIRED_PhysicianApprovingInterpretation,			X	},
+	{	DCM_PhysiciansReadingStudyIdentificationSequence,		X	},
+	{	DCM_PhysiciansOfRecord,									X	},
+	{	DCM_PhysiciansOfRecordIdentificationSequence,			X	},
+	{	DCM_RETIRED_PlacerOrderNumberImagingServiceRequestRetired,	Z	},
+	{	DCM_PlateID,											X	},
+	{	DCM_PreMedication,										X	},
+	{	DCM_PregnancyStatus,									X	},
+	{	DCM_ProcedureStepCancellationDateTime,					X	},
+//	{	DCM_PrivateAttributes,									X	},
+	{	DCM_ProtocolName,										X_D	},
+	{	DCM_RETIRED_ReasonForTheImagingServiceRequest,			X	},
+	{	DCM_RETIRED_ReasonForStudy,								X	},
+	{	DCM_ReferencedDigitalSignatureSequence,					X	},
+	{	DCM_ReferencedFrameOfReferenceUID,						U	},
+	{	DCM_RETIRED_ReferencedGeneralPurposeScheduledProcedureStepSequence,	U	},
+	{	DCM_ReferencedImageSequence,							X_Z_U	},
+	{	DCM_RETIRED_ReferencedObservationUIDTrial,				U	},
+	{	DCM_ReferencedPatientAliasSequence,						X	},
+	{	DCM_ReferencedPatientPhotoSequence,						X	},
+	{	DCM_ReferencedPatientSequence,							X	},
+	{	DCM_ReferencedPerformedProcedureStepSequence,			X_Z_D	},
+	{	DCM_ReferencedSOPInstanceMACSequence,					X	},
+	{	DCM_ReferencedSOPInstanceUID,							U	},
+	{	DCM_ReferencedSOPInstanceUIDInFile,						U	},
+	{	DCM_ReferencedStudySequence,							X_Z	},
+	{	DCM_ReferringPhysicianAddress,							X	},
+	{	DCM_ReferringPhysicianIdentificationSequence,			X	},
+	{	DCM_ReferringPhysicianName,								Z	},
+	{	DCM_ReferringPhysicianTelephoneNumbers,					X	},
+	{	DCM_RegionOfResidence,									X	},
+	{	DCM_RETIRED_RelatedFrameOfReferenceUID,					U	},
+	{	DCM_RequestAttributesSequence,							X	},
+	{	DCM_RequestedContrastAgent,								X	},
+	{	DCM_RequestedProcedureComments,							X	},
+	{	DCM_RequestedProcedureDescription,						X_Z	},
+	{	DCM_RequestedProcedureID,								X	},
+	{	DCM_RequestedProcedureLocation,							X	},
+	{	DCM_RequestedSOPInstanceUID,							U	},
+	{	DCM_RequestingPhysician,								X	},
+	{	DCM_RequestingService,									X	},
+	{	DCM_ResponsibleOrganization,							X	},
+	{	DCM_ResponsiblePerson,									X	},
+	{	DCM_RETIRED_ResultsComments,							X	},
+	{	DCM_RETIRED_ResultsDistributionListSequence,			X	},
+	{	DCM_RETIRED_ResultsIDIssuer,							X	},
+	{	DCM_ReviewerName,										X_Z	},
+	{	DCM_ScheduledHumanPerformersSequence,					X	},
+	{	DCM_RETIRED_ScheduledPatientInstitutionResidence,		X	},
+	{	DCM_ScheduledPerformingPhysicianIdentificationSequence,	X	},
+	{	DCM_ScheduledPerformingPhysicianName,					X	},
+	{	DCM_ScheduledProcedureStepEndDate,						X	},
+	{	DCM_ScheduledProcedureStepEndTime,						X	},
+	{	DCM_ScheduledProcedureStepDescription,					X	},
+	{	DCM_ScheduledProcedureStepLocation,						X	},
+	{	DCM_ScheduledProcedureStepModificationDateTime,			X	},
+	{	DCM_ScheduledProcedureStepStartDate,					X	},
+	{	DCM_ScheduledProcedureStepStartDateTime,				X	},
+	{	DCM_ScheduledProcedureStepStartTime,					X	},
+	{	DCM_ScheduledStationAETitle,							X	},
+	{	DCM_ScheduledStationGeographicLocationCodeSequence,		X	},
+	{	DCM_ScheduledStationName,								X	},
+	{	DCM_ScheduledStationNameCodeSequence,					X	},
+	{	DCM_RETIRED_ScheduledStudyLocation,						X	},
+	{	DCM_RETIRED_ScheduledStudyLocationAETitle,				X	},
+	{	DCM_SeriesDate,											X_D	},
+	{	DCM_SeriesDescription,									X	},
+	{	DCM_SeriesInstanceUID,									U	},
+	{	DCM_SeriesTime,											X_D	},
+	{	DCM_ServiceEpisodeDescription,							X	},
+	{	DCM_ServiceEpisodeID,									X	},
+	{	DCM_SmokingStatus,										X	},
+	{	DCM_SOPInstanceUID,										U	},
+	{	DCM_SourceImageSequence,								X_Z_U	},
+	{	DCM_SourceSerialNumber,									X	},
+	{	DCM_SpecialNeeds,										X	},
+	{	DCM_StartAcquisitionDateTime,							X_D	},
+	{	DCM_StationName,										X_Z_D	},
+	{	DCM_StorageMediaFileSetUID,								U	},
+	{	DCM_RETIRED_StudyComments,								X	},
+	{	DCM_StudyDate,											Z	},
+	{	DCM_StudyDescription,									X	},
+	{	DCM_StudyID,											Z	},
+	{	DCM_RETIRED_StudyIDIssuer,								X	},
+	{	DCM_StudyInstanceUID,									U	},
+	{	DCM_StudyTime,											Z	},
+	{	DCM_SynchronizationFrameOfReferenceUID,					U	},
+	{	DCM_TargetUID,											U	},
+	{	DCM_RETIRED_TelephoneNumberTrial,						X	},
+	{	DCM_RETIRED_TemplateExtensionCreatorUID,				U	},
+	{	DCM_RETIRED_TemplateExtensionOrganizationUID,			U	},
+	{	DCM_RETIRED_TextComments,								X	},
+	{	DCM_TextString,											X	},
+	{	DCM_TimezoneOffsetFromUTC,								X	},
+	{	DCM_RETIRED_TopicAuthor,								X	},
+	{	DCM_RETIRED_TopicKeywords,								X	},
+	{	DCM_RETIRED_TopicSubject,								X	},
+	{	DCM_RETIRED_TopicTitle,									X	},
+	{	DCM_TransactionUID,										U	},
+	{	DCM_UID,												U	},
+	{	DCM_RETIRED_VerbalSourceTrial,							X	},
+	{	DCM_RETIRED_VerbalSourceIdentifierCodeSequenceTrial,	X	},
+	{	DCM_VerifyingObserverIdentificationCodeSequence,		Z	},
+	{	DCM_VerifyingObserverName,								D	},
+	{	DCM_VerifyingObserverSequence,							D	},
+	{	DCM_VerifyingOrganization,								X	},
+	{	DCM_VisitComments,										X	},
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Logger Dataset::_logger = Logger::getInstance("dcm.Dataset");
 
 Dataset::Dataset(void)
@@ -131,6 +425,8 @@ Status Dataset::save(const String& filename,
 	return dcmDatasetPtr->saveFile(filename, transferSyntax, encodingType, groupLength, padEncoding, padLength, subPadLength);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Status Dataset::setTransferSyntax(E_TransferSyntax transferSyntax, DcmRepresentationParameter* dcmRepParamPtr)
 {
 	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItemPtr);
@@ -147,6 +443,8 @@ E_TransferSyntax Dataset::getTransferSyntax(void) const
 	assert(dcmDatasetPtr != NULL);
 	return dcmDatasetPtr->getCurrentXfer();
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPtr)
 {
@@ -270,6 +568,52 @@ Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPt
 
 	return EC_Normal;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Dataset::deidentify(void)
+{
+	Status stat;
+
+	int count = sizeof(attributeConfidentialityList) / sizeof(AttributeConfidentiality);
+	for(int i = 0; i < count; i++) {
+		DcmTagKey tag = attributeConfidentialityList[i].tag;
+		int action = attributeConfidentialityList[i].basicProfileAction;
+
+		if (action & D) {
+			DcmEVR vr = DcmTag(tag).getEVR();
+			switch(vr) {
+			case EVR_AS :
+			case EVR_DA :
+			case EVR_DT :
+			case EVR_TM :
+				stat = putEmpty(tag);
+				break;
+			default :
+				stat = putString(tag, "-");
+				break;
+			}
+		} else if (action & Z) {
+			stat = putEmpty(tag);
+		} else if (action == X) {
+			stat = removeValue(tag);
+		}
+	}
+
+	TagList tagList;
+	stat = getTagList(tagList);
+	if (stat.good()) {
+		for(TagList::iterator i = tagList.begin(); i != tagList.end(); i++) {
+			DcmTagKey tag = *i;
+			if (tag.getGroup() % 2 != 0)
+				stat = removeValue(tag);
+		}
+	}
+
+	return EC_Normal;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Dataset::setDefaultNLS(int nls)
 {

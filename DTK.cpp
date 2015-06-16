@@ -18,16 +18,23 @@
 #include "DTKinternal.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 class DTKInit
 {
+private:
+	ServiceList2 _dummy;
+
 public:
 	DTKInit(void);
 	virtual ~DTKInit(void);
 };
+*/
+ServiceList2 DTKInit::basicSCUServiceList;
+ServiceList2 DTKInit::basicSCPServiceList;
 
 DTKInit::DTKInit(void)
 {
+	/*
 	if (DCM_BASIC_SCU_SERVICE_LIST.size() == 0) {
 		Service::addVerificationService(DCM_BASIC_SCU_SERVICE_LIST);
 
@@ -55,9 +62,33 @@ DTKInit::DTKInit(void)
 		Service::addGrayscalePrintService(DCM_BASIC_SCP_SERVICE_LIST);
 		Service::addColorPrintService(DCM_BASIC_SCP_SERVICE_LIST);
 	}
+*/
+	if (basicSCUServiceList.size() == 1) {
+		basicSCUServiceList.addAllStorageSCUServices();
+		basicSCUServiceList.addAllQueryRetrieveServices();
+
+		basicSCUServiceList.addMWLService();
+		basicSCUServiceList.addMPPSService();
+		basicSCUServiceList.addStorageCommitmentSCUService();
+
+		basicSCUServiceList.addGrayscalePrintService();
+		basicSCUServiceList.addColorPrintService();
+	}
+
+	if (basicSCPServiceList.size() == 1) {
+		basicSCPServiceList.addAllStorageSCPServices();
+		basicSCPServiceList.addAllQueryRetrieveServices();
+
+		basicSCPServiceList.addMWLService();
+		basicSCPServiceList.addMPPSService();
+		basicSCPServiceList.addStorageCommitmentSCPService();
+
+		basicSCPServiceList.addGrayscalePrintService();
+		basicSCPServiceList.addColorPrintService();
+	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	// register codecs
 	{
 		DcmRLEEncoderRegistration::registerCodecs();
 		DJEncoderRegistration::registerCodecs();
@@ -72,7 +103,7 @@ DTKInit::DTKInit(void)
 DTKInit::~DTKInit()
 {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	// unregister codecs
 	{
 		DcmRLEEncoderRegistration::cleanup();
 		DJEncoderRegistration::cleanup();

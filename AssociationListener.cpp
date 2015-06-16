@@ -92,7 +92,7 @@ Status AssociationListener::listen(int timeout)
 
 	return EC_Normal;
 }
-
+/*
 Status AssociationListener::accept(const ServiceList& dcmServiceList)
 {
 	QMutexLocker locker(&_assocMutex);
@@ -101,6 +101,31 @@ Status AssociationListener::accept(const ServiceList& dcmServiceList)
 //	OnAcceptPresentationContext();
 
 	for(ServiceList::const_iterator si = dcmServiceList.begin(); si != dcmServiceList.end(); si++) {
+		const char* abstractSyntaxUID = si->_abstractSyntax.c_str();
+		int count = 0;
+		const char** transferSyntaxes = new const char*[si->_transferSyntaxList.size()];
+
+		for(TransferSyntaxList::const_iterator ti = si->_transferSyntaxList.begin(); ti != si->_transferSyntaxList.end(); ti++) {
+			DcmXfer dcmXfer(*ti);
+			transferSyntaxes[count++] = dcmXfer.getXferID();
+		}
+		cond = ASC_acceptContextsWithPreferredTransferSyntaxes(_ascAssocPtr->params, &abstractSyntaxUID, 1, transferSyntaxes, count, si->_role);
+		delete[] transferSyntaxes;
+	}
+
+	cond = ASC_acknowledgeAssociation(_ascAssocPtr);
+
+	return cond;
+}
+*/
+Status AssociationListener::accept(const ServiceList2& serviceList)
+{
+	QMutexLocker locker(&_assocMutex);
+	OFCondition cond;
+
+//	OnAcceptPresentationContext();
+
+	for(ServiceList::const_iterator si = serviceList.cbegin(); si != serviceList.cend(); si++) {
 		const char* abstractSyntaxUID = si->_abstractSyntax.c_str();
 		int count = 0;
 		const char** transferSyntaxes = new const char*[si->_transferSyntaxList.size()];

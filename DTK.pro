@@ -28,7 +28,8 @@ SOURCES += \
     DTK.cpp \
     NLS.cpp \
     DirRecord.cpp \
-    Dir.cpp
+    Dir.cpp \
+    ServiceList.cpp
 
 HEADERS += DTK.h\
     DTKinternal.h \

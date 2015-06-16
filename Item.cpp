@@ -324,6 +324,17 @@ Status Item::putEmpty(const DcmTagKey& tag)
 	return _dcmItemPtr->insertEmptyElement(tag);
 }
 
+Status Item::removeValue(const DcmTagKey& tag)
+{
+	DcmElement* dcmElementPtr = _dcmItemPtr->remove(tag);
+	if (dcmElementPtr) {
+		delete dcmElementPtr;
+		return EC_Normal;
+	} else {
+		return EC_TagNotFound;
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Item::getString(const DcmTagKey& tag, String& value, Sint32 pos, int nls) const
@@ -481,89 +492,6 @@ Status Item::getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* cou
 Status Item::getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* countPtr) const
 {
 	return _dcmItemPtr->findAndGetFloat64Array(tag, valuePtr, countPtr);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-Status Item::putItem(const DcmTagKey& tag, Item& item, Sint32 pos)
-{
-	DcmItem* dcmItemPtr = NULL;
-	OFCondition cond = _dcmItemPtr->findOrCreateSequenceItem(tag, dcmItemPtr, pos);
-	if (cond.good())
-		item.set(dcmItemPtr, _autoNLS);
-	return cond;
-}
-
-Status Item::getItem(const DcmTagKey& tag, Item& item, Sint32 pos) const
-{
-	DcmItem* dcmItemPtr = NULL;
-	OFCondition cond = _dcmItemPtr->findAndGetSequenceItem(tag, dcmItemPtr, pos);
-	if (cond.good())
-		item.set(dcmItemPtr, _autoNLS);
-	return cond;
-}
-
-Sint32 Item::getItemCount(const DcmTagKey& tag) const
-{
-	DcmSequenceOfItems* dcmSequencePtr = NULL;
-	OFCondition cond = _dcmItemPtr->findAndGetSequence(tag, dcmSequencePtr);
-	return (cond.good() && dcmSequencePtr) ? dcmSequencePtr->card() : -1;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-CDcmStatus CDcmItem::putPixelItem(const DcmTagKey& tag, const CDcmPixelSequence& dcmPixelSequence)
-{
-	return EC_IllegalParameter;
-}
-*/
-Status Item::getPixelItem(const DcmTagKey& tag, Uint32 pos, Uint8*& dataPtr, Uint32* lengthPtr) const
-{
-	DcmPixelSequence* dcmPixelSequencePtr = getPixelSequence(tag);
-	if (dcmPixelSequencePtr == NULL)
-		return EC_IllegalParameter;
-
-	DcmPixelItem* dcmPixelItemPtr = NULL;
-	OFCondition cond = dcmPixelSequencePtr->getItem(dcmPixelItemPtr, pos);
-	if (cond.good())
-	{
-		cond = dcmPixelItemPtr->getUint8Array(dataPtr);
-		*lengthPtr = dcmPixelItemPtr->getLength();
-	}
-	return cond;
-}
-
-Sint32 Item::getPixelItemCount(const DcmTagKey& tag) const
-{
-	DcmPixelSequence* dcmPixelSequencePtr = getPixelSequence(tag);
-	return dcmPixelSequencePtr ? dcmPixelSequencePtr->card() : -1;
-}
-
-DcmPixelSequence* Item::getPixelSequence(const DcmTagKey& tag) const
-{
-	OFCondition cond;
-	DcmElement* dcmElementPtr = NULL;
-	cond = _dcmItemPtr->findAndGetElement(tag, dcmElementPtr);
-	if (cond.bad())
-		return NULL;
-	DcmPixelData* dcmPixelDataPtr = dynamic_cast<DcmPixelData*>(dcmElementPtr);
-	if (dcmPixelDataPtr == NULL)
-		return NULL;
-
-	E_TransferSyntax ts;
-	const DcmRepresentationParameter* dcmRepParamPtr = NULL;
-	dcmPixelDataPtr->getOriginalRepresentationKey(ts, dcmRepParamPtr);
-	if (cond.bad())
-		return NULL;
-
-	DcmPixelSequence* dcmPixelSequencePtr = NULL;
-	cond = dcmPixelDataPtr->getEncapsulatedRepresentation(ts, dcmRepParamPtr, dcmPixelSequencePtr);
-	if (cond.bad())
-		return NULL;
-	if (dcmPixelSequencePtr == NULL)
-		return NULL;
-
-	return dcmPixelSequencePtr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -758,6 +686,33 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime
 		return EC_InvalidTag;
 
 	return status;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Item::putItem(const DcmTagKey& tag, Item& item, Sint32 pos)
+{
+	DcmItem* dcmItemPtr = NULL;
+	OFCondition cond = _dcmItemPtr->findOrCreateSequenceItem(tag, dcmItemPtr, pos);
+	if (cond.good())
+		item.set(dcmItemPtr, _autoNLS);
+	return cond;
+}
+
+Status Item::getItem(const DcmTagKey& tag, Item& item, Sint32 pos) const
+{
+	DcmItem* dcmItemPtr = NULL;
+	OFCondition cond = _dcmItemPtr->findAndGetSequenceItem(tag, dcmItemPtr, pos);
+	if (cond.good())
+		item.set(dcmItemPtr, _autoNLS);
+	return cond;
+}
+
+Sint32 Item::getItemCount(const DcmTagKey& tag) const
+{
+	DcmSequenceOfItems* dcmSequencePtr = NULL;
+	OFCondition cond = _dcmItemPtr->findAndGetSequence(tag, dcmSequencePtr);
+	return (cond.good() && dcmSequencePtr) ? dcmSequencePtr->card() : -1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -967,6 +922,8 @@ Sint32 Item::getVL(const DcmTagKey& tag) const
 		return -1;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Item::hasTag(const DcmTagKey& tag) const
 {
 	return _dcmItemPtr->tagExists(tag);
@@ -976,8 +933,6 @@ bool Item::hasTagValue(const DcmTagKey& tag) const
 {
 	return _dcmItemPtr->tagExistsWithValue(tag);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Item::getTagList(TagList& tagList) const
 {
@@ -991,6 +946,8 @@ Status Item::getTagList(TagList& tagList) const
 
 	return EC_Normal;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmTagKey sourceTag)
 {
@@ -1080,17 +1037,6 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 		break;
 	}
 	return stat;
-}
-
-Status Item::removeValue(const DcmTagKey& tag)
-{
-	DcmElement* dcmElementPtr = _dcmItemPtr->remove(tag);
-	if (dcmElementPtr) {
-		delete dcmElementPtr;
-		return EC_Normal;
-	} else {
-		return EC_TagNotFound;
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
