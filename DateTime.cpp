@@ -58,6 +58,10 @@ DateTime DateTime::currentDateTime()
 {
 	DateTime dt;
 	time_t t = time(NULL);
+#ifdef	HAVE_LOCALTIME_R
+	localtime_r(&t, &dt);
+#else
 	localtime_s(&dt, &t);
+#endif
 	return dt;
 }

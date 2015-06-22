@@ -500,7 +500,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPt
 		// from second to last items: encapsulated pixel data
 		Uint32 offset = 0;
 		Uint32 frameIndex = 0;
-		for(int fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++) {
+		for(Uint fragmentIndex = 1; fragmentIndex < fragmentCount; fragmentIndex++) {
 			stat = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, fragmentIndex);
 			if (stat.bad())
 				return EC_InvalidStream;
@@ -555,7 +555,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumerPt
 			return EC_CorruptedData;
 
 		Uint8* frameDataPtr = pixelDataPtr;
-		for(int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
+		for(Uint frameIndex = 0; frameIndex < frameCount; frameIndex++) {
 			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: uncompressed: frame(%d) (size=%d,data=%08x)", frameIndex+1, frameSize, frameDataPtr);
 			if (consumerPtr != NULL) {
 				if (!consumerPtr->onGetPixelData(false, frameIndex+1, frameSize, frameDataPtr, true, true))

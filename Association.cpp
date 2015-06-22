@@ -16,7 +16,6 @@
 
 #include "DTK.h"
 #include "DTKinternal.h"
-//#include <QString>
 
 static void ProgressCallback(void *callbackContextPtr, Ulong byteCount);
 
@@ -72,6 +71,8 @@ Status Association::sendMessage(dcm::Message& req)
 	case DIMSE_N_CREATE_RQ :
 	case DIMSE_N_DELETE_RQ :
 		req.setIDs(_ascAssocPtr);
+		break;
+	default :
 		break;
 	}
 
@@ -264,6 +265,7 @@ Status Association::verify(const String& localAETitle, const String& aetitle, co
 	bool verified = false;
 	Status dcmStat;
 	AppEntity dcmAppEntity;
+	ServiceList verificationServiceList;
 	AssociationRequestor dcmRequestor(&dcmAppEntity);
 	CEchoRQ req;
 	Message rsp;
@@ -272,7 +274,7 @@ Status Association::verify(const String& localAETitle, const String& aetitle, co
 	if (!dcmStat.good())
 		goto on_exit;
 
-	dcmStat = dcmRequestor.connect(aetitle, hostname, port);
+	dcmStat = dcmRequestor.connect(aetitle, hostname, port, verificationServiceList);
 	if (!dcmStat.good())
 		goto on_exit;
 

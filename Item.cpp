@@ -224,7 +224,7 @@ Status Item::putString(const DcmTagKey& tag, const QString& value, int nls)
 	return putString(tag, str, nls);
 }
 
-#define	PUT_VALUE(tag, value, pos) \
+#define	PUT_VALUE(tag, value, pos, fmt) \
 { \
 	switch(DcmTag((tag)).getEVR()) \
 	{ \
@@ -243,55 +243,64 @@ Status Item::putString(const DcmTagKey& tag, const QString& value, int nls)
 	default : \
 		String str, str2; \
 		char buffer[4000]; \
+		sprintf(buffer, (fmt), (value)); \
 		if ((pos) > 0 && getString((tag), str2).good()) { \
-			sprintf(buffer, "%s\\%d", str2.c_str(), (value)); \
-			str = buffer; \
+			str = str2 + "\\" + buffer; \
 		} else { \
-			sprintf(buffer, "%d", (value)); \
 			str = buffer; \
 		} \
 		return putString((tag), str); \
 	} \
 }
 
+/*
+			sprintf(buffer, "%s\\%d", str2.c_str(), (value)); \
+			str = buffer; \
+			sprintf(buffer, "%d", (value)); \
+			str = buffer; \
+ */
+#if SIZEOF_LONG == 4
+
 Status Item::putValue(const DcmTagKey& tag, Uint value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Sint value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
+
+#endif
 
 Status Item::putValue(const DcmTagKey& tag, Uint16 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Sint16 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Uint32 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Sint32 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%d");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Float32 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%f");
 }
 
 Status Item::putValue(const DcmTagKey& tag, Float64 value, Uint32 pos)
 {
-	PUT_VALUE(tag, value, pos);
+	PUT_VALUE(tag, value, pos, "%f");
 }
 
 Status Item::putValue(const DcmTagKey& tag, const Uint8* valuePtr, Uint32 length)
@@ -414,6 +423,8 @@ Status Item::getString(const DcmTagKey& tag, QString& value, Sint32 pos, int nls
 	return cond; \
 }
 
+#if SIZEOF_LONG == 4
+
 Status Item::getValue(const DcmTagKey& tag, Uint& value, Uint32 pos) const
 {
 	GET_VALUE(tag, value, pos);
@@ -423,6 +434,8 @@ Status Item::getValue(const DcmTagKey& tag, Sint& value, Uint32 pos) const
 {
 	GET_VALUE(tag, value, pos);
 }
+
+#endif
 
 Status Item::getValue(const DcmTagKey& tag, Uint16& value, Uint32 pos) const
 {
@@ -993,7 +1006,7 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 		break;
 	case EVR_SL :
 		sourceItemPtr->getValue(sourceTag, s32Ptr, &length);
-		for(int i = 0; i < length; i++) {
+		for(Uint i = 0; i < length; i++) {
 			stat = putValue(tag, s32Ptr[i], i);
 		}
 		break;
@@ -1003,7 +1016,7 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 		break;
 	case EVR_UL :
 		sourceItemPtr->getValue(sourceTag, u32Ptr, &length);
-		for(int i = 0; i < length; i++) {
+		for(Uint i = 0; i < length; i++) {
 			stat = putValue(tag, u32Ptr[i], i);
 		}
 		break;
@@ -1043,9 +1056,9 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 
 Status Item::setNLS(int nls)
 {
-	Uint nls1 = (nls >> 0) & 0xFF;
-	Uint nls2 = (nls >> 8) & 0xFF;
-	Uint nls3 = (nls >> 16) & 0xFF;
+	int nls1 = (nls >> 0) & 0xFF;
+	int nls2 = (nls >> 8) & 0xFF;
+	int nls3 = (nls >> 16) & 0xFF;
 	String str;
 
 	if (nls1 >= NLS::characterSetCount() || nls2 >= NLS::characterSetCount() || nls3 >= NLS::characterSetCount())

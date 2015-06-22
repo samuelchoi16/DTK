@@ -85,8 +85,6 @@ namespace dcm {
 	typedef E_TransferSyntax			TransferSyntax;
 	typedef std::list<TransferSyntax>	TransferSyntaxList;
 
-	class DTKInit;
-
 	class NLS;
 
 	class AppEntity;
@@ -116,8 +114,7 @@ namespace dcm {
 	class NDeleteRSP;
 
 	class Service;
-	typedef std::list<Service>			ServiceList;
-	class ServiceList2;
+	class ServiceList;
 	class AssociationInfo;
 	class Association;
 	class AssociationRequestor;
@@ -135,23 +132,6 @@ namespace dcm {
 	class Dir;
 
 	class UIDHelper;
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	DTKInit
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	class DTKInit
-	{
-	public:
-		DTKInit(void);
-		virtual ~DTKInit(void);
-
-		static ServiceList2 basicSCUServiceList;
-		static ServiceList2 basicSCPServiceList;
-	};
-
-#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::DTKInit::basicSCUServiceList
-#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::DTKInit::basicSCPServiceList
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	NLS
@@ -508,44 +488,35 @@ namespace dcm {
 		}
 
 		void addBasicTransferSyntaxes(void);
-/*
-		static void addVerificationService(ServiceList& serviceList);
-
-		static void addStorageSCUServices(ServiceList& serviceList);
-		static void addStorageSCPServices(ServiceList& serviceList);
-
-		static void addStorageCommitmentSCUService(ServiceList& serviceList);
-		static void addStorageCommitmentSCPService(ServiceList& serviceList);
-
-		static void addQueryRetrieveService(ServiceList& serviceList);
-		static void addMWLService(ServiceList& serviceList);
-		static void addMPPSService(ServiceList& serviceList);
-
-		static void addGrayscalePrintService(ServiceList& serviceList);
-		static void addColorPrintService(ServiceList& serviceList);
-
-		static ServiceList DcmBasicSCUServiceList;
-		static ServiceList DcmBasicSCPServiceList;
-*/
 	};
-
-//	#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::Service::DcmBasicSCUServiceList
-//	#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::Service::DcmBasicSCPServiceList
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	ServiceList
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class DTKSHARED_EXPORT ServiceList2
+	typedef std::list<Service>			ServiceListType;
+
+	class DTKSHARED_EXPORT ServiceList
 	{
 	protected:
-		ServiceList _serviceList;
+		ServiceListType _serviceList;
+
+		static ServiceList _basicSCUServiceList;
+		static ServiceList _basicSCPServiceList;
 
 	public:
-		ServiceList2(void);
+		ServiceList(bool includeEcho = true);
+
+		bool hasService(const String& abstractSyntax, TransferSyntax transferSyntax);
+		bool hasService(const String& abstractSyntax, const String& transferSyntaxUID);
 
 		void addService(const String& abstractSyntax, TransferSyntax transferSyntax);
+		void addService(const String& abstractSyntax, const String& transferSyntaxUID);
+
 		void addService(const String& abstractSyntax, const TransferSyntaxList& transferSyntaxList);
+		void addService(const String& abstractSyntax, const StringList& transferSyntaxUIDList);
+
+		void addVerificationService(void);
 
 		void addAllStorageSCUServices(void);
 		void addAllStorageSCPServices(void);
@@ -561,21 +532,16 @@ namespace dcm {
 		void addGrayscalePrintService(void);
 		void addColorPrintService(void);
 
-		ServiceList::size_type size() const
-		{
-			return _serviceList.size();
-		}
+		ServiceListType::size_type size() const;
+		ServiceListType::const_iterator cbegin() const;
+		ServiceListType::const_iterator cend() const;
 
-		ServiceList::const_iterator cbegin() const
-		{
-			return _serviceList.cbegin();
-		}
-
-		ServiceList::const_iterator cend() const
-		{
-			return _serviceList.cend();
-		}
+		static const ServiceList& getBasicSCUServiceList(void);
+		static const ServiceList& getBasicSCPServiceList(void);
 	};
+
+#define	DCM_BASIC_SCU_SERVICE_LIST		dcm::ServiceList::getBasicSCUServiceList()
+#define	DCM_BASIC_SCP_SERVICE_LIST		dcm::ServiceList::getBasicSCPServiceList()
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	AssociationInfo
@@ -657,8 +623,7 @@ namespace dcm {
 		AssociationRequestor(AppEntity* appEntityPtr);
 		virtual ~AssociationRequestor(void);
 
-//		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
-		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList2& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
+		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -676,8 +641,7 @@ namespace dcm {
 		virtual ~AssociationListener(void);
 
 		Status	listen(const int nTimeout);
-//		Status	accept(const ServiceList& dcmServiceList = DCM_BASIC_SCP_SERVICE_LIST);
-		Status	accept(const ServiceList2& serviceList = DCM_BASIC_SCP_SERVICE_LIST);
+		Status	accept(const ServiceList& serviceList = DCM_BASIC_SCP_SERVICE_LIST);
 		Status	reject(void);
 		Status	abort(void);
 	};
@@ -780,8 +744,10 @@ namespace dcm {
 		Status putString(const DcmTagKey& tag, const QString& value, int nls = NLS::AUTO);
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
+#if SIZEOF_LONG == 4
 		Status putValue(const DcmTagKey& tag, Uint value, Uint32 pos = 0);
 		Status putValue(const DcmTagKey& tag, Sint value, Uint32 pos = 0);
+#endif
 		Status putValue(const DcmTagKey& tag, Uint16 value, Uint32 pos = 0);							// US
 		Status putValue(const DcmTagKey& tag, Sint16 value, Uint32 pos = 0);							// SS
 		Status putValue(const DcmTagKey& tag, Uint32 value, Uint32 pos = 0);							// UL
@@ -804,8 +770,10 @@ namespace dcm {
 		Status getString(const DcmTagKey& tag, QString& value, Sint32 pos = -1, int nls = NLS::AUTO) const;
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
+#if SIZEOF_LONG == 4
 		Status getValue(const DcmTagKey& tag, Uint& value, Uint32 pos = 0) const;
 		Status getValue(const DcmTagKey& tag, Sint& value, Uint32 pos = 0) const;
+#endif
 		Status getValue(const DcmTagKey& tag, Uint16& value, Uint32 pos = 0) const;						// US
 		Status getValue(const DcmTagKey& tag, Uint32& value, Uint32 pos = 0) const;						// UL
 		Status getValue(const DcmTagKey& tag, Sint16& value, Uint32 pos = 0) const;						// SS
@@ -1043,10 +1011,10 @@ namespace dcm {
 		MetaInfo& metaInfo(void);
 		Dataset& dataset(void);
 
-		MetaInfo* getFileMetaInfo(void);
+		MetaInfo* getMetaInfo(void);
 		Dataset* getDataset(void);
 
-		const MetaInfo* getFileMetaInfo(void) const;
+		const MetaInfo* getMetaInfo(void) const;
 		const Dataset* getDataset(void) const;
 
 		DcmFileFormat* getDcmFileFormat(void) const;
@@ -1135,5 +1103,27 @@ namespace dcm {
 		static Uint32 getDataSize(const String& sopClassUID);
 	};
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef	DCMTK_LOG4CPLUS_ERROR_FMT
+#define	DCMTK_LOG4CPLUS_ERROR_FMT(logger, logFmt, ...)
+#endif
+
+#ifndef	DCMTK_LOG4CPLUS_WARN_FMT
+#define	DCMTK_LOG4CPLUS_WARN_FMT(logger, logFmt, ...)
+#endif
+
+#ifndef	DCMTK_LOG4CPLUS_INFO_FMT
+#define	DCMTK_LOG4CPLUS_INFO_FMT(logger, logFmt, ...)
+#endif
+
+#ifndef	DCMTK_LOG4CPLUS_DEBUG_FMT
+#define	DCMTK_LOG4CPLUS_DEBUG_FMT(logger, logFmt, ...)
+#endif
+
+#ifndef	DCMTK_LOG4CPLUS_TRACE_FMT
+#define	DCMTK_LOG4CPLUS_TRACE_FMT(logger, logFmt, ...)
+#endif
 
 #endif // DTK_H

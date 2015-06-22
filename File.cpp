@@ -136,7 +136,7 @@ Dataset& File::dataset(void)
 	return _dataset;
 }
 
-MetaInfo* File::getFileMetaInfo(void)
+MetaInfo* File::getMetaInfo(void)
 {
 	return &_metaInfo;
 }
@@ -146,7 +146,7 @@ Dataset* File::getDataset(void)
 	return &_dataset;
 }
 
-const MetaInfo* File::getFileMetaInfo(void) const
+const MetaInfo* File::getMetaInfo(void) const
 {
 	return &_metaInfo;
 }
