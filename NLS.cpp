@@ -232,7 +232,7 @@ String NLS::toLocal8Bit(const QString& istr, int nls)
 	if (codec != NULL)
 		return codec->fromUnicode(istr).constData();
 	else
-		return istr.toStdString().c_str();
+		return QSTR_TO_CSTR(istr);
 }
 
 QString NLS::toUnicode(const dcm::String& istr, int nls)

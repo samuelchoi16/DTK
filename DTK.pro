@@ -42,30 +42,57 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../dcmtk-3.6.1_20150217-macos_debug/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../dcmtk-3.6.1_20150217-macos_debug/lib -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet -lz -liconv
+		INCLUDEPATH += $$PWD/../DTK-1.0.0-macos/include
+		LIBS += -v -stdlib=libc++ -L$$PWD/../DTK-1.0.0-macos/lib_debug -ldcmtk
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../dcmtk-3.6.1_20150217-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../dcmtk-3.6.1_20150217-macos/lib -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet -lz -liconv
+		INCLUDEPATH += $$PWD/../DTK-1.0.0-macos/include
+		LIBS += -v -stdlib=libc++ -L$$PWD/../DTK-1.0.0-macos/lib -ldcmtk
+	}
+}
+unix:!macx {
+	CONFIG(debug, debug|release) {
+		target.path = /usr/lib
+		INSTALLS += target
+
+		QMAKE_CXXFLAGS += -std=c++0x -g -O0
+
+		CONFIG(arm, arm|x86) {
+			INCLUDEPATH += $$PWD/../DTK-1.0.0-arm/include
+			LIBS += -v -L$$PWD/../DTK-1.0.0-arm/lib_debug -ldcmtk
+		} else {
+			INCLUDEPATH += $$PWD/../DTK-1.0.0-linux/include
+			LIBS += -v -L$$PWD/../DTK-1.0.0-linux/lib_debug -ldcmtk
+		}
+	} else {
+		target.path = /usr/lib
+		INSTALLS += target
+
+		QMAKE_CXXFLAGS += -std=c++0x
+
+		CONFIG(arm, arm|x86) {
+			INCLUDEPATH += $$PWD/../DTK-1.0.0-arm/include
+			LIBS += -v -L$$PWD/../DTK-1.0.0-arm/lib -ldcmtk
+		} else {
+			INCLUDEPATH += $$PWD/../DTK-1.0.0-linux/include
+			LIBS += -v -L$$PWD/../DTK-1.0.0-linux/lib -ldcmtk
+		}
 	}
 }
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\dcmtk-3.6.1_20150217-VS12_MD_debug\include" "$$PWD\..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\include"
-		LIBS += -L"$$PWD\..\dcmtk-3.6.1_20150217-VS12_MD_debug\lib" -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet \
-				-L"$$PWD\..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\lib" -lzlib_d \
+		INCLUDEPATH += "$$PWD\..\DTK-1.0.0-win32\include"
+		LIBS += -L"$$PWD\..\DTK-1.0.0-win32\lib_debug" -ldcmtk \
 				wsock32.lib netapi32.lib
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\dcmtk-3.6.1_20150217-VS12_MD\include" "$$PWD\..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\include"
-		LIBS += -L"$$PWD\..\dcmtk-3.6.1_20150217-VS12_MD\lib" -loflog -lofstd -lcharls -ldcmdata -ldcmimgle -ldcmimage -ldcmjpeg -lijg8 -lijg12 -lijg16 -ldcmjpls -ldcmnet \
-				-L"$$PWD\..\dcmtk-3.6.0-win32-i386-support_MD\zlib-1.2.5\lib" -lzlib_o \
+		INCLUDEPATH += "$$PWD\..\DTK-1.0.0-win32\include"
+		LIBS += -L"$$PWD\..\DTK-1.0.0-win32\lib" -ldcmtk \
 				wsock32.lib netapi32.lib
 	}
 }

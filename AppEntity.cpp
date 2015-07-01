@@ -25,26 +25,26 @@ AppEntity::AppEntity(void)
 	_checkImplementationClassUID = true;
 	_maxPDUSize = 16384;
 
-	_ascNetworkPtr = NULL;
+	_ascNetwork = NULL;
 }
 
 AppEntity::~AppEntity(void)
 {
-	if (_ascNetworkPtr)
+	if (_ascNetwork)
 		exit();
 }
 
 Status AppEntity::init(const String& aetitle, const T_ASC_NetworkRole ascRole, const int listenerPort, const int timeout)
 {
 	_aetitle = aetitle;
-	OFCondition cond = ASC_initializeNetwork(ascRole, listenerPort, timeout, &_ascNetworkPtr);
+	OFCondition cond = ASC_initializeNetwork(ascRole, listenerPort, timeout, &_ascNetwork);
 	return cond;
 }
 
 Status AppEntity::exit(void)
 {
-	OFCondition cond = ASC_dropNetwork(&_ascNetworkPtr);
-	_ascNetworkPtr = NULL;
+	OFCondition cond = ASC_dropNetwork(&_ascNetwork);
+	_ascNetwork = NULL;
 	return cond;
 }
 
@@ -55,5 +55,5 @@ String AppEntity::getAETitle(void) const
 
 T_ASC_Network *AppEntity::getInternal(void)
 {
-	return _ascNetworkPtr;
+	return _ascNetwork;
 }

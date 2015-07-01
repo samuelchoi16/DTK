@@ -16,14 +16,13 @@
 
 #include "DTK.h"
 #include "DTKinternal.h"
-#include <QThread>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Logger AssociationListener::_logger = Logger::getInstance("dcm.AssociationListener");
 
-AssociationListener::AssociationListener(AppEntity* appEntityPtr)
-	: Association(appEntityPtr)
+AssociationListener::AssociationListener(AppEntity* appEntity)
+	: Association(appEntity)
 {
 }
 
@@ -35,32 +34,32 @@ Status AssociationListener::listen(int timeout)
 {
 	QMutexLocker locker(&_assocMutex);
 	OFCondition cond;
-	T_ASC_Network* ascNetworkPtr = _appEntityPtr->getInternal();
+	T_ASC_Network* ascNetworkPtr = _appEntity->getInternal();
 
 	if (!ASC_associationWaiting(ascNetworkPtr, timeout))
 		return DUL_NOASSOCIATIONREQUEST;
 
 	DCMTK_LOG4CPLUS_DEBUG(_logger, "1b");
 	if (timeout == -1)
-		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssocPtr, _maxPDUSize, NULL, NULL, 0, DUL_BLOCK);
+		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssoc, _maxPDUSize, NULL, NULL, 0, DUL_BLOCK);
 	else
-		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssocPtr, _maxPDUSize, NULL, NULL, 0, DUL_NOBLOCK, timeout);
+		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssoc, _maxPDUSize, NULL, NULL, 0, DUL_NOBLOCK, timeout);
 
 	DCMTK_LOG4CPLUS_DEBUG(_logger, "1c");
 	if (cond.bad() /*&& cond == DUL_NOASSOCIATIONREQUEST*/) {
-		cond = ASC_dropSCPAssociation(_ascAssocPtr);
-		cond = ASC_destroyAssociation(&_ascAssocPtr);
-		_ascParamsPtr = NULL;
-		_ascAssocPtr  = NULL;
+		cond = ASC_dropSCPAssociation(_ascAssoc);
+		cond = ASC_destroyAssociation(&_ascAssoc);
+		_ascParams = NULL;
+		_ascAssoc  = NULL;
 
 		return DUL_NOASSOCIATIONREQUEST;
 	}
 
-	ASC_setAPTitles(_ascAssocPtr->params, NULL, NULL, _appEntityPtr->getAETitle().c_str());
+	ASC_setAPTitles(_ascAssoc->params, NULL, NULL, _appEntity->getAETitle().c_str());
 
-	if (_appEntityPtr->_checkApplicationContextName) {
+	if (_appEntity->_checkApplicationContextName) {
 		char buffer[BUFSIZ];
-		cond = ASC_getApplicationContextName(_ascAssocPtr->params, buffer);
+		cond = ASC_getApplicationContextName(_ascAssoc->params, buffer);
 		if (cond.bad() || strcmp(buffer, UID_StandardApplicationContext) != 0) {
 			T_ASC_RejectParameters ascRejectParams = {
 				ASC_RESULT_REJECTEDPERMANENT,
@@ -68,22 +67,22 @@ Status AssociationListener::listen(int timeout)
 				ASC_REASON_SU_APPCONTEXTNAMENOTSUPPORTED
 			};
 
-			cond = ASC_rejectAssociation(_ascAssocPtr, &ascRejectParams);
+			cond = ASC_rejectAssociation(_ascAssoc, &ascRejectParams);
 			close();
 
 			return DUL_ASSOCIATIONREJECTED;
 		}
 	}
 
-	if (_appEntityPtr->_checkImplementationClassUID) {
-		if (strlen(_ascAssocPtr->params->theirImplementationClassUID) == 0) {
+	if (_appEntity->_checkImplementationClassUID) {
+		if (strlen(_ascAssoc->params->theirImplementationClassUID) == 0) {
 			T_ASC_RejectParameters ascRejectParams = {
 				ASC_RESULT_REJECTEDPERMANENT,
 				ASC_SOURCE_SERVICEUSER,
 				ASC_REASON_SU_NOREASON
 			};
 
-			cond = ASC_rejectAssociation(_ascAssocPtr, &ascRejectParams);
+			cond = ASC_rejectAssociation(_ascAssoc, &ascRejectParams);
 			close();
 
 			return DUL_ASSOCIATIONREJECTED;
@@ -109,11 +108,11 @@ Status AssociationListener::accept(const ServiceList& serviceList)
 			DcmXfer dcmXfer(*ti);
 			transferSyntaxes[count++] = dcmXfer.getXferID();
 		}
-		cond = ASC_acceptContextsWithPreferredTransferSyntaxes(_ascAssocPtr->params, &abstractSyntaxUID, 1, transferSyntaxes, count, si->_role);
+		cond = ASC_acceptContextsWithPreferredTransferSyntaxes(_ascAssoc->params, &abstractSyntaxUID, 1, transferSyntaxes, count, si->_role);
 		delete[] transferSyntaxes;
 	}
 
-	cond = ASC_acknowledgeAssociation(_ascAssocPtr);
+	cond = ASC_acknowledgeAssociation(_ascAssoc);
 
 	return cond;
 }
@@ -128,7 +127,7 @@ Status AssociationListener::reject(void)
 		ASC_REASON_SU_NOREASON
 	};
 
-	OFCondition cond = ASC_rejectAssociation(_ascAssocPtr, &ascRejectParams);
+	OFCondition cond = ASC_rejectAssociation(_ascAssoc, &ascRejectParams);
 	close();
 
 	return cond;
@@ -138,7 +137,7 @@ Status AssociationListener::abort(void)
 {
 	QMutexLocker locker(&_assocMutex);
 
-	OFCondition cond = ASC_abortAssociation(_ascAssocPtr);
+	OFCondition cond = ASC_abortAssociation(_ascAssoc);
 	close();
 
 	return cond;
@@ -175,8 +174,8 @@ void CDcmAssocListener::OnAcceptPresentationContext(void)	// FIXME...
 
 Logger AssociationListenerMaster::_logger = Logger::getInstance("dcm.AssociationListenerMaster");
 
-AssociationListenerMaster::AssociationListenerMaster(AppEntity* appEntityPtr)
-	: AssociationListener(appEntityPtr)
+AssociationListenerMaster::AssociationListenerMaster(AppEntity* appEntity)
+	: AssociationListener(appEntity)
 {
 	_started = false;
 	_stopped = true;
@@ -206,7 +205,7 @@ Status AssociationListenerMaster::stoplisten(void)
 	while(!_stopped)
 	{
 		DCMTK_LOG4CPLUS_DEBUG(_logger, "stopListen: waiting for master listener to die...");
-		QThread::sleep(1);
+		DTK_SLEEP(1);
 	}
 
 	DCMTK_LOG4CPLUS_DEBUG(_logger, "stopListen: stopped.");
@@ -241,7 +240,7 @@ void AssociationListenerMaster::run(void)
 
 	while(_counter > 0) {
 		DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "run: waiting for slave listeners(%d) to die...", _counter);
-		QThread::sleep(1);
+		DTK_SLEEP(1);
 	}
 
 	_stopped = true;
@@ -253,14 +252,14 @@ void AssociationListenerMaster::run(void)
 
 Logger AssociationListenerWorker::_logger = Logger::getInstance("dcm.AssociationListenerWorker");
 
-AssociationListenerWorker::AssociationListenerWorker(AssociationListenerMaster* masterPtr)
-	: AssociationListener(masterPtr->_appEntityPtr)
-	, _masterPtr(masterPtr)
+AssociationListenerWorker::AssociationListenerWorker(AssociationListenerMaster* masterListener)
+	: AssociationListener(masterListener->_appEntity)
+	, _masterListener(masterListener)
 {
-	_appEntityPtr = masterPtr->_appEntityPtr;
-	_ascParamsPtr = masterPtr->_ascParamsPtr;
-	_ascAssocPtr = masterPtr->_ascAssocPtr;
-	_maxPDUSize = masterPtr->_maxPDUSize;
+	_appEntity = masterListener->_appEntity;
+	_ascParams = masterListener->_ascParams;
+	_ascAssoc = masterListener->_ascAssoc;
+	_maxPDUSize = masterListener->_maxPDUSize;
 }
 
 AssociationListenerWorker::~AssociationListenerWorker(void)
@@ -277,22 +276,22 @@ Status AssociationListenerWorker::startlisten(void)
 
 bool AssociationListenerWorker::isListening(void)
 {
-	return _masterPtr->isListening();
+	return _masterListener->isListening();
 }
 
 void AssociationListenerWorker::run(void)
 {
 	DCMTK_LOG4CPLUS_DEBUG(_logger, "run: started.");
 
-	_masterPtr->_masterMutex.lock();
-	_masterPtr->_counter++;
-	_masterPtr->_masterMutex.unlock();
+	_masterListener->_masterMutex.lock();
+	_masterListener->_counter++;
+	_masterListener->_masterMutex.unlock();
 
 	onlisten();
 
-	_masterPtr->_masterMutex.lock();
-	_masterPtr->_counter--;
-	_masterPtr->_masterMutex.unlock();
+	_masterListener->_masterMutex.lock();
+	_masterListener->_counter--;
+	_masterListener->_masterMutex.unlock();
 
 	delete this;
 

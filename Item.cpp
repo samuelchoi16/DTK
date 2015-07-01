@@ -24,7 +24,7 @@ int Item::_DefaultNLS = NLS::DEFAULT;
 Item::Item(void)
 {
 	_created = true;
-	_dcmItemPtr = new DcmItem;
+	_dcmItem = new DcmItem;
 
 	Status dcmStat;
 	dcmStat = setAutoNLS(_DefaultNLS);
@@ -33,7 +33,7 @@ Item::Item(void)
 Item::Item(DcmItem* dcmItemPtr)
 {
 	_created = false;
-	_dcmItemPtr = dcmItemPtr;
+	_dcmItem = dcmItemPtr;
 
 	int nNLS;
 	Status dcmStat;
@@ -45,7 +45,7 @@ Item::Item(DcmItem* dcmItemPtr)
 Item::Item(const Item& dcmItem)
 {
 	_created = true;
-	_dcmItemPtr = new DcmItem(*dcmItem._dcmItemPtr);
+	_dcmItem = new DcmItem(*dcmItem._dcmItem);
 
 	int nNLS;
 	Status dcmStat;
@@ -57,8 +57,8 @@ Item::~Item(void)
 {
 	if (_created)
 	{
-		delete _dcmItemPtr;
-		_dcmItemPtr = NULL;
+		delete _dcmItem;
+		_dcmItem = NULL;
 	}
 }
 
@@ -68,24 +68,24 @@ Item& Item::operator=(const Item& item)
 	return *this;
 }
 
-Status Item::copyFrom(const Item* sourceItemPtr)
+Status Item::copyFrom(const Item* sourceItem)
 {
-	if (sourceItemPtr == NULL)
+	if (sourceItem == NULL)
 		return EC_IllegalParameter;
-	if (sourceItemPtr == this)
+	if (sourceItem == this)
 		return EC_Normal;
 
 	clear();
 
 	TagList tagList;
-	if (sourceItemPtr->getTagList(tagList).good()) {
+	if (sourceItem->getTagList(tagList).good()) {
 		for(TagList::iterator ti = tagList.begin(); ti != tagList.end(); ti++)
-			copyValueFrom(*ti, sourceItemPtr);
+			copyValueFrom(*ti, sourceItem);
 
 		int nls;
-		if (sourceItemPtr->getAutoNLS(nls).good())
+		if (sourceItem->getAutoNLS(nls).good())
 			setAutoNLS(nls);
-		if (sourceItemPtr->getNLS(nls).good())
+		if (sourceItem->getNLS(nls).good())
 			setNLS(nls);
 
 		return EC_Normal;
@@ -97,9 +97,9 @@ Status Item::copyFrom(const Item* sourceItemPtr)
 Status Item::set(DcmItem* dcmItemPtr, int parentNLS)
 {
 	if (_created)
-		delete _dcmItemPtr;
+		delete _dcmItem;
 	_created = false;
-	_dcmItemPtr = dcmItemPtr;
+	_dcmItem = dcmItemPtr;
 
 	int nNLS;
 	Status status;
@@ -113,7 +113,7 @@ Status Item::set(DcmItem* dcmItemPtr, int parentNLS)
 
 Status Item::clear(void)
 {
-	OFCondition cond = _dcmItemPtr->clear();
+	OFCondition cond = _dcmItem->clear();
 	_autoNLS = NLS::DEFAULT;
 	return cond;
 }
@@ -123,7 +123,7 @@ Status Item::print(const char* filename) const
 	std::ofstream os;
 
 	os.open(filename);
-	_dcmItemPtr->print(os);
+	_dcmItem->print(os);
 	os.close();
 
 	return EC_Normal;
@@ -134,7 +134,7 @@ Status Item::print(const String& filename) const
 	std::ofstream os;
 
 	os.open(filename.c_str());
-	_dcmItemPtr->print(os);
+	_dcmItem->print(os);
 	os.close();
 
 	return EC_Normal;
@@ -144,8 +144,8 @@ Status Item::print(const QString& filename) const
 {
 	std::ofstream os;
 
-	os.open(filename.toStdString().c_str());
-	_dcmItemPtr->print(os);
+	os.open(QSTR_TO_CSTR(filename));
+	_dcmItem->print(os);
 	os.close();
 
 	return EC_Normal;
@@ -156,7 +156,7 @@ Status Item::printXML(const char* filename) const
 	std::ofstream os;
 
 	os.open(filename);
-	OFCondition cond = _dcmItemPtr->writeXML(os);
+	OFCondition cond = _dcmItem->writeXML(os);
 	os.close();
 
 	return cond;
@@ -167,7 +167,7 @@ Status Item::printXML(const String& filename) const
 	std::ofstream os;
 
 	os.open(filename.c_str());
-	OFCondition cond = _dcmItemPtr->writeXML(os);
+	OFCondition cond = _dcmItem->writeXML(os);
 	os.close();
 
 	return cond;
@@ -177,8 +177,8 @@ Status Item::printXML(const QString& filename) const
 {
 	std::ofstream os;
 
-	os.open(filename.toStdString().c_str());
-	OFCondition cond = _dcmItemPtr->writeXML(os);
+	os.open(QSTR_TO_CSTR(filename));
+	OFCondition cond = _dcmItem->writeXML(os);
 	os.close();
 
 	return cond;
@@ -209,7 +209,7 @@ Status Item::putString(const DcmTagKey& tag, const char* value, int nls)
 		break;
 	}
 
-	return _dcmItemPtr->putAndInsertString(tag, str.c_str());
+	return _dcmItem->putAndInsertString(tag, str.c_str());
 }
 
 Status Item::putString(const DcmTagKey& tag, const String& value, int nls)
@@ -229,17 +229,17 @@ Status Item::putString(const DcmTagKey& tag, const QString& value, int nls)
 	switch(DcmTag((tag)).getEVR()) \
 	{ \
 	case EVR_US : \
-		return _dcmItemPtr->putAndInsertUint16((tag), (Uint16)(value), (pos)); \
+		return _dcmItem->putAndInsertUint16((tag), (Uint16)(value), (pos)); \
 	case EVR_SS : \
-		return _dcmItemPtr->putAndInsertSint16((tag), (Sint16)(value), (pos)); \
+		return _dcmItem->putAndInsertSint16((tag), (Sint16)(value), (pos)); \
 	case EVR_UL : \
-		return _dcmItemPtr->putAndInsertUint32((tag), (Uint32)(value), (pos)); \
+		return _dcmItem->putAndInsertUint32((tag), (Uint32)(value), (pos)); \
 	case EVR_SL : \
-		return _dcmItemPtr->putAndInsertSint32((tag), (Sint32)(value), (pos)); \
+		return _dcmItem->putAndInsertSint32((tag), (Sint32)(value), (pos)); \
 	case EVR_FL : \
-		return _dcmItemPtr->putAndInsertFloat32((tag), (Float32)(value), (pos)); \
+		return _dcmItem->putAndInsertFloat32((tag), (Float32)(value), (pos)); \
 	case EVR_FD : \
-		return _dcmItemPtr->putAndInsertFloat64((tag), (Float64)(value), (pos)); \
+		return _dcmItem->putAndInsertFloat64((tag), (Float64)(value), (pos)); \
 	default : \
 		String str, str2; \
 		char buffer[4000]; \
@@ -305,37 +305,37 @@ Status Item::putValue(const DcmTagKey& tag, Float64 value, Uint32 pos)
 
 Status Item::putValue(const DcmTagKey& tag, const Uint8* valuePtr, Uint32 length)
 {
-	return _dcmItemPtr->putAndInsertUint8Array(tag, valuePtr, length);	// AT, OW, US/SS, OB/OW
+	return _dcmItem->putAndInsertUint8Array(tag, valuePtr, length);	// AT, OW, US/SS, OB/OW
 }
 
 Status Item::putValue(const DcmTagKey& tag, const Uint16* valuePtr, Uint32 length)
 {
-	return _dcmItemPtr->putAndInsertUint16Array(tag, valuePtr, length);	// AT, OW, US/SS, OB/OW
+	return _dcmItem->putAndInsertUint16Array(tag, valuePtr, length);	// AT, OW, US/SS, OB/OW
 }
 
 Status Item::putValue(const DcmTagKey& tag, const Sint16* valuePtr, Uint32 length)
 {
-	return _dcmItemPtr->putAndInsertSint16Array(tag, valuePtr, length);	// SS, US/SS
+	return _dcmItem->putAndInsertSint16Array(tag, valuePtr, length);	// SS, US/SS
 }
 
 Status Item::putValue(const DcmTagKey& tag, const Float32* valuePtr, Uint32 length)
 {
-	return _dcmItemPtr->putAndInsertFloat32Array(tag, valuePtr, length);	// FL
+	return _dcmItem->putAndInsertFloat32Array(tag, valuePtr, length);	// FL
 }
 
 Status Item::putValue(const DcmTagKey& tag, const Float64* valuePtr, Uint32 length)
 {
-	return _dcmItemPtr->putAndInsertFloat64Array(tag, valuePtr, length);	// FD
+	return _dcmItem->putAndInsertFloat64Array(tag, valuePtr, length);	// FD
 }
 
 Status Item::putEmpty(const DcmTagKey& tag)
 {
-	return _dcmItemPtr->insertEmptyElement(tag);
+	return _dcmItem->insertEmptyElement(tag);
 }
 
 Status Item::removeValue(const DcmTagKey& tag)
 {
-	DcmElement* dcmElementPtr = _dcmItemPtr->remove(tag);
+	DcmElement* dcmElementPtr = _dcmItem->remove(tag);
 	if (dcmElementPtr) {
 		delete dcmElementPtr;
 		return EC_Normal;
@@ -348,15 +348,99 @@ Status Item::removeValue(const DcmTagKey& tag)
 
 Status Item::getString(const DcmTagKey& tag, String& value, Sint32 pos, int nls) const
 {
-	OFCondition cond;
+	OFCondition stat;
 	String ostr;
 
 	if (pos == -1) {
+		DcmEVR vr = DcmTag(tag).getEVR();
+		Sint32 vm = getVM(tag);
 		const char* valuePtr;
-		cond = _dcmItemPtr->findAndGetString(tag, valuePtr);
-		ostr = (valuePtr != NULL) ? valuePtr : "";
+
+		switch(vr) {
+		case EVR_AE :
+		case EVR_AS :
+		case EVR_AT :
+		case EVR_CS :
+		case EVR_DA :
+		case EVR_DS :
+		case EVR_DT :
+		case EVR_IS :
+		case EVR_LO :
+		case EVR_LT :
+		case EVR_PN :
+		case EVR_SH :
+		case EVR_ST :
+		case EVR_TM :
+		case EVR_UC :
+		case EVR_UI :
+		case EVR_UR :
+		case EVR_UT :
+			stat = _dcmItem->findAndGetString(tag, valuePtr);
+			ostr = (valuePtr != NULL) ? valuePtr : "";
+			break;
+		case EVR_FL :
+			for(int i = 0; i < vm; i++) {
+				float f32;
+				stat = getValue(tag, f32);
+				char buffer[1000];
+				sprintf(buffer, "%f", f32);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_FD :
+			for(int i = 0; i < vm; i++) {
+				double f64;
+				stat = getValue(tag, f64);
+				char buffer[1000];
+				sprintf(buffer, "%f", f64);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_SL :
+			for(int i = 0; i < vm; i++) {
+				Sint32 s32;
+				stat = getValue(tag, s32);
+				char buffer[1000];
+				sprintf(buffer, "%d", s32);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_SS :
+			for(int i = 0; i < vm; i++) {
+				Sint16 s16;
+				stat = getValue(tag, s16);
+				char buffer[1000];
+				sprintf(buffer, "%d", s16);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_UL :
+			for(int i = 0; i < vm; i++) {
+				Uint32 u32;
+				stat = getValue(tag, u32);
+				char buffer[1000];
+				sprintf(buffer, "%d", u32);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_US :
+			for(int i = 0; i < vm; i++) {
+				Uint16 u16;
+				stat = getValue(tag, u16);
+				char buffer[1000];
+				sprintf(buffer, "%d", u16);
+				ostr += (ostr.empty() ? String("") : String("\\")) + buffer;
+			}
+			break;
+		case EVR_SQ :
+			ostr = "";
+			break;
+		default :
+			ostr = "";
+			break;
+		}
 	} else {
-		cond = _dcmItemPtr->findAndGetOFString(tag, ostr, pos);
+		stat = _dcmItem->findAndGetOFString(tag, ostr, pos);
 	}
 
 	nls = (nls == NLS::AUTO) ? _autoNLS : nls;
@@ -365,7 +449,7 @@ Status Item::getString(const DcmTagKey& tag, String& value, Sint32 pos, int nls)
 	else
 		value = ostr;
 
-	return cond;
+	return stat;
 }
 
 Status Item::getString(const DcmTagKey& tag, QString& value, Sint32 pos, int nls) const
@@ -386,32 +470,32 @@ Status Item::getString(const DcmTagKey& tag, QString& value, Sint32 pos, int nls
 	{ \
 	case EVR_US : \
 		Uint16 u16; \
-		cond = _dcmItemPtr->findAndGetUint16((tag), u16, (pos)); \
+		cond = _dcmItem->findAndGetUint16((tag), u16, (pos)); \
 		(value) = u16; \
 		break; \
 	case EVR_SS : \
 		Sint16 s16; \
-		cond = _dcmItemPtr->findAndGetSint16((tag), s16, (pos)); \
+		cond = _dcmItem->findAndGetSint16((tag), s16, (pos)); \
 		(value) = s16; \
 		break; \
 	case EVR_UL : \
 		Uint32 u32; \
-		cond = _dcmItemPtr->findAndGetUint32((tag), u32, (pos)); \
+		cond = _dcmItem->findAndGetUint32((tag), u32, (pos)); \
 		(value) = u32; \
 		break; \
 	case EVR_SL : \
 		Sint32 s32; \
-		cond = _dcmItemPtr->findAndGetSint32((tag), s32, (pos)); \
+		cond = _dcmItem->findAndGetSint32((tag), s32, (pos)); \
 		(value) = s32; \
 		break; \
 	case EVR_FL : \
 		Float32 f32; \
-		cond = _dcmItemPtr->findAndGetFloat32((tag), f32, (pos)); \
+		cond = _dcmItem->findAndGetFloat32((tag), f32, (pos)); \
 		(value) = f32; \
 		break; \
 	case EVR_FD : \
 		Float64 f64; \
-		cond = _dcmItemPtr->findAndGetFloat64((tag), f64, (pos)); \
+		cond = _dcmItem->findAndGetFloat64((tag), f64, (pos)); \
 		(value) = f64; \
 		break; \
 	default : \
@@ -469,42 +553,42 @@ Status Item::getValue(const DcmTagKey& tag, Float64& value, Uint32 pos) const
 
 Status Item::getValue(const DcmTagKey& tag, Uint8& value, Uint32 pos) const
 {
-	return _dcmItemPtr->findAndGetUint8(tag, value, pos);
+	return _dcmItem->findAndGetUint8(tag, value, pos);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Uint8*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint8Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetUint8Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint16Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetUint16Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetUint32Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetUint32Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetSint16Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetSint16Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetSint32Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetSint32Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetFloat32Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetFloat32Array(tag, valuePtr, countPtr);
 }
 
 Status Item::getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* countPtr) const
 {
-	return _dcmItemPtr->findAndGetFloat64Array(tag, valuePtr, countPtr);
+	return _dcmItem->findAndGetFloat64Array(tag, valuePtr, countPtr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -706,7 +790,7 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime
 Status Item::putItem(const DcmTagKey& tag, Item& item, Sint32 pos)
 {
 	DcmItem* dcmItemPtr = NULL;
-	OFCondition cond = _dcmItemPtr->findOrCreateSequenceItem(tag, dcmItemPtr, pos);
+	OFCondition cond = _dcmItem->findOrCreateSequenceItem(tag, dcmItemPtr, pos);
 	if (cond.good())
 		item.set(dcmItemPtr, _autoNLS);
 	return cond;
@@ -715,7 +799,7 @@ Status Item::putItem(const DcmTagKey& tag, Item& item, Sint32 pos)
 Status Item::getItem(const DcmTagKey& tag, Item& item, Sint32 pos) const
 {
 	DcmItem* dcmItemPtr = NULL;
-	OFCondition cond = _dcmItemPtr->findAndGetSequenceItem(tag, dcmItemPtr, pos);
+	OFCondition cond = _dcmItem->findAndGetSequenceItem(tag, dcmItemPtr, pos);
 	if (cond.good())
 		item.set(dcmItemPtr, _autoNLS);
 	return cond;
@@ -724,7 +808,7 @@ Status Item::getItem(const DcmTagKey& tag, Item& item, Sint32 pos) const
 Sint32 Item::getItemCount(const DcmTagKey& tag) const
 {
 	DcmSequenceOfItems* dcmSequencePtr = NULL;
-	OFCondition cond = _dcmItemPtr->findAndGetSequence(tag, dcmSequencePtr);
+	OFCondition cond = _dcmItem->findAndGetSequence(tag, dcmSequencePtr);
 	return (cond.good() && dcmSequencePtr) ? dcmSequencePtr->card() : -1;
 }
 
@@ -881,7 +965,7 @@ Status Item::getRefSOP(const DcmTagKey& tag, Item& item, QString& sopClassUID, Q
 Status Item::getVR(const DcmTagKey& tag, DcmEVR& vr) const
 {
 	DcmElement* dcmElementPtr;
-	OFCondition cond = _dcmItemPtr->findAndGetElement(tag, dcmElementPtr);
+	OFCondition cond = _dcmItem->findAndGetElement(tag, dcmElementPtr);
 	if (cond.bad())
 		return cond;
 	vr = dcmElementPtr->getTag().getEVR();
@@ -891,7 +975,7 @@ Status Item::getVR(const DcmTagKey& tag, DcmEVR& vr) const
 Status Item::getVM(const DcmTagKey& tag, Uint32& vm) const
 {
 	DcmElement* dcmElementPtr;
-	OFCondition cond = _dcmItemPtr->findAndGetElement(tag, dcmElementPtr);
+	OFCondition cond = _dcmItem->findAndGetElement(tag, dcmElementPtr);
 	if (cond.bad())
 		return cond;
 	vm = dcmElementPtr->getVM();
@@ -901,7 +985,7 @@ Status Item::getVM(const DcmTagKey& tag, Uint32& vm) const
 Status Item::getVL(const DcmTagKey& tag, Uint32& vl) const
 {
 	DcmElement* dcmElementPtr;
-	OFCondition cond = _dcmItemPtr->findAndGetElement(tag, dcmElementPtr);
+	OFCondition cond = _dcmItem->findAndGetElement(tag, dcmElementPtr);
 	if (cond.bad())
 		return cond;
 	vl = dcmElementPtr->getLength();
@@ -939,21 +1023,21 @@ Sint32 Item::getVL(const DcmTagKey& tag) const
 
 bool Item::hasTag(const DcmTagKey& tag) const
 {
-	return _dcmItemPtr->tagExists(tag);
+	return _dcmItem->tagExists(tag);
 }
 
 bool Item::hasTagValue(const DcmTagKey& tag) const
 {
-	return _dcmItemPtr->tagExistsWithValue(tag);
+	return _dcmItem->tagExistsWithValue(tag);
 }
 
 Status Item::getTagList(TagList& tagList) const
 {
 	tagList.clear();
 
-	DcmObject* dcmObjectPtr = NULL;
-	while((dcmObjectPtr = _dcmItemPtr->nextInContainer(dcmObjectPtr)) != NULL) {
-		Tag tag = dcmObjectPtr->getTag();
+	DcmObject* dcmObject = NULL;
+	while((dcmObject = _dcmItem->nextInContainer(dcmObject)) != NULL) {
+		Tag tag = dcmObject->getTag();
 		tagList.push_back(tag);
 	}
 
@@ -962,7 +1046,7 @@ Status Item::getTagList(TagList& tagList) const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmTagKey sourceTag)
+Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItem, DcmTagKey sourceTag)
 {
 	Status stat;
 	String str;
@@ -978,10 +1062,10 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 
 	if (sourceTag == DcmTagKey(0xffff, 0xffff))
 		sourceTag = tag;
-	if (!sourceItemPtr->hasTag(sourceTag))
+	if (!sourceItem->hasTag(sourceTag))
 		return EC_TagNotFound;
 
-	switch(sourceItemPtr->getVR(sourceTag))
+	switch(sourceItem->getVR(sourceTag))
 	{
 	case EVR_AE :
 	case EVR_AS :
@@ -1001,31 +1085,31 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 	case EVR_TM :
 	case EVR_UI :
 	case EVR_UT :
-		stat = sourceItemPtr->getString(sourceTag, str);
+		stat = sourceItem->getString(sourceTag, str);
 		stat = putString(tag, str);
 		break;
 	case EVR_SL :
-		sourceItemPtr->getValue(sourceTag, s32Ptr, &length);
+		sourceItem->getValue(sourceTag, s32Ptr, &length);
 		for(Uint i = 0; i < length; i++) {
 			stat = putValue(tag, s32Ptr[i], i);
 		}
 		break;
 	case EVR_SS :
-		sourceItemPtr->getValue(sourceTag, s16Ptr, &length);
+		sourceItem->getValue(sourceTag, s16Ptr, &length);
 		stat = putValue(tag, s16Ptr, length);
 		break;
 	case EVR_UL :
-		sourceItemPtr->getValue(sourceTag, u32Ptr, &length);
+		sourceItem->getValue(sourceTag, u32Ptr, &length);
 		for(Uint i = 0; i < length; i++) {
 			stat = putValue(tag, u32Ptr[i], i);
 		}
 		break;
 	case EVR_US :
-		sourceItemPtr->getValue(sourceTag, u16Ptr, &length);
+		sourceItem->getValue(sourceTag, u16Ptr, &length);
 		stat = putValue(tag, u16Ptr, length);
 		break;
 	case EVR_SQ :
-		for(Sint32 pos = 0; (stat = sourceItemPtr->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
+		for(Sint32 pos = 0; (stat = sourceItem->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
 			stat = putItem(tag, subItemTarget, pos);
 			TagList tagList;
 			stat = subItemSource.getTagList(tagList);
@@ -1034,15 +1118,15 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItemPtr, DcmT
 		}
 		break;
 	case EVR_OB :
-		stat = sourceItemPtr->getValue(sourceTag, obPtr, &length);
+		stat = sourceItem->getValue(sourceTag, obPtr, &length);
 		stat = putValue(tag, obPtr, length);
 		break;
 	case EVR_OW :
-		stat = sourceItemPtr->getValue(sourceTag, owPtr, &length);
+		stat = sourceItem->getValue(sourceTag, owPtr, &length);
 		stat = putValue(tag, owPtr, length);
 		break;
 	case EVR_OF :
-		stat = sourceItemPtr->getValue(sourceTag, ofPtr, &length);
+		stat = sourceItem->getValue(sourceTag, ofPtr, &length);
 		stat = putValue(tag, ofPtr, length);
 		break;
 	default :
@@ -1077,7 +1161,7 @@ Status Item::setNLS(int nls)
 	}
 
 	if (str.size() > 0) {
-		return _dcmItemPtr->putAndInsertString(DCM_SpecificCharacterSet, str.c_str());
+		return _dcmItem->putAndInsertString(DCM_SpecificCharacterSet, str.c_str());
 	} else {
 		return EC_Normal;
 	}
@@ -1090,7 +1174,7 @@ Status Item::getNLS(int& nls) const
 	nls = 0;
 
 	// NLS component 1
-	cond1 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls1, 0);
+	cond1 = _dcmItem->findAndGetOFString(DCM_SpecificCharacterSet, nls1, 0);
 	if (cond1.good() && nls1.size() > 0) {
 		for(int i = 0; i < NLS::characterSetCount(); i++) {
 			if (nls1.compare(NLS::characterSetName1(i)) == 0) {
@@ -1107,7 +1191,7 @@ Status Item::getNLS(int& nls) const
 	}
 
 	// NLS component 2
-	cond2 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls2, 1);
+	cond2 = _dcmItem->findAndGetOFString(DCM_SpecificCharacterSet, nls2, 1);
 	if (cond2.good() && nls2.size() > 0) {
 		for(int i = 0; i < NLS::characterSetCount(); i++) {
 			if (nls2.compare(NLS::characterSetName2(i)) == 0) {
@@ -1118,7 +1202,7 @@ Status Item::getNLS(int& nls) const
 	}
 
 	// NLS component 3
-	cond3 = _dcmItemPtr->findAndGetOFString(DCM_SpecificCharacterSet, nls3, 2);
+	cond3 = _dcmItem->findAndGetOFString(DCM_SpecificCharacterSet, nls3, 2);
 	if (cond3.good() && nls3.size() > 0) {
 		for(int i = 0; i < NLS::characterSetCount(); i++) {
 			if (nls3.compare(NLS::characterSetName2(i)) == 0) {
@@ -1147,10 +1231,10 @@ Status Item::getAutoNLS(int& nls) const
 
 DcmItem* Item::_getDcmItem(void) const
 {
-	return _dcmItemPtr;
+	return _dcmItem;
 }
 
 Item::operator DcmItem*(void) const
 {
-	return _dcmItemPtr;
+	return _dcmItem;
 }

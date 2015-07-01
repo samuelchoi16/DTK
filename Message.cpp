@@ -27,21 +27,21 @@ Message::Message(void)
 {
 	memset(static_cast<T_DIMSE_Message*>(this), 0, sizeof(T_DIMSE_Message));
 	_pcId = 0;
-	_dcmDatasetPtr = NULL;
+	_dcmDataset = NULL;
 };
 
-Message::Message(Dataset* datasetPtr)
+Message::Message(Dataset* dataset)
 {
 	memset(static_cast<T_DIMSE_Message*>(this), 0, sizeof(T_DIMSE_Message));
 	_pcId = 0;
-	_dcmDatasetPtr = datasetPtr ? datasetPtr->_getDcmDataset() : NULL;
+	_dcmDataset = dataset ? dataset->_getDcmDataset() : NULL;
 };
 
-Message& Message::setDcmDataset(Dataset* datasetPtr)
+Message& Message::setDcmDataset(Dataset* dataset)
 {
 	memset(static_cast<T_DIMSE_Message*>(this), 0, sizeof(T_DIMSE_Message));
 	_pcId = 0;
-	_dcmDatasetPtr = datasetPtr ? datasetPtr->_getDcmDataset() : NULL;
+	_dcmDataset = dataset ? dataset->_getDcmDataset() : NULL;
 
 	return *this;
 }
@@ -169,39 +169,39 @@ Message& Message::print(const String& filename)
 	std::ofstream os;
 
 	os.open(filename.c_str());
-	DIMSE_printMessage(os, *this, _dcmDatasetPtr);
+	DIMSE_printMessage(os, *this, _dcmDataset);
 	os.close();
 
 	return *this;
 }
 
-void Message::onProgress(Uint32 byteCount)
+void Message::onProgress(Uint32 /*byteCount*/)
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CEchoRQ::CEchoRQ(Dataset* datasetPtr)
-	: Message(datasetPtr)
+CEchoRQ::CEchoRQ(Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = UID_VerificationSOPClass;
 
 	CommandField = DIMSE_C_ECHO_RQ;
 	SAFE_COPY(msg.CEchoRQ.AffectedSOPClassUID, _sopClassUID.c_str());
-	msg.CEchoRQ.DataSetType	= _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CEchoRQ.DataSetType	= _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 };
 
-void CEchoRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void CEchoRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, _sopClassUID.c_str());
-	Message::setIDs(ascAssocPtr);
-	msg.CEchoRQ.MessageID = ascAssocPtr->nextMsgID++;
+	_pcId = ASC_findAcceptedPresentationContextID(ascAssoc, _sopClassUID.c_str());
+	Message::setIDs(ascAssoc);
+	msg.CEchoRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CEchoRSP::CEchoRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CEchoRSP::CEchoRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_C_ECHO_RQ);
@@ -214,39 +214,39 @@ CEchoRSP::CEchoRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.CEchoRSP.AffectedSOPClassUID, req.msg.CEchoRQ.AffectedSOPClassUID);
 		msg.CEchoRSP.opts |= O_ECHO_AFFECTEDSOPCLASSUID;
 	}
-	msg.CEchoRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CEchoRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CEchoRSP.DimseStatus = status;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CStoreRQ::CStoreRQ(Dataset* datasetPtr)
-	: Message(datasetPtr)
+CStoreRQ::CStoreRQ(Dataset* dataset)
+	: Message(dataset)
 {
-	datasetPtr->getString(DCM_SOPClassUID, _sopClassUID);
-	datasetPtr->getString(DCM_SOPInstanceUID, _sopInstanceUID);
+	dataset->getString(DCM_SOPClassUID, _sopClassUID);
+	dataset->getString(DCM_SOPInstanceUID, _sopInstanceUID);
 
 	CommandField = DIMSE_C_STORE_RQ;
 	SAFE_COPY(msg.CStoreRQ.AffectedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.CStoreRQ.AffectedSOPInstanceUID, _sopInstanceUID.c_str());
-	msg.CStoreRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CStoreRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CStoreRQ.Priority = DIMSE_PRIORITY_MEDIUM;
 }
 
-void CStoreRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void CStoreRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	DcmXfer filexfer(_dcmDatasetPtr->getOriginalXfer());
+	DcmXfer filexfer(_dcmDataset->getOriginalXfer());
 	if (filexfer.getXfer() != EXS_Unknown)
-		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, _sopClassUID.c_str(), filexfer.getXferID());
+		_pcId = ASC_findAcceptedPresentationContextID(ascAssoc, _sopClassUID.c_str(), filexfer.getXferID());
 	else
-		_pcId = ASC_findAcceptedPresentationContextID(ascAssocPtr, _sopClassUID.c_str());
-	msg.CStoreRQ.MessageID = ascAssocPtr->nextMsgID++;
+		_pcId = ASC_findAcceptedPresentationContextID(ascAssoc, _sopClassUID.c_str());
+	msg.CStoreRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CStoreRSP::CStoreRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CStoreRSP::CStoreRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_C_STORE_RQ);
@@ -264,7 +264,7 @@ CStoreRSP::CStoreRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.CStoreRSP.AffectedSOPInstanceUID, req.msg.CStoreRQ.AffectedSOPInstanceUID);
 		msg.CStoreRSP.opts |= O_STORE_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.CStoreRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CStoreRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CStoreRSP.DimseStatus = status;
 	if (req.msg.CStoreRQ.opts & O_STORE_RQ_BLANK_PADDING)
 		msg.CStoreRSP.opts |= O_STORE_RSP_BLANK_PADDING;
@@ -272,27 +272,27 @@ CStoreRSP::CStoreRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFindRQ::CFindRQ(const dcm::String& sopClassUID, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CFindRQ::CFindRQ(const dcm::String& sopClassUID, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = SAFE_STRING(sopClassUID.c_str());
 
 	CommandField = DIMSE_C_FIND_RQ;
 	SAFE_COPY(msg.CFindRQ.AffectedSOPClassUID, _sopClassUID.c_str());
-	msg.CFindRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CFindRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CFindRQ.Priority = DIMSE_PRIORITY_MEDIUM;
 }
 
-void CFindRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void CFindRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.CFindRQ.MessageID = ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.CFindRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFindRSP::CFindRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CFindRSP::CFindRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_C_FIND_RQ);
@@ -305,33 +305,33 @@ CFindRSP::CFindRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.CFindRSP.AffectedSOPClassUID, req.msg.CFindRQ.AffectedSOPClassUID);
 		msg.CFindRSP.opts |= O_FIND_AFFECTEDSOPCLASSUID;
 	}
-	msg.CFindRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CFindRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CFindRSP.DimseStatus = status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CGetRQ::CGetRQ(const String& sopClassUID, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CGetRQ::CGetRQ(const String& sopClassUID, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = SAFE_STRING(sopClassUID.c_str());
 
 	CommandField = DIMSE_C_GET_RQ;
 	SAFE_COPY(msg.CGetRQ.AffectedSOPClassUID, _sopClassUID.c_str());
 	msg.CGetRQ.Priority = DIMSE_PRIORITY_MEDIUM;
-	msg.CGetRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CGetRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
-void CGetRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void CGetRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.CGetRQ.MessageID = ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.CGetRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CGetRSP::CGetRSP(const Message& req, Uint16 status, Dataset* datasetPtr, int remaining, int completed, int failure, int warning)
-	: Message(datasetPtr)
+CGetRSP::CGetRSP(const Message& req, Uint16 status, Dataset* dataset, int remaining, int completed, int failure, int warning)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_C_GET_RQ);
@@ -344,7 +344,7 @@ CGetRSP::CGetRSP(const Message& req, Uint16 status, Dataset* datasetPtr, int rem
 		SAFE_COPY(msg.CGetRSP.AffectedSOPClassUID, req.msg.CGetRQ.AffectedSOPClassUID);
 		msg.CGetRSP.opts |= O_GET_AFFECTEDSOPCLASSUID;
 	}
-	msg.CGetRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CGetRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CGetRSP.DimseStatus = status;
 	if (remaining >= 0)
 	{
@@ -370,28 +370,28 @@ CGetRSP::CGetRSP(const Message& req, Uint16 status, Dataset* datasetPtr, int rem
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMoveRQ::CMoveRQ(const String& sopClassUID, const String& destination, Dataset* datasetPtr)
-	: Message(datasetPtr)
+CMoveRQ::CMoveRQ(const String& sopClassUID, const String& destination, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 
 	CommandField = DIMSE_C_MOVE_RQ;
 	SAFE_COPY(msg.CMoveRQ.AffectedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.CMoveRQ.MoveDestination, destination.c_str());
-	msg.CMoveRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CMoveRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CMoveRQ.Priority = DIMSE_PRIORITY_MEDIUM;
 }
 
-void CMoveRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void CMoveRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.CMoveRQ.MessageID = ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.CMoveRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMoveRSP::CMoveRSP(const Message& req, Uint16 status, Dataset* datasetPtr, int remaining, int completed, int failure, int warning)
-	: Message(datasetPtr)
+CMoveRSP::CMoveRSP(const Message& req, Uint16 status, Dataset* dataset, int remaining, int completed, int failure, int warning)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_C_MOVE_RQ);
@@ -404,7 +404,7 @@ CMoveRSP::CMoveRSP(const Message& req, Uint16 status, Dataset* datasetPtr, int r
 		SAFE_COPY(msg.CMoveRSP.AffectedSOPClassUID, req.msg.CMoveRQ.AffectedSOPClassUID);
 		msg.CMoveRSP.opts |= O_MOVE_AFFECTEDSOPCLASSUID;
 	}
-	msg.CMoveRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.CMoveRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.CMoveRSP.DimseStatus = status;
 
 	if (remaining >= 0)
@@ -447,8 +447,8 @@ CCancelRQ::CCancelRQ(const Message& req)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NEventReportRQ::NEventReportRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 eventTypeId, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NEventReportRQ::NEventReportRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 eventTypeId, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID	= sopInstanceUID;
@@ -456,7 +456,7 @@ NEventReportRQ::NEventReportRQ(const String& sopClassUID, const String& sopInsta
 	CommandField = DIMSE_N_EVENT_REPORT_RQ;
 	SAFE_COPY(msg.NEventReportRQ.AffectedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.NEventReportRQ.AffectedSOPInstanceUID, _sopInstanceUID.c_str());
-	msg.NEventReportRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NEventReportRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.NEventReportRQ.EventTypeID = eventTypeId;
 }
 
@@ -488,7 +488,7 @@ NEventReportRSP::NEventReportRSP(const Message& req, Uint16 status, Dataset* dat
 		SAFE_COPY(msg.NEventReportRSP.AffectedSOPInstanceUID, req.msg.NEventReportRQ.AffectedSOPInstanceUID);
 		msg.NEventReportRSP.opts |= O_NEVENTREPORT_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NEventReportRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NEventReportRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	if (req.msg.NEventReportRQ.EventTypeID > 0)
 	{
 		msg.NEventReportRSP.EventTypeID = req.msg.NEventReportRQ.EventTypeID;
@@ -498,8 +498,8 @@ NEventReportRSP::NEventReportRSP(const Message& req, Uint16 status, Dataset* dat
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NGetRQ::NGetRQ(const dcm::String& sopClassUID, const dcm::String& sopInstanceUID, const DcmTagKey* dcmTagPtr, int dcmTagCount, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NGetRQ::NGetRQ(const dcm::String& sopClassUID, const dcm::String& sopInstanceUID, const DcmTagKey* dcmTag, int dcmTagCount, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID	= sopInstanceUID;
@@ -507,13 +507,13 @@ NGetRQ::NGetRQ(const dcm::String& sopClassUID, const dcm::String& sopInstanceUID
 	CommandField = DIMSE_N_GET_RQ;
 	SAFE_COPY(msg.NGetRQ.RequestedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.NGetRQ.RequestedSOPInstanceUID, _sopInstanceUID.c_str());
-	msg.NGetRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NGetRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 	msg.NGetRQ.ListCount = dcmTagCount * 2;
 	msg.NGetRQ.AttributeIdentifierList = new DIC_US[msg.NGetRQ.ListCount * 2];
 	for(int nIndex = 0; nIndex < dcmTagCount; nIndex++)
 	{
-		msg.NGetRQ.AttributeIdentifierList[nIndex*2 + 0] = dcmTagPtr[nIndex].getGroup();
-		msg.NGetRQ.AttributeIdentifierList[nIndex*2 + 1] = dcmTagPtr[nIndex].getElement();
+		msg.NGetRQ.AttributeIdentifierList[nIndex*2 + 0] = dcmTag[nIndex].getGroup();
+		msg.NGetRQ.AttributeIdentifierList[nIndex*2 + 1] = dcmTag[nIndex].getElement();
 	}
 }
 
@@ -522,10 +522,10 @@ NGetRQ::~NGetRQ(void)
 	delete[] msg.NGetRQ.AttributeIdentifierList;
 }
 
-void NGetRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void NGetRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.NGetRQ.MessageID = ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.NGetRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,13 +550,13 @@ NGetRSP::NGetRSP(const Message& req, Uint16 nStatus, Dataset* pDcmDatasetArg)
 		SAFE_COPY(msg.NGetRSP.AffectedSOPInstanceUID, req.msg.NGetRQ.RequestedSOPInstanceUID);
 		msg.NGetRSP.opts |= O_NGET_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NGetRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NGetRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NSetRQ::NSetRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NSetRQ::NSetRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID	= sopInstanceUID;
@@ -564,19 +564,19 @@ NSetRQ::NSetRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset*
 	CommandField = DIMSE_N_SET_RQ;
 	SAFE_COPY(msg.NSetRQ.RequestedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.NSetRQ.RequestedSOPInstanceUID, _sopInstanceUID.c_str());
-	msg.NSetRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NSetRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
-void NSetRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void NSetRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.NSetRQ.MessageID = ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.NSetRQ.MessageID = ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NSetRSP::NSetRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NSetRSP::NSetRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_N_SET_RQ);
@@ -595,13 +595,13 @@ NSetRSP::NSetRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.NSetRSP.AffectedSOPInstanceUID, req.msg.NSetRQ.RequestedSOPInstanceUID);
 		msg.NSetRSP.opts |= O_NSET_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NSetRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NSetRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NActionRQ::NActionRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 actionTypeId, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NActionRQ::NActionRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 actionTypeId, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID	= sopInstanceUID;
@@ -610,19 +610,19 @@ NActionRQ::NActionRQ(const String& sopClassUID, const String& sopInstanceUID, Ui
 	SAFE_COPY(msg.NActionRQ.RequestedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.NActionRQ.RequestedSOPInstanceUID, _sopInstanceUID.c_str());
 	msg.NActionRQ.ActionTypeID = actionTypeId;
-	msg.NActionRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NActionRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
-void NActionRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void NActionRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.NActionRQ.MessageID	= ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.NActionRQ.MessageID	= ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NActionRSP::NActionRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NActionRSP::NActionRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_N_ACTION_RQ);
@@ -646,13 +646,13 @@ NActionRSP::NActionRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		msg.NActionRSP.ActionTypeID = req.msg.NActionRQ.ActionTypeID;
 		msg.NActionRSP.opts |= O_NACTION_ACTIONTYPEID;
 	}
-	msg.NActionRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NActionRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NCreateRQ::NCreateRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NCreateRQ::NCreateRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID = sopInstanceUID;
@@ -665,7 +665,7 @@ NCreateRQ::NCreateRQ(const String& sopClassUID, const String& sopInstanceUID, Da
 		SAFE_COPY(msg.NCreateRQ.AffectedSOPInstanceUID, _sopInstanceUID.c_str());
 		msg.NCreateRQ.opts	= O_NCREATE_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NCreateRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NCreateRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
 void NCreateRQ::setIDs(T_ASC_Association* ascAssocPtr)
@@ -676,8 +676,8 @@ void NCreateRQ::setIDs(T_ASC_Association* ascAssocPtr)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NCreateRSP::NCreateRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NCreateRSP::NCreateRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_N_CREATE_RQ);
@@ -696,13 +696,13 @@ NCreateRSP::NCreateRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.NCreateRSP.AffectedSOPInstanceUID, req.msg.NCreateRQ.AffectedSOPInstanceUID);
 		msg.NCreateRSP.opts |= O_NCREATE_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NCreateRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NCreateRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NDeleteRQ::NDeleteRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NDeleteRQ::NDeleteRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset)
+	: Message(dataset)
 {
 	_sopClassUID = sopClassUID;
 	_sopInstanceUID	= sopInstanceUID;
@@ -710,19 +710,19 @@ NDeleteRQ::NDeleteRQ(const String& sopClassUID, const String& sopInstanceUID, Da
 	CommandField = DIMSE_N_DELETE_RQ;
 	SAFE_COPY(msg.NDeleteRQ.RequestedSOPClassUID, _sopClassUID.c_str());
 	SAFE_COPY(msg.NDeleteRQ.RequestedSOPInstanceUID, _sopInstanceUID.c_str());
-	msg.NDeleteRQ.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NDeleteRQ.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }
 
-void NDeleteRQ::setIDs(T_ASC_Association* ascAssocPtr)
+void NDeleteRQ::setIDs(T_ASC_Association* ascAssoc)
 {
-	Message::setIDs(ascAssocPtr);
-	msg.NDeleteRQ.MessageID	= ascAssocPtr->nextMsgID++;
+	Message::setIDs(ascAssoc);
+	msg.NDeleteRQ.MessageID	= ascAssoc->nextMsgID++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NDeleteRSP::NDeleteRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
-	: Message(datasetPtr)
+NDeleteRSP::NDeleteRSP(const Message& req, Uint16 status, Dataset* dataset)
+	: Message(dataset)
 {
 	_pcId = req._pcId;
 	assert(req.CommandField == DIMSE_N_DELETE_RQ);
@@ -741,5 +741,5 @@ NDeleteRSP::NDeleteRSP(const Message& req, Uint16 status, Dataset* datasetPtr)
 		SAFE_COPY(msg.NDeleteRSP.AffectedSOPInstanceUID, req.msg.NDeleteRQ.RequestedSOPInstanceUID);
 		msg.NDeleteRSP.opts |= O_NDELETE_AFFECTEDSOPINSTANCEUID;
 	}
-	msg.NDeleteRSP.DataSetType = _dcmDatasetPtr ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
+	msg.NDeleteRSP.DataSetType = _dcmDataset ? DIMSE_DATASET_PRESENT : DIMSE_DATASET_NULL;
 }

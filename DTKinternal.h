@@ -34,15 +34,9 @@
 #include "dcmtk/dcmjpeg/dipijpeg.h"			/* for dcmimage JPEG plugin */
 #include "dcmtk/dcmjpeg/djrplol.h"
 
-#include "zlib.h"							/* for zlibVersion() */
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define	DTK_DEFAULT_UID_ROOT				("1.2.410.200055")
-
-extern const char* _ISO_IR[];
-extern const char* _ISO_2022[];
-extern const char* _ISO_2022_ESC[];
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,8 +44,10 @@ using namespace dcm;
 
 #ifdef  WIN32
 #define DTK_MAX(a, b)                       max(a, b)
+#define	DTK_SLEEP(n)						Sleep((n))
 #else
 #define DTK_MAX(a, b)                       std::max(a, b)
+#define	DTK_SLEEP(n)						sleep((n))
 #endif
 
 #endif // DTKINTERNAL_H

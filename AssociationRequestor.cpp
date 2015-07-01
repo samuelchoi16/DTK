@@ -21,14 +21,14 @@
 
 Logger AssociationRequestor::_logger = Logger::getInstance("dcm.AssociationRequestor");
 
-AssociationRequestor::AssociationRequestor(AppEntity* dcmAppEntityPtr)
-	: Association(dcmAppEntityPtr)
+AssociationRequestor::AssociationRequestor(AppEntity* appEntity)
+	: Association(appEntity)
 {
 }
 
 AssociationRequestor::~AssociationRequestor(void)
 {
-	if (_ascParamsPtr)
+	if (_ascParams)
 		close();
 }
 
@@ -41,9 +41,9 @@ Status AssociationRequestor::connect(const String& calledAETitle, const String& 
 	sprintf(remoteAddress, "%s:%d", hostname.c_str(), port);
 
 	Status stat;
-	stat = ASC_createAssociationParameters(&_ascParamsPtr, _appEntityPtr->_maxPDUSize);
-	stat = ASC_setAPTitles(_ascParamsPtr, _appEntityPtr->getAETitle().c_str(), calledAETitle.c_str(), NULL);
-	stat = ASC_setPresentationAddresses(_ascParamsPtr, localAddress, remoteAddress);
+	stat = ASC_createAssociationParameters(&_ascParams, _appEntity->_maxPDUSize);
+	stat = ASC_setAPTitles(_ascParams, _appEntity->getAETitle().c_str(), calledAETitle.c_str(), NULL);
+	stat = ASC_setPresentationAddresses(_ascParams, localAddress, remoteAddress);
 
 //	OnProposePresentationContext();
 
@@ -55,14 +55,14 @@ Status AssociationRequestor::connect(const String& calledAETitle, const String& 
 			DcmXfer dcmXfer(*ti);
 			transferSyntaxes[count++] = dcmXfer.getXferID();
 		}
-		stat = ASC_addPresentationContext(_ascParamsPtr, pcId, si->_abstractSyntax.c_str(), transferSyntaxes, count, si->_role);
+		stat = ASC_addPresentationContext(_ascParams, pcId, si->_abstractSyntax.c_str(), transferSyntaxes, count, si->_role);
 		delete []transferSyntaxes;
 
 		pcId += 2;
 	}
 
-	T_ASC_Network* ascNetworkPtr = reinterpret_cast<T_ASC_Network*>(_appEntityPtr->getInternal());
-	stat = ASC_requestAssociation(ascNetworkPtr, _ascParamsPtr, &_ascAssocPtr);
+	T_ASC_Network* ascNetwork = reinterpret_cast<T_ASC_Network*>(_appEntity->getInternal());
+	stat = ASC_requestAssociation(ascNetwork, _ascParams, &_ascAssoc);
 
 //	int iCount = ASC_countAcceptedPresentationContexts(m_pAscParams);
 

@@ -22,27 +22,27 @@
 MetaInfo::MetaInfo(void)
 {
 	if (_created)
-		delete _dcmItemPtr;
-	_dcmItemPtr = new DcmMetaInfo;
+		delete _dcmItem;
+	_dcmItem = new DcmMetaInfo;
 }
 
-MetaInfo::MetaInfo(DcmMetaInfo* dcmMetaInfoPtr)
-	: Item(dcmMetaInfoPtr)
+MetaInfo::MetaInfo(DcmMetaInfo* dcmMetaInfo)
+	: Item(dcmMetaInfo)
 {
 }
 
 MetaInfo::MetaInfo(const MetaInfo& metaInfo)
 {
 	if (_created)
-		delete _dcmItemPtr;
-	_dcmItemPtr = new DcmMetaInfo(*dynamic_cast<DcmMetaInfo*>(metaInfo._dcmItemPtr));
+		delete _dcmItem;
+	_dcmItem = new DcmMetaInfo(*dynamic_cast<DcmMetaInfo*>(metaInfo._dcmItem));
 }
 
 MetaInfo::~MetaInfo(void)
 {
 	if (_created) {
-		delete _dcmItemPtr;
-		_dcmItemPtr = NULL;
+		delete _dcmItem;
+		_dcmItem = NULL;
 	}
 }
 
@@ -52,8 +52,8 @@ MetaInfo& MetaInfo::operator=(const MetaInfo& metaInfo)
 		return *this;
 
 	if (_created)
-		delete _dcmItemPtr;
-	_dcmItemPtr = new DcmMetaInfo(*dynamic_cast<DcmMetaInfo*>(metaInfo._dcmItemPtr));
+		delete _dcmItem;
+	_dcmItem = new DcmMetaInfo(*dynamic_cast<DcmMetaInfo*>(metaInfo._dcmItem));
 
 	return *this;
 }

@@ -22,10 +22,10 @@
 DirRecord::DirRecord()
 {
 	if (_created)
-		delete _dcmItemPtr;
+		delete _dcmItem;
 
 	_created = true;
-	_dcmItemPtr = new DcmDirectoryRecord;
+	_dcmItem = new DcmDirectoryRecord;
 
 	setAutoNLS(_DefaultNLS);
 	setNLS(_DefaultNLS);
@@ -43,8 +43,8 @@ DirRecord::DirRecord(const E_DirRecType recordType)
 	setNLS(_DefaultNLS);
 }
 */
-DirRecord::DirRecord(DcmDirectoryRecord* dcmDirRecordPtr)
-	: Item(dcmDirRecordPtr)
+DirRecord::DirRecord(DcmDirectoryRecord* dcmDirRecord)
+	: Item(dcmDirRecord)
 {
 	int nls;
 	if (getNLS(nls).good() && nls > 0)
@@ -54,10 +54,10 @@ DirRecord::DirRecord(DcmDirectoryRecord* dcmDirRecordPtr)
 DirRecord::DirRecord(const DirRecord& dirRecord)
 {
 	if (_created)
-		delete _dcmItemPtr;
+		delete _dcmItem;
 
 	_created = true;
-	_dcmItemPtr = new DcmDirectoryRecord(*dynamic_cast<DcmDirectoryRecord*>(dirRecord._dcmItemPtr));
+	_dcmItem = new DcmDirectoryRecord(*dynamic_cast<DcmDirectoryRecord*>(dirRecord._dcmItem));
 
 	int nls;
 	if (dirRecord.getAutoNLS(nls).good())
@@ -69,8 +69,8 @@ DirRecord::DirRecord(const DirRecord& dirRecord)
 DirRecord::~DirRecord(void)
 {
 	if (_created) {
-		delete _dcmItemPtr;
-		_dcmItemPtr = NULL;
+		delete _dcmItem;
+		_dcmItem = NULL;
 	}
 }
 
@@ -93,7 +93,7 @@ String DirRecord::fileId(void) const
 
 Status DirRecord::putRecord(const E_DirRecType recordType, const String& fileId, DirRecord& subRecord)
 {
-	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItemPtr);
+	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItem);
 	DcmDirectoryRecord* dcmSubRecordPtr = new DcmDirectoryRecord(recordType, NULL, "", NULL);
 
 	Status stat = dcmDirRecordPtr->insertSub(dcmSubRecordPtr);
@@ -104,7 +104,7 @@ Status DirRecord::putRecord(const E_DirRecType recordType, const String& fileId,
 
 Status DirRecord::getRecord(const E_DirRecType recordType, const File& file, DirRecord& subRecord)
 {
-	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItemPtr);
+	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItem);
 	DcmDirectoryRecord* record = NULL;
 	bool found = false;
 	const Dataset* datasetPtr = file.getDataset();
@@ -148,7 +148,7 @@ Status DirRecord::getRecord(const E_DirRecType recordType, const File& file, Dir
 
 Status DirRecord::copyValue(const File& file)
 {
-	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItemPtr);
+	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItem);
 	Status stat;
 	const MetaInfo* metainfoPtr = file.getMetaInfo();
 	const Dataset* datasetPtr = file.getDataset();
@@ -205,7 +205,7 @@ Status DirRecord::copyValue(const File& file)
 
 E_DirRecType DirRecord::getRecordType(void)
 {
-	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItemPtr);
+	DcmDirectoryRecord* dcmDirRecordPtr = dynamic_cast<DcmDirectoryRecord*>(_dcmItem);
 	return  dcmDirRecordPtr->getRecordType();
 }
 

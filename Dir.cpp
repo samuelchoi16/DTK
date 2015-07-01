@@ -28,24 +28,24 @@ Logger Dir::_logger = Logger::getInstance("dcm.Dir");
 
 Dir::Dir()
 {
-	_dcmDirPtr = new DcmDicomDir;
+	_dcmDir = new DcmDicomDir;
 	_baseDir = ".";
 }
 
 Dir::Dir(const String& dicomdir)
 {
-	_dcmDirPtr = new DcmDicomDir(dicomdir);
-	_baseDir = QSTR_TO_DSTR(QFileInfo(_dcmDirPtr->getDirFileName().getCharPointer()).absolutePath());
+	_dcmDir = new DcmDicomDir(dicomdir);
+	_baseDir = QSTR_TO_DSTR(QFileInfo(_dcmDir->getDirFileName().getCharPointer()).absolutePath());
 }
 
 Dir::~Dir()
 {
-	delete _dcmDirPtr;
+	delete _dcmDir;
 }
 
 Status Dir::getRootRecord(DirRecord& rootRecord)
 {
-	DcmDirectoryRecord* rootRecordPtr = &(_dcmDirPtr->getRootRecord());
+	DcmDirectoryRecord* rootRecordPtr = &(_dcmDir->getRootRecord());
 	rootRecord.set(rootRecordPtr);
 	return EC_Normal;
 }
@@ -121,7 +121,7 @@ Status Dir::save(const E_EncodingType encodingType, const E_GrpLenEncoding group
 {
 	QDir baseDir(DSTR_TO_QSTR(_baseDir));
 	baseDir.mkpath(".");
-	Status stat = _dcmDirPtr->write(DICOMDIR_DEFAULT_TRANSFERSYNTAX, encodingType, groupLength);
+	Status stat = _dcmDir->write(DICOMDIR_DEFAULT_TRANSFERSYNTAX, encodingType, groupLength);
 
 	assert(_sourceFileList.size() == _targetFileList.size());
 	StringList::iterator si = _sourceFileList.begin();
@@ -146,7 +146,7 @@ Status Dir::print(const String& filename)
 	std::ofstream os;
 
 	os.open(filename.c_str());
-	_dcmDirPtr->print(os);
+	_dcmDir->print(os);
 	os.close();
 
 	return EC_Normal;

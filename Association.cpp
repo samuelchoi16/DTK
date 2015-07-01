@@ -17,18 +17,18 @@
 #include "DTK.h"
 #include "DTKinternal.h"
 
-static void ProgressCallback(void *callbackContextPtr, Ulong byteCount);
+static void ProgressCallback(void *callbackContext, Ulong byteCount);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Logger Association::_logger = Logger::getInstance("dcm.Association");
 
-Association::Association(AppEntity* appEntityPtr)
+Association::Association(AppEntity* appEntity)
 {
-	_appEntityPtr = appEntityPtr;
-	_ascParamsPtr = NULL;
-	_ascAssocPtr = NULL;
-	_maxPDUSize = appEntityPtr->_maxPDUSize;
+	_appEntity = appEntity;
+	_ascParams = NULL;
+	_ascAssoc = NULL;
+	_maxPDUSize = appEntity->_maxPDUSize;
 }
 
 Association::~Association(void)
@@ -40,11 +40,11 @@ Status Association::close()
 	QMutexLocker locker(&_assocMutex);
 
 	OFCondition cond;
-	if (_ascAssocPtr) {
-		cond = ASC_releaseAssociation(_ascAssocPtr);
-		cond = ASC_destroyAssociation(&_ascAssocPtr);
-		_ascParamsPtr = NULL;
-		_ascAssocPtr = NULL;
+	if (_ascAssoc) {
+		cond = ASC_releaseAssociation(_ascAssoc);
+		cond = ASC_destroyAssociation(&_ascAssoc);
+		_ascParams = NULL;
+		_ascAssoc = NULL;
 	}
 	return cond;
 }
@@ -55,10 +55,10 @@ Status Association::sendMessage(dcm::Message& req)
 
 	OFCondition cond;
 	T_ASC_PresentationContextID& pcId = req._pcId;
-	T_DIMSE_Message* dimsePtr = &req;
-	DcmDataset* statusDatasetPtr = NULL;
+	T_DIMSE_Message* dimse = &req;
+	DcmDataset* statusDataset = NULL;
 
-	switch(dimsePtr->CommandField) {
+	switch(dimse->CommandField) {
 	case DIMSE_C_ECHO_RQ :
 	case DIMSE_C_STORE_RQ :
 	case DIMSE_C_GET_RQ :
@@ -70,18 +70,18 @@ Status Association::sendMessage(dcm::Message& req)
 	case DIMSE_N_ACTION_RQ :
 	case DIMSE_N_CREATE_RQ :
 	case DIMSE_N_DELETE_RQ :
-		req.setIDs(_ascAssocPtr);
+		req.setIDs(_ascAssoc);
 		break;
 	default :
 		break;
 	}
 
-	cond = DIMSE_sendMessageUsingMemoryData(_ascAssocPtr, pcId, dimsePtr, statusDatasetPtr, req._dcmDatasetPtr, ProgressCallback, (void*)&req);
+	cond = DIMSE_sendMessageUsingMemoryData(_ascAssoc, pcId, dimse, statusDataset, req._dcmDataset, ProgressCallback, (void*)&req);
 
-	DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "sendMessage: cmd=%04XH:%s,cond=%s", dimsePtr->CommandField, req.getCommandName().c_str(), cond.text());
+	DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "sendMessage: cmd=%04XH:%s,cond=%s", dimse->CommandField, req.getCommandName().c_str(), cond.text());
 
-	if (statusDatasetPtr != NULL)
-		delete statusDatasetPtr;
+	if (statusDataset != NULL)
+		delete statusDataset;
 
 	return cond;
 }
@@ -97,16 +97,16 @@ Status Association::receiveMessage(Message& rsp, int timeout)
 	DcmDataset* statusDatasetPtr = NULL;
 	bool isDatasetPresent = false;
 
-	if (rsp._dcmDatasetPtr)
-		cond = rsp._dcmDatasetPtr->clear();
+	if (rsp._dcmDataset)
+		cond = rsp._dcmDataset->clear();
 
 //	if (!ASC_dataWaiting(m_pAscAssoc, nTimeout))	// FIXME
 //		return DIMSE_NODATAAVAILABLE;
 
 	if (timeout == -1)
-		cond = DIMSE_receiveCommand(this->_ascAssocPtr, DIMSE_BLOCKING, 0, &pcId, &dimse, &statusDatasetPtr);
+		cond = DIMSE_receiveCommand(this->_ascAssoc, DIMSE_BLOCKING, 0, &pcId, &dimse, &statusDatasetPtr);
 	else
-		cond = DIMSE_receiveCommand(this->_ascAssocPtr, DIMSE_NONBLOCKING, timeout, &pcId, &dimse, &statusDatasetPtr);
+		cond = DIMSE_receiveCommand(this->_ascAssoc, DIMSE_NONBLOCKING, timeout, &pcId, &dimse, &statusDatasetPtr);
 
 	if (statusDatasetPtr != NULL)
 		delete statusDatasetPtr;
@@ -114,7 +114,7 @@ Status Association::receiveMessage(Message& rsp, int timeout)
 	if (cond == DIMSE_NODATAAVAILABLE) {
 		return DIMSE_NODATAAVAILABLE;
 	} else if (cond == DUL_PEERREQUESTEDRELEASE) {
-		cond = ASC_acknowledgeRelease(this->_ascAssocPtr);
+		cond = ASC_acknowledgeRelease(this->_ascAssoc);
 		return DUL_PEERREQUESTEDRELEASE;
 	}
 	else if (cond != EC_Normal)
@@ -222,10 +222,10 @@ Status Association::receiveMessage(Message& rsp, int timeout)
 
 	if (isDatasetPresent) {
 		if (timeout == -1)
-			cond = DIMSE_receiveDataSetInMemory(_ascAssocPtr, DIMSE_BLOCKING, 0, &pcId2, &rsp._dcmDatasetPtr,
+			cond = DIMSE_receiveDataSetInMemory(_ascAssoc, DIMSE_BLOCKING, 0, &pcId2, &rsp._dcmDataset,
 															ProgressCallback, (void*)&rsp);
 		else
-			cond = DIMSE_receiveDataSetInMemory(_ascAssocPtr, DIMSE_NONBLOCKING, timeout, &pcId2, &rsp._dcmDatasetPtr,
+			cond = DIMSE_receiveDataSetInMemory(_ascAssoc, DIMSE_NONBLOCKING, timeout, &pcId2, &rsp._dcmDataset,
 															ProgressCallback, (void*)&rsp);
 	}
 
@@ -234,25 +234,25 @@ Status Association::receiveMessage(Message& rsp, int timeout)
 
 Status Association::getAssocInfo(AssociationInfo& assocInfo)
 {
-	if (_ascAssocPtr == NULL)
+	if (_ascAssoc == NULL)
 		return EC_Normal;
 
-	assocInfo.applicationContextName = _ascAssocPtr->params->DULparams.applicationContextName;
+	assocInfo.applicationContextName = _ascAssoc->params->DULparams.applicationContextName;
 
-	assocInfo.callingAETitle = _ascAssocPtr->params->DULparams.callingAPTitle;
-	assocInfo.callingPresentationAddress = _ascAssocPtr->params->DULparams.callingPresentationAddress;
-	assocInfo.callingImplementationClassUID = _ascAssocPtr->params->DULparams.callingImplementationClassUID;
-	assocInfo.callingImplementationVersion = _ascAssocPtr->params->DULparams.callingImplementationVersionName;
+	assocInfo.callingAETitle = _ascAssoc->params->DULparams.callingAPTitle;
+	assocInfo.callingPresentationAddress = _ascAssoc->params->DULparams.callingPresentationAddress;
+	assocInfo.callingImplementationClassUID = _ascAssoc->params->DULparams.callingImplementationClassUID;
+	assocInfo.callingImplementationVersion = _ascAssoc->params->DULparams.callingImplementationVersionName;
 
-	assocInfo.calledAETitle = _ascAssocPtr->params->DULparams.calledAPTitle;
-	assocInfo.calledPresentationAddress = _ascAssocPtr->params->DULparams.calledPresentationAddress;
-	assocInfo.calledImplementationClassUID = _ascAssocPtr->params->DULparams.calledImplementationClassUID;
-	assocInfo.calledImplementationVersion = _ascAssocPtr->params->DULparams.calledImplementationVersionName;
+	assocInfo.calledAETitle = _ascAssoc->params->DULparams.calledAPTitle;
+	assocInfo.calledPresentationAddress = _ascAssoc->params->DULparams.calledPresentationAddress;
+	assocInfo.calledImplementationClassUID = _ascAssoc->params->DULparams.calledImplementationClassUID;
+	assocInfo.calledImplementationVersion = _ascAssoc->params->DULparams.calledImplementationVersionName;
 
-	assocInfo.respondingAETitle = _ascAssocPtr->params->DULparams.respondingAPTitle;
+	assocInfo.respondingAETitle = _ascAssoc->params->DULparams.respondingAPTitle;
 
-	assocInfo.maxPDUSizeOfMine = _ascAssocPtr->params->DULparams.maxPDU;
-	assocInfo.maxPDUSizeOfPeer = _ascAssocPtr->params->DULparams.peerMaxPDU;
+	assocInfo.maxPDUSizeOfMine = _ascAssoc->params->DULparams.maxPDU;
+	assocInfo.maxPDUSizeOfPeer = _ascAssoc->params->DULparams.peerMaxPDU;
 
 	return EC_Normal;
 }
@@ -306,8 +306,8 @@ Status Association::verify(const QString& localAETitle, const QString& aetitle, 
 	return verify(QSTR_TO_DSTR(localAETitle), QSTR_TO_DSTR(aetitle), QSTR_TO_DSTR(hostname), port, timeout);
 }
 
-static void ProgressCallback(void *callbackContextPtr, Ulong byteCount)
+static void ProgressCallback(void *callbackContext, Ulong byteCount)
 {
-	Message* messagePtr = reinterpret_cast<Message*>(callbackContextPtr);
+	Message* messagePtr = reinterpret_cast<Message*>(callbackContext);
 	messagePtr->onProgress(byteCount);
 }
