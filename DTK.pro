@@ -90,13 +90,11 @@ unix:!macx {
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\DTK-1.1.0-win32\lib_debug" -ldcmtk \
-				wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\DTK-1.1.0-win32\lib" -ldcmtk \
-				wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
 	}
 }
