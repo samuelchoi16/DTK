@@ -1110,7 +1110,7 @@ Status Item::copyValueFrom(const DcmTagKey& tag, const Item* sourceItem, DcmTagK
 		break;
 	case EVR_SQ :
 		for(Sint32 pos = 0; (stat = sourceItem->getItem(sourceTag, subItemSource, pos)).good(); pos++) {
-			stat = putItem(tag, subItemTarget, pos);
+			stat = putItem(tag, subItemTarget, POS_APPEND);
 			TagList tagList;
 			stat = subItemSource.getTagList(tagList);
 			for(TagList::iterator ti = tagList.begin(); ti != tagList.end(); ti++)

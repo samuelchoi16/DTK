@@ -226,7 +226,7 @@ void AssociationListenerMaster::run(void)
 		AssociationListenerWorker* workerPtr;
 		Status stat = listen(1);
 		if (stat == DUL_NOASSOCIATIONREQUEST) {
-			DCMTK_LOG4CPLUS_TRACE_FMT(_logger, "run: listen() timeout");
+			DCMTK_LOG4CPLUS_TRACE(_logger, "run: listen() timeout");
 			continue;
 		}
 		if (stat != EC_Normal) {

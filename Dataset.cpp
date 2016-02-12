@@ -468,6 +468,66 @@ E_TransferSyntax Dataset::getTransferSyntax(void) const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Status Dataset::putPixelData(const DcmTagKey& tag, const dcm::PixelDataFrameListType& pixelDataFrameList)
+{
+	Status stat;
+	Uint32 frameCount = pixelDataFrameList.size();
+	Uint32 frameIndex = 0;
+	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItem);
+	assert(dcmDatasetPtr != NULL);
+
+	E_TransferSyntax transferSyntax = getTransferSyntax();
+	if (DcmXfer(transferSyntax).isEncapsulated()) {
+		DcmPixelData* dcmPixelData = new DcmPixelData(tag);
+		DcmPixelSequence *dcmPixelSeq = new DcmPixelSequence(DcmTag(DCM_PixelData, EVR_OB));
+
+		// basic offset table with null data
+		DcmPixelItem* dcmPixelItem = new DcmPixelItem(DCM_Item);
+		stat = dcmPixelItem->putUint8Array(NULL, 0);
+		stat = dcmPixelSeq->insert(dcmPixelItem);
+		DCMTK_LOG4CPLUS_DEBUG(_logger, "putPixelData: encapsulated: no basic offset table");
+
+		// each fragment has each frame
+		for(dcm::PixelDataFrameListType::const_iterator i = pixelDataFrameList.cbegin(); i != pixelDataFrameList.cend(); i++) {
+			DcmPixelItem* dcmPixelItem = new DcmPixelItem(DCM_Item);
+			stat = dcmPixelItem->putUint8Array(i->_frameData, i->_frameSize);
+			stat = dcmPixelSeq->insert(dcmPixelItem);
+			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "putPixelData: encapsulated: frame(%d) (size=%d,data=%08x)", ++frameIndex, i->_frameSize, i->_frameData);
+		}
+
+		dcmPixelData->putOriginalRepresentation(transferSyntax, NULL, dcmPixelSeq);
+		stat = dcmDatasetPtr->insert(dcmPixelData, true);
+	} else {
+		Uint16 samplesPerPixel, rows, columns, bitsAllocated;
+		getValue(DCM_SamplesPerPixel, samplesPerPixel);
+		getValue(DCM_Rows, rows);
+		getValue(DCM_Columns, columns);
+		getValue(DCM_BitsAllocated, bitsAllocated);
+
+		Uint32 frameSize = samplesPerPixel * rows * columns * (bitsAllocated > 8 ? 2 : 1);
+		for(dcm::PixelDataFrameListType::const_iterator i = pixelDataFrameList.cbegin(); i != pixelDataFrameList.cend(); i++) {
+			if (i->_frameSize != frameSize) {
+				return EC_InvalidStream;
+			}
+		}
+
+		Uint32 pixelDataSize = frameCount * frameSize;
+		Uint8* pixelDataPtr = new Uint8[pixelDataSize];
+		Uint8* frameDataPtr = pixelDataPtr;
+		for(dcm::PixelDataFrameListType::const_iterator i = pixelDataFrameList.cbegin(); i != pixelDataFrameList.cend(); i++) {
+			memcpy(frameDataPtr, i->_frameData, frameSize);
+			frameDataPtr += frameSize;
+			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "putPixelData: uncompressed: frame(%d) (size=%d,data=%08x)", ++frameIndex, frameSize, i->_frameData);
+		}
+
+		stat = putValue(tag, pixelDataPtr, pixelDataSize);
+	}
+
+	stat = putValue(DCM_NumberOfFrames, frameCount);
+
+	return stat;
+}
+
 Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumer)
 {
 	Status stat;
@@ -507,7 +567,7 @@ Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumer)
 		fragmentSize = dcmPixelItemPtr->getLength();
 		if (fragmentSize == 0) {							// without basic offset table
 			basicOffsetTable = NULL;
-			DCMTK_LOG4CPLUS_DEBUG_FMT(_logger, "getPixelData: encapsulated: no basic offset table");
+			DCMTK_LOG4CPLUS_DEBUG(_logger, "getPixelData: encapsulated: no basic offset table");
 		} else if (fragmentSize == 4 * frameCount) {		// with basic offset table
 			stat = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
 			if (stat.bad())

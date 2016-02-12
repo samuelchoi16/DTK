@@ -14,6 +14,175 @@
  *
  */
 
+/*
+				   GNU LESSER GENERAL PUBLIC LICENSE
+					   Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+  This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU Lesser
+General Public License, and the "GNU GPL" refers to version 3 of the GNU
+General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface provided
+by the Library, but which is not otherwise based on the Library.
+Defining a subclass of a class defined by the Library is deemed a mode
+of using an interface provided by the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library.  The particular version of the Library
+with which the Combined Work was made is also called the "Linked
+Version".
+
+  The "Minimal Corresponding Source" for a Combined Work means the
+Corresponding Source for the Combined Work, excluding any source code
+for portions of the Combined Work that, considered in isolation, are
+based on the Application, and not on the Linked Version.
+
+  The "Corresponding Application Code" for a Combined Work means the
+object code and/or source code for the Application, including any data
+and utility programs needed for reproducing the Combined Work from the
+Application, but excluding the System Libraries of the Combined Work.
+
+  1. Exception to Section 3 of the GNU GPL.
+
+  You may convey a covered work under sections 3 and 4 of this License
+without being bound by section 3 of the GNU GPL.
+
+  2. Conveying Modified Versions.
+
+  If you modify a copy of the Library, and, in your modifications, a
+facility refers to a function or data to be supplied by an Application
+that uses the facility (other than as an argument passed when the
+facility is invoked), then you may convey a copy of the modified
+version:
+
+   a) under this License, provided that you make a good faith effort to
+   ensure that, in the event an Application does not supply the
+   function or data, the facility still operates, and performs
+   whatever part of its purpose remains meaningful, or
+
+   b) under the GNU GPL, with none of the additional permissions of
+   this License applicable to that copy.
+
+  3. Object Code Incorporating Material from Library Header Files.
+
+  The object code form of an Application may incorporate material from
+a header file that is part of the Library.  You may convey such object
+code under terms of your choice, provided that, if the incorporated
+material is not limited to numerical parameters, data structure
+layouts and accessors, or small macros, inline functions and templates
+(ten or fewer lines in length), you do both of the following:
+
+   a) Give prominent notice with each copy of the object code that the
+   Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the object code with a copy of the GNU GPL and this license
+   document.
+
+  4. Combined Works.
+
+  You may convey a Combined Work under terms of your choice that,
+taken together, effectively do not restrict modification of the
+portions of the Library contained in the Combined Work and reverse
+engineering for debugging such modifications, if you also do each of
+the following:
+
+   a) Give prominent notice with each copy of the Combined Work that
+   the Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the Combined Work with a copy of the GNU GPL and this license
+   document.
+
+   c) For a Combined Work that displays copyright notices during
+   execution, include the copyright notice for the Library among
+   these notices, as well as a reference directing the user to the
+   copies of the GNU GPL and this license document.
+
+   d) Do one of the following:
+
+	   0) Convey the Minimal Corresponding Source under the terms of this
+	   License, and the Corresponding Application Code in a form
+	   suitable for, and under terms that permit, the user to
+	   recombine or relink the Application with a modified version of
+	   the Linked Version to produce a modified Combined Work, in the
+	   manner specified by section 6 of the GNU GPL for conveying
+	   Corresponding Source.
+
+	   1) Use a suitable shared library mechanism for linking with the
+	   Library.  A suitable mechanism is one that (a) uses at run time
+	   a copy of the Library already present on the user's computer
+	   system, and (b) will operate properly with a modified version
+	   of the Library that is interface-compatible with the Linked
+	   Version.
+
+   e) Provide Installation Information, but only if you would otherwise
+   be required to provide such information under section 6 of the
+   GNU GPL, and only to the extent that such information is
+   necessary to install and execute a modified version of the
+   Combined Work produced by recombining or relinking the
+   Application with a modified version of the Linked Version. (If
+   you use option 4d0, the Installation Information must accompany
+   the Minimal Corresponding Source and Corresponding Application
+   Code. If you use option 4d1, you must provide the Installation
+   Information in the manner specified by section 6 of the GNU GPL
+   for conveying Corresponding Source.)
+
+  5. Combined Libraries.
+
+  You may place library facilities that are a work based on the
+Library side by side in a single library together with other library
+facilities that are not Applications and are not covered by this
+License, and convey such a combined library under terms of your
+choice, if you do both of the following:
+
+   a) Accompany the combined library with a copy of the same work based
+   on the Library, uncombined with any other library facilities,
+   conveyed under the terms of this License.
+
+   b) Give prominent notice with the combined library that part of it
+   is a work based on the Library, and explaining where to find the
+   accompanying uncombined form of the same work.
+
+  6. Revised Versions of the GNU Lesser General Public License.
+
+  The Free Software Foundation may publish revised and/or new versions
+of the GNU Lesser General Public License from time to time. Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.
+
+  Each version is given a distinguishing version number. If the
+Library as you received it specifies that a certain numbered version
+of the GNU Lesser General Public License "or any later version"
+applies to it, you have the option of following the terms and
+conditions either of that published version or of any later version
+published by the Free Software Foundation. If the Library as you
+received it does not specify a version number of the GNU Lesser
+General Public License, you may choose any version of the GNU Lesser
+General Public License ever published by the Free Software Foundation.
+
+  If the Library as you received it specifies that a proxy can decide
+whether future versions of the GNU Lesser General Public License shall
+apply, that proxy's public statement of acceptance of any version is
+permanent authorization for you to choose that version for the
+Library.
+
+*/
+
 #ifndef DTK_H
 #define DTK_H
 
@@ -52,7 +221,9 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//#define	QSTR_TO_CSTR(s)					((s).toStdString().c_str())
+/*
+#define	QSTR_TO_CSTR(s)					((s).toStdString().c_str())
+*/
 #define	QSTR_TO_CSTR(s)					((s).toLocal8Bit().constData())
 #define	QSTR_TO_DSTR(s)					(dcm::String(QSTR_TO_CSTR((s))))
 #define	DSTR_TO_CSTR(s)					((s).c_str())
@@ -300,7 +471,12 @@ namespace dcm {
 		static const int CHINESE_GB18030	= GB18030;
 		static const int UNICODE_UTF8		= ISO_IR_192;
 
+		/**
+		 * @brief characterSetCount returns the number of character sets supported by DTK
+		 * @return the number of character sets
+		 */
 		static int characterSetCount(void);
+
 		static String characterSetName1(int nls);
 		static String characterSetName2(int nls);
 		static String characterSetEscapeSequence(int nls);
@@ -552,13 +728,28 @@ namespace dcm {
 	class DTKSHARED_EXPORT CEchoRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CEchoRQ constructor
+		 * @param dataset
+		 */
 		CEchoRQ(Dataset* dataset = NULL);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT CEchoRSP : public Message
 	{
 	public:
+		/**
+		 * @brief CEchoRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		CEchoRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -567,13 +758,28 @@ namespace dcm {
 	class DTKSHARED_EXPORT CStoreRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CStoreRQ constructor
+		 * @param dataset
+		 */
 		CStoreRQ(Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT CStoreRSP : public Message
 	{
 	public:
+		/**
+		 * @brief CStoreRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		CStoreRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -582,13 +788,29 @@ namespace dcm {
 	class DTKSHARED_EXPORT CFindRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CFindRQ constructor
+		 * @param sopClassUID
+		 * @param dataset
+		 */
 		CFindRQ(const String& sopClassUID, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT CFindRSP : public Message
 	{
 	public:
+		/**
+		 * @brief CFindRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		CFindRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -597,13 +819,33 @@ namespace dcm {
 	class DTKSHARED_EXPORT CGetRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CGetRQ constructor
+		 * @param sopClassUID
+		 * @param dataset
+		 */
 		CGetRQ(const String& sopClassUID, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT CGetRSP : public Message
 	{
 	public:
+		/**
+		 * @brief CGetRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 * @param remaining
+		 * @param completed
+		 * @param failure
+		 * @param warning
+		 */
 		CGetRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL,
 				int remaining = -1, int completed = -1, int failure = -1, int warning = -1);
 	};
@@ -613,13 +855,34 @@ namespace dcm {
 	class DTKSHARED_EXPORT CMoveRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CMoveRQ constructor
+		 * @param sopClassUID
+		 * @param destination
+		 * @param dataset
+		 */
 		CMoveRQ(const String& sopClassUID, const String& destination, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT CMoveRSP : public Message
 	{
 	public:
+		/**
+		 * @brief CMoveRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 * @param remaining
+		 * @param completed
+		 * @param failure
+		 * @param warning
+		 */
 		CMoveRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL,
 				 int remaining = -1, int completed = -1, int failure = -1, int warning = -1);
 	};
@@ -629,6 +892,10 @@ namespace dcm {
 	class DTKSHARED_EXPORT CCancelRQ : public Message
 	{
 	public:
+		/**
+		 * @brief CCancelRQ constructor
+		 * @param req
+		 */
 		CCancelRQ(const Message& req);
 	};
 
@@ -637,13 +904,31 @@ namespace dcm {
 	class DTKSHARED_EXPORT NEventReportRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NEventReportRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param eventTypeId
+		 * @param dataset
+		 */
 		NEventReportRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 eventTypeId, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssocPtr
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssocPtr);
 	};
 
 	class DTKSHARED_EXPORT NEventReportRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NEventReportRSP constructor
+		 * @param req
+		 * @param status
+		 * @param datasetPtr
+		 */
 		NEventReportRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* datasetPtr = NULL);
 	};
 
@@ -652,14 +937,37 @@ namespace dcm {
 	class DTKSHARED_EXPORT NGetRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NGetRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param dcmTag
+		 * @param dcmTagCount
+		 * @param dataset
+		 */
 		NGetRQ(const String& sopClassUID, const String& sopInstanceUID, const DcmTagKey* dcmTag, int dcmTagCount, Dataset* dataset = NULL);
+
+		/**
+		 * @brief ~NGetRQ destructor
+		 */
 		virtual ~NGetRQ(void);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT NGetRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NGetRSP constructor
+		 * @param req
+		 * @param nStatus
+		 * @param _dcmDataset
+		 */
 		NGetRSP(const Message& req, Uint16 nStatus = STATUS_Success, Dataset* _dcmDataset = NULL);
 	};
 
@@ -668,13 +976,30 @@ namespace dcm {
 	class DTKSHARED_EXPORT NSetRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NSetRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param dataset
+		 */
 		NSetRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT NSetRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NSetRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		NSetRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -683,13 +1008,31 @@ namespace dcm {
 	class DTKSHARED_EXPORT NActionRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NActionRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param actionTypeId
+		 * @param dataset
+		 */
 		NActionRQ(const String& sopClassUID, const String& sopInstanceUID, Uint16 actionTypeId, Dataset* dataset = NULL);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT NActionRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NActionRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		NActionRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -698,13 +1041,30 @@ namespace dcm {
 	class DTKSHARED_EXPORT NCreateRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NCreateRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param dataset
+		 */
 		NCreateRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssocPtr
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssocPtr);
 	};
 
 	class DTKSHARED_EXPORT NCreateRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NCreateRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		NCreateRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -713,13 +1073,30 @@ namespace dcm {
 	class DTKSHARED_EXPORT NDeleteRQ : public Message
 	{
 	public:
+		/**
+		 * @brief NDeleteRQ constructor
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param dataset
+		 */
 		NDeleteRQ(const String& sopClassUID, const String& sopInstanceUID, Dataset* dataset = NULL);
+
+		/**
+		 * @brief setIDs sets association to this message
+		 * @param ascAssoc
+		 */
 		virtual void setIDs(T_ASC_Association* ascAssoc);
 	};
 
 	class DTKSHARED_EXPORT NDeleteRSP : public Message
 	{
 	public:
+		/**
+		 * @brief NDeleteRSP constructor
+		 * @param req
+		 * @param status
+		 * @param dataset
+		 */
 		NDeleteRSP(const Message& req, Uint16 status = STATUS_Success, Dataset* dataset = NULL);
 	};
 
@@ -735,11 +1112,17 @@ namespace dcm {
 		TransferSyntaxList _transferSyntaxList;	// Transfer Syntax List
 
 	public:
+		/**
+		 * @brief Service constructor
+		 */
 		Service(void)
 		{
 			_role = ASC_SC_ROLE_DEFAULT;
 		}
 
+		/**
+		 * @brief addBasicTransferSyntaxes adds basic transfer syntaxes (implicit little endian, explicit little endian, explicit big endian)
+		 */
 		void addBasicTransferSyntaxes(void);
 	};
 
@@ -758,38 +1141,134 @@ namespace dcm {
 		static ServiceList _basicSCPServiceList;
 
 	public:
+		/**
+		 * @brief ServiceList constructor
+		 * @param includeEcho flag to include DICOM Verification Service as default
+		 */
 		ServiceList(bool includeEcho = true);
 
+		/**
+		 * @brief hasService checks if this service list has the specified abstract syntax/transfer syntax pair
+		 * @param abstractSyntax
+		 * @param transferSyntax
+		 * @return
+		 */
 		bool hasService(const String& abstractSyntax, TransferSyntax transferSyntax);
+
+		/**
+		 * @brief hasService checks if this service list has the specified abstract syntax/transfer syntax pair
+		 * @param abstractSyntax
+		 * @param transferSyntaxUID
+		 * @return
+		 */
 		bool hasService(const String& abstractSyntax, const String& transferSyntaxUID);
 
+		/**
+		 * @brief addService adds abstract syntax/transfer syntax pair to this service list
+		 * @param abstractSyntax
+		 * @param transferSyntax
+		 */
 		void addService(const String& abstractSyntax, TransferSyntax transferSyntax);
+
+		/**
+		 * @brief addService adds abstract syntax/transfer syntax pair to this service list
+		 * @param abstractSyntax
+		 * @param transferSyntaxUID
+		 */
 		void addService(const String& abstractSyntax, const String& transferSyntaxUID);
 
+		/**
+		 * @brief addService adds abstract syntax/transfer syntax pair to this service list
+		 * @param abstractSyntax
+		 * @param transferSyntaxList
+		 */
 		void addService(const String& abstractSyntax, const TransferSyntaxList& transferSyntaxList);
+
+		/**
+		 * @brief addService adds abstract syntax/transfer syntax pair to this service list
+		 * @param abstractSyntax
+		 * @param transferSyntaxUIDList
+		 */
 		void addService(const String& abstractSyntax, const StringList& transferSyntaxUIDList);
 
+		/**
+		 * @brief addVerificationService adds DICOM Verification Service to this service list
+		 */
 		void addVerificationService(void);
 
+		/**
+		 * @brief addAllStorageSCUServices adds all Storage SCU services to this service list
+		 */
 		void addAllStorageSCUServices(void);
+
+		/**
+		 * @brief addAllStorageSCPServices adds all Storage SCP services to this service list
+		 */
 		void addAllStorageSCPServices(void);
 
+		/**
+		 * @brief addAllQueryRetrieveServices adds all Query/Retrieve services to this service list
+		 */
 		void addAllQueryRetrieveServices(void);
 
+		/**
+		 * @brief addMWLService adds MWL service to this service list
+		 */
 		void addMWLService(void);
+
+		/**
+		 * @brief addMPPSService adds MPPS service to this service list
+		 */
 		void addMPPSService(void);
 
+		/**
+		 * @brief addStorageCommitmentSCUService adds Storage Commitment SCU service to this service list
+		 */
 		void addStorageCommitmentSCUService(void);
+
+		/**
+		 * @brief addStorageCommitmentSCPService adds Storage Commitment SCP service to this service list
+		 */
 		void addStorageCommitmentSCPService(void);
 
+		/**
+		 * @brief addGrayscalePrintService adds Grayscale Print service to this service list
+		 */
 		void addGrayscalePrintService(void);
+
+		/**
+		 * @brief addColorPrintService adds Color Print service to this service list
+		 */
 		void addColorPrintService(void);
 
+		/**
+		 * @brief size returns the number of abstract syntaxes in this service list
+		 * @return
+		 */
 		ServiceListType::size_type size() const;
+
+		/**
+		 * @brief cbegin returns the first position of this service list
+		 * @return
+		 */
 		ServiceListType::const_iterator cbegin() const;
+
+		/**
+		 * @brief cend returns the last position of this service list
+		 * @return
+		 */
 		ServiceListType::const_iterator cend() const;
 
+		/**
+		 * @brief getBasicSCUServiceList returns the service list containing all SCU services
+		 * @return
+		 */
 		static const ServiceList& getBasicSCUServiceList(void);
+
+		/**
+		 * @brief getBasicSCPServiceList returns the service list containing all SCP services
+		 * @return
+		 */
 		static const ServiceList& getBasicSCPServiceList(void);
 	};
 
@@ -803,23 +1282,69 @@ namespace dcm {
 	class DTKSHARED_EXPORT AssociationInfo
 	{
 	public:
+		/**
+		 * @brief applicationContextName DICOM Application Context Name
+		 */
 		String applicationContextName;
 
+		/**
+		 * @brief callingAETitle calling AE Title
+		 */
 		String callingAETitle;
+
+		/**
+		 * @brief callingPresentationAddress caller's presentation address
+		 */
 		String callingPresentationAddress;
+
+		/**
+		 * @brief callingImplementationClassUID caller's implementation class UID
+		 */
 		String callingImplementationClassUID;
+
+		/**
+		 * @brief callingImplementationVersion caller's implementation version
+		 */
 		String callingImplementationVersion;
 
+		/**
+		 * @brief calledAETitle called AE Title
+		 */
 		String calledAETitle;
+
+		/**
+		 * @brief calledPresentationAddress callee's presentation address
+		 */
 		String calledPresentationAddress;
+
+		/**
+		 * @brief calledImplementationClassUID callee's implementation class UID
+		 */
 		String calledImplementationClassUID;
+
+		/**
+		 * @brief calledImplementationVersion callee's implementation version
+		 */
 		String calledImplementationVersion;
 
+		/**
+		 * @brief respondingAETitle responding AE Title
+		 */
 		String respondingAETitle;
 
+		/**
+		 * @brief maxPDUSizeOfMine maximum PDU size of this AE
+		 */
 		Uint32 maxPDUSizeOfMine;
+
+		/**
+		 * @brief maxPDUSizeOfPeer maximum PDU size of peer AE
+		 */
 		Uint32 maxPDUSizeOfPeer;
 
+		/**
+		 * @brief AssociationInfo constructor
+		 */
 		AssociationInfo(void)
 		{
 			maxPDUSizeOfMine = 0;
@@ -844,17 +1369,65 @@ namespace dcm {
 		int _maxPDUSize;
 
 	public:
+		/**
+		 * @brief Association constructor
+		 * @param appEntity
+		 */
 		Association(AppEntity* appEntity);
+
+		/**
+		 * @brief ~Association destructor
+		 */
 		virtual ~Association(void);
 
+		/**
+		 * @brief close closes the association
+		 * @return
+		 */
 		Status close(void);
 
+		/**
+		 * @brief sendMessage sends message to remote AE
+		 * @param req
+		 * @return
+		 */
 		Status sendMessage(Message& req);
+
+		/**
+		 * @brief receiveMessage receives message from remote AE
+		 * @param rsp
+		 * @param timeout
+		 * @return
+		 */
 		Status receiveMessage(Message& rsp, int timeout);
 
+		/**
+		 * @brief getAssocInfo retrieves association information
+		 * @param assocInfo
+		 * @return
+		 */
 		Status getAssocInfo(AssociationInfo& assocInfo);
 
+		/**
+		 * @brief verify performs DICOM Verification Service
+		 * @param localAETitle
+		 * @param aetitle
+		 * @param hostname
+		 * @param port
+		 * @param timeout
+		 * @return
+		 */
 		static Status verify(const String& localAETitle, const String& aetitle, const String& hostname, const Uint16 port, const Uint16 timeout = 15);
+
+		/**
+		 * @brief verify performs DICOM Verification Service
+		 * @param localAETitle
+		 * @param aetitle
+		 * @param hostname
+		 * @param port
+		 * @param timeout
+		 * @return
+		 */
 		static Status verify(const QString& localAETitle, const QString& aetitle, const QString& hostname, const Uint16 port, const Uint16 timeout = 15);
 
 	private:
@@ -873,9 +1446,25 @@ namespace dcm {
 		static Logger _logger;
 
 	public:
+		/**
+		 * @brief AssociationRequestor constructor
+		 * @param appEntity
+		 */
 		AssociationRequestor(AppEntity* appEntity);
+
+		/**
+		 * @brief ~AssociationRequestor destructor
+		 */
 		virtual ~AssociationRequestor(void);
 
+		/**
+		 * @brief connect creates an association to remote AE
+		 * @param calledAETitle
+		 * @param hostname
+		 * @param port
+		 * @param serviceList
+		 * @return
+		 */
 		Status	connect(const String& calledAETitle, const String& hostname, const Uint16 port, const ServiceList& serviceList = DCM_BASIC_SCU_SERVICE_LIST);
 	};
 
@@ -890,12 +1479,41 @@ namespace dcm {
 		static Logger _logger;
 
 	public:
+		/**
+		 * @brief AssociationListener constructor
+		 * @param appEntity
+		 */
 		AssociationListener(AppEntity* appEntity);
+
+		/**
+		 * @brief ~AssociationListener destructor
+		 */
 		virtual ~AssociationListener(void);
 
+		/**
+		 * @brief listen waits for an association
+		 * @param nTimeout
+		 * @return
+		 */
 		Status	listen(const int nTimeout);
+
+		/**
+		 * @brief accept accepts this association
+		 * @param serviceList
+		 * @return
+		 */
 		Status	accept(const ServiceList& serviceList = DCM_BASIC_SCP_SERVICE_LIST);
+
+		/**
+		 * @brief reject rejects this association
+		 * @return
+		 */
 		Status	reject(void);
+
+		/**
+		 * @brief abort aborts this association
+		 * @return
+		 */
 		Status	abort(void);
 	};
 
@@ -915,15 +1533,45 @@ namespace dcm {
 		QMutex _masterMutex;
 
 	public:
+		/**
+		 * @brief AssociationListenerMaster constructor
+		 * @param appEntity
+		 */
 		AssociationListenerMaster(AppEntity* appEntity);
+
+		/**
+		 * @brief ~AssociationListenerMaster destructor
+		 */
 		virtual ~AssociationListenerMaster(void);
 
+		/**
+		 * @brief startlisten spawns a new master listener thread
+		 * @return
+		 */
 		Status startlisten(void);
+
+		/**
+		 * @brief stoplisten stops listening
+		 * @return
+		 */
 		Status stoplisten(void);
+
+		/**
+		 * @brief isListening returns the listening status
+		 * @return
+		 */
 		bool isListening(void);
 
 	protected:
+		/**
+		 * @brief run main thread of master listener
+		 */
 		virtual void run(void);
+
+		/**
+		 * @brief clone creates new worker listener (MUST be implemented in the derived class)
+		 * @return
+		 */
 		virtual AssociationListenerWorker* clone(void) = 0;
 
 		friend class AssociationListenerWorker;
@@ -942,15 +1590,44 @@ namespace dcm {
 		AssociationListenerMaster* _masterListener;
 
 	public:
+		/**
+		 * @brief AssociationListenerWorker constructor
+		 * @param masterListener
+		 */
 		AssociationListenerWorker(AssociationListenerMaster* masterListener);
+
+		/**
+		 * @brief ~AssociationListenerWorker destructor
+		 */
 		virtual ~AssociationListenerWorker(void);
 
+		/**
+		 * @brief startlisten starts worker listener thread
+		 * @return
+		 */
 		Status startlisten(void);
+
+		/**
+		 * @brief stoplisten stops listening
+		 * @return
+		 */
 		Status stoplisten(void);	// not required, nor implemented
+
+		/**
+		 * @brief isListening returns listening status
+		 * @return
+		 */
 		bool isListening(void);
 
 	protected:
+		/**
+		 * @brief run main thread of worker listener
+		 */
 		virtual void run(void);
+
+		/**
+		 * @brief onlisten worker callback (MUST be implemented in the derived class)
+		 */
 		virtual void onlisten(void) = 0;
 	};
 
@@ -971,168 +1648,845 @@ namespace dcm {
 		static const int POS_LAST = -1;
 		static const int POS_APPEND = -2;
 
+		/**
+		 * @brief Item
+		 */
 		Item(void);
+
+		/**
+		 * @brief Item
+		 * @param _dcmItem
+		 */
 		Item(DcmItem* _dcmItem);
+
+		/**
+		 * @brief Item
+		 * @param dcmItem
+		 */
 		Item(const Item& dcmItem);
+
+		/**
+		 * @brief ~Item
+		 */
 		virtual ~Item(void);
 
+		/**
+		 * @brief operator =
+		 * @param item
+		 * @return
+		 */
 		Item& operator=(const Item& item);
+
+		/**
+		 * @brief copyFrom
+		 * @param sourceItem
+		 * @return
+		 */
 		Status copyFrom(const Item* sourceItem);
 
+		/**
+		 * @brief set
+		 * @param _dcmItem
+		 * @param parentNLS
+		 * @return
+		 */
 		Status set(DcmItem* _dcmItem, int parentNLS = NLS::DEFAULT);
+
+		/**
+		 * @brief clear
+		 * @return
+		 */
 		Status clear(void);
 
+		/**
+		 * @brief print
+		 * @param filename
+		 * @return
+		 */
 		Status print(const char* filename) const;
+
+		/**
+		 * @brief print
+		 * @param filename
+		 * @return
+		 */
 		Status print(const String& filename) const;
+
+		/**
+		 * @brief print
+		 * @param filename
+		 * @return
+		 */
 		Status print(const QString& filename) const;
 
+		/**
+		 * @brief printXML
+		 * @param filename
+		 * @return
+		 */
 		Status printXML(const char* filename) const;
+
+		/**
+		 * @brief printXML
+		 * @param filename
+		 * @return
+		 */
 		Status printXML(const String& filename) const;
+
+		/**
+		 * @brief printXML
+		 * @param filename
+		 * @return
+		 */
 		Status printXML(const QString& filename) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief putString
+		 * @param tag
+		 * @param value
+		 * @param nls
+		 * @return
+		 */
 		Status putString(const DcmTagKey& tag, const char* value, int nls = NLS::AUTO);
+
+		/**
+		 * @brief putString
+		 * @param tag
+		 * @param value
+		 * @param nls
+		 * @return
+		 */
 		Status putString(const DcmTagKey& tag, const String& value, int nls = NLS::AUTO);
+
+		/**
+		 * @brief putString
+		 * @param tag
+		 * @param value
+		 * @param nls
+		 * @return
+		 */
 		Status putString(const DcmTagKey& tag, const QString& value, int nls = NLS::AUTO);
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
 #if SIZEOF_LONG == 4
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Uint value, Uint32 pos = 0);
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Sint value, Uint32 pos = 0);
 #endif
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Uint16 value, Uint32 pos = 0);							// US
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Sint16 value, Uint32 pos = 0);							// SS
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Uint32 value, Uint32 pos = 0);							// UL
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Sint32 value, Uint32 pos = 0);							// SL
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Float32 value, Uint32 pos = 0);							// FL
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, Float64 value, Uint32 pos = 0);							// FD
 
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param length
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, const Uint8* valuePtr, Uint32 length);					// AT, OW, US/SS, OB/OW
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param length
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, const Uint16* valuePtr, Uint32 length);					// AT, OW, US/SS, OB/OW
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param length
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, const Sint16* valuePtr, Uint32 length);					// SS, US/SS
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param length
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, const Float32* valuePtr, Uint32 length);					// FL
+
+		/**
+		 * @brief putValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param length
+		 * @return
+		 */
 		Status putValue(const DcmTagKey& tag, const Float64* valuePtr, Uint32 length);					// FD
 
+		/**
+		 * @brief putEmpty
+		 * @param tag
+		 * @return
+		 */
 		Status putEmpty(const DcmTagKey& tag);
+
+		/**
+		 * @brief removeValue
+		 * @param tag
+		 * @return
+		 */
 		Status removeValue(const DcmTagKey& tag);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief getString
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @param nls
+		 * @return
+		 */
 		Status getString(const DcmTagKey& tag, String& value, Sint32 pos = -1, int nls = NLS::AUTO) const;
+
+		/**
+		 * @brief getString
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @param nls
+		 * @return
+		 */
 		Status getString(const DcmTagKey& tag, QString& value, Sint32 pos = -1, int nls = NLS::AUTO) const;
 			// AE, AS, AT, CS, DA, DS, DT, FL, FD, IS, LO, LT, OB, OF, OW, PN, SH, SL, SS, ST, TM, UI, UL, US, UT
 
 #if SIZEOF_LONG == 4
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Uint& value, Uint32 pos = 0) const;
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Sint& value, Uint32 pos = 0) const;
 #endif
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Uint16& value, Uint32 pos = 0) const;						// US
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Uint32& value, Uint32 pos = 0) const;						// UL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Sint16& value, Uint32 pos = 0) const;						// SS
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Sint32& value, Uint32 pos = 0) const;						// SL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Float32& value, Uint32 pos = 0) const;					// FL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Float64& value, Uint32 pos = 0) const;					// FD
 
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param value
+		 * @param pos
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, Uint8& value, Uint32 pos = 0) const;						// OB
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param lengthPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Uint8*& valuePtr, Ulong* lengthPtr = NULL) const;	// OB
 
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Uint16*& valuePtr, Ulong* countPtr = NULL) const;	// AT, OW, US/SS, OB/OW
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Uint32*& valuePtr, Ulong* countPtr = NULL) const;	// UL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Sint16*& valuePtr, Ulong* countPtr = NULL) const;	// AT, OW, US/SS, OB/OW
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Sint32*& valuePtr, Ulong* countPtr = NULL) const;	// SL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Float32*& valuePtr, Ulong* countPtr = NULL) const;	// FL
+
+		/**
+		 * @brief getValue
+		 * @param tag
+		 * @param valuePtr
+		 * @param countPtr
+		 * @return
+		 */
 		Status getValue(const DcmTagKey& tag, const Float64*& valuePtr, Ulong* countPtr = NULL) const;	// FD
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief putDate
+		 * @param tag
+		 * @param dt
+		 * @return
+		 */
 		Status putDate(const DcmTagKey& tag, const DateTime& dt);								// DA, DT
+
+		/**
+		 * @brief putDate
+		 * @param tag
+		 * @param qdt
+		 * @return
+		 */
 		Status putDate(const DcmTagKey& tag, const QDateTime& qdt);								// DA, DT
+
+		/**
+		 * @brief getDate
+		 * @param tag
+		 * @param dt
+		 * @return
+		 */
 		Status getDate(const DcmTagKey& tag, DateTime& dt) const;								// DA, DT
+
+		/**
+		 * @brief getDate
+		 * @param tag
+		 * @param qdt
+		 * @return
+		 */
 		Status getDate(const DcmTagKey& tag, QDateTime& qdt) const;								// DA, DT
 
+		/**
+		 * @brief putDateTime
+		 * @param dtag
+		 * @param ttag
+		 * @param dt
+		 * @return
+		 */
 		Status putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const DateTime& dt);	// DA, TM
+
+		/**
+		 * @brief putDateTime
+		 * @param dtag
+		 * @param ttag
+		 * @param qdt
+		 * @return
+		 */
 		Status putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const QDateTime& qdt);	// DA, TM
+
+		/**
+		 * @brief getDateTime
+		 * @param dtag
+		 * @param ttag
+		 * @param dt
+		 * @return
+		 */
 		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime& dt) const;	// DA, TM
+
+		/**
+		 * @brief getDateTime
+		 * @param dtag
+		 * @param ttag
+		 * @param qdt
+		 * @return
+		 */
 		Status getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, QDateTime& qdt) const;	// DA, TM
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief putItem
+		 * @param tag
+		 * @param item
+		 * @param pos
+		 * @return
+		 */
 		Status putItem(const DcmTagKey& tag, Item& item, Sint32 pos = POS_APPEND);
+
+		/**
+		 * @brief getItem
+		 * @param tag
+		 * @param item
+		 * @param pos
+		 * @return
+		 */
 		Status getItem(const DcmTagKey& tag, Item& item, Sint32 pos = 0) const;
+
+		/**
+		 * @brief getItemCount
+		 * @param tag
+		 * @return
+		 */
 		Sint32 getItemCount(const DcmTagKey& tag) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief putCode
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @return
+		 */
 		Status putCode(const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning);
+
+		/**
+		 * @brief putCode
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @return
+		 */
 		Status putCode(const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning);
+
+		/**
+		 * @brief getCode
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @return
+		 */
 		Status getCode(String& codeValue, String& codingSchemeDesignator, String& codingSchemeVersion, String& codeMeaning) const;
+
+		/**
+		 * @brief getCode
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @return
+		 */
 		Status getCode(QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning) const;
 
+		/**
+		 * @brief putCode
+		 * @param tag
+		 * @param item
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @param pos
+		 * @return
+		 */
 		Status putCode(const DcmTagKey& tag, Item& item,
 						const String& codeValue, const String& codingSchemeDesignator, const String& codingSchemeVersion, const String& codeMeaning,
 						Sint32 pos = POS_APPEND);
+
+		/**
+		 * @brief putCode
+		 * @param tag
+		 * @param item
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @param pos
+		 * @return
+		 */
 		Status putCode(const DcmTagKey& tag, Item& item,
 						const QString& codeValue, const QString& codingSchemeDesignator, const QString& codingSchemeVersion, const QString& codeMeaning,
 						Sint32 pos = POS_APPEND);
+
+		/**
+		 * @brief getCode
+		 * @param tag
+		 * @param item
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @param pos
+		 * @return
+		 */
 		Status getCode(const DcmTagKey& tag, Item& item,
 						String& codeValue, String& codingSchemeDesignator, String& codingSchemeVersion, String& codeMeaning,
 						Sint32 pos = 0) const;
+
+		/**
+		 * @brief getCode
+		 * @param tag
+		 * @param item
+		 * @param codeValue
+		 * @param codingSchemeDesignator
+		 * @param codingSchemeVersion
+		 * @param codeMeaning
+		 * @param pos
+		 * @return
+		 */
 		Status getCode(const DcmTagKey& tag, Item& item,
 						QString& codeValue, QString& codingSchemeDesignator, QString& codingSchemeVersion, QString& codeMeaning,
 						Sint32 pos = 0) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief putRefSOP
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @return
+		 */
 		Status putRefSOP(const String& sopClassUID, const String& sopInstanceUID);
+
+		/**
+		 * @brief putRefSOP
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @return
+		 */
 		Status putRefSOP(const QString& sopClassUID, const QString& sopInstanceUID);
+
+		/**
+		 * @brief getRefSOP
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @return
+		 */
 		Status getRefSOP(String& sopClassUID, String& sopInstanceUID) const;
+
+		/**
+		 * @brief getRefSOP
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @return
+		 */
 		Status getRefSOP(QString& sopClassUID, QString& sopInstanceUID) const;
 
+		/**
+		 * @brief putRefSOP
+		 * @param tag
+		 * @param item
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param pos
+		 * @return
+		 */
 		Status putRefSOP(const DcmTagKey& tag, Item& item, const String& sopClassUID, const String& sopInstanceUID, Sint32 pos = POS_APPEND);
+
+		/**
+		 * @brief putRefSOP
+		 * @param tag
+		 * @param item
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param pos
+		 * @return
+		 */
 		Status putRefSOP(const DcmTagKey& tag, Item& item, const QString& sopClassUID, const QString& sopInstanceUID, Sint32 pos = POS_APPEND);
+
+		/**
+		 * @brief getRefSOP
+		 * @param tag
+		 * @param item
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param pos
+		 * @return
+		 */
 		Status getRefSOP(const DcmTagKey& tag, Item& item, String& sopClassUID, String& sopInstanceUID, Sint32 pos = 0) const;
+
+		/**
+		 * @brief getRefSOP
+		 * @param tag
+		 * @param item
+		 * @param sopClassUID
+		 * @param sopInstanceUID
+		 * @param pos
+		 * @return
+		 */
 		Status getRefSOP(const DcmTagKey& tag, Item& item, QString& sopClassUID, QString& sopInstanceUID, Sint32 pos = 0) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief getVR
+		 * @param tag
+		 * @param vr
+		 * @return
+		 */
 		Status getVR(const DcmTagKey& tag, DcmEVR& vr) const;
+
+		/**
+		 * @brief getVM
+		 * @param tag
+		 * @param vm
+		 * @return
+		 */
 		Status getVM(const DcmTagKey& tag, Uint32& vm) const;
+
+		/**
+		 * @brief getVL
+		 * @param tag
+		 * @param vl
+		 * @return
+		 */
 		Status getVL(const DcmTagKey& tag, Uint32& vl) const;
 
+		/**
+		 * @brief getVR
+		 * @param tag
+		 * @return
+		 */
 		DcmEVR getVR(const DcmTagKey& tag) const;
+
+		/**
+		 * @brief getVM
+		 * @param tag
+		 * @return
+		 */
 		Sint32 getVM(const DcmTagKey& tag) const;
+
+		/**
+		 * @brief getVL
+		 * @param tag
+		 * @return
+		 */
 		Sint32 getVL(const DcmTagKey& tag) const;
 
+		/**
+		 * @brief hasTag
+		 * @param tag
+		 * @return
+		 */
 		bool hasTag(const DcmTagKey& tag) const;
+
+		/**
+		 * @brief hasTagValue
+		 * @param tag
+		 * @return
+		 */
 		bool hasTagValue(const DcmTagKey& tag) const;
+
+		/**
+		 * @brief getTagList
+		 * @param tagList
+		 * @return
+		 */
 		Status getTagList(TagList& tagList) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief copyValueFrom
+		 * @param tag
+		 * @param sourceItem
+		 * @param sourceTag
+		 * @return
+		 */
 		Status copyValueFrom(const DcmTagKey& tag, const Item* sourceItem, DcmTagKey sourceTag = DcmTagKey(0xffff, 0xffff));
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief setNLS
+		 * @param nls
+		 * @return
+		 */
 		Status setNLS(int nls);
+
+		/**
+		 * @brief getNLS
+		 * @param nls
+		 * @return
+		 */
 		Status getNLS(int& nls) const;
+
+		/**
+		 * @brief setAutoNLS
+		 * @param nls
+		 * @return
+		 */
 		Status setAutoNLS(int nls);
+
+		/**
+		 * @brief getAutoNLS
+		 * @param nls
+		 * @return
+		 */
 		Status getAutoNLS(int& nls) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief _getDcmItem
+		 * @return
+		 */
 		DcmItem* _getDcmItem(void) const;
+
+		/**
+		 * @brief operator DcmItem *
+		 */
 		operator DcmItem*(void) const;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//	PixelDataProducer
+	//	PixelDataStruct
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class DTKSHARED_EXPORT PixelDataProducer
+	struct DTKSHARED_EXPORT PixelDataFrame
 	{
-	public:
+		Uint32	_frameSize;
+		Uint8*	_frameData;
+
+		PixelDataFrame(Uint32 size, Uint8* data) {
+			_frameSize = size;
+			_frameData = data;
+		}
 	};
+
+	typedef std::list<PixelDataFrame>			PixelDataFrameListType;
+
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	PixelDataConsumer
@@ -1260,6 +2614,14 @@ namespace dcm {
 		E_TransferSyntax getTransferSyntax(void) const;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * @brief putPixelData
+		 * @param tag pixel data tag: in most cases, DCM_PixelData is used
+		 * @param producer pixel data producer callback
+		 * @return status
+		 */
+		Status putPixelData(const DcmTagKey& tag, const PixelDataFrameListType& pixelDataFrameList);
 
 		/**
 		 * @brief getPixelData gets pixel data
@@ -1399,17 +2761,56 @@ namespace dcm {
 		Dataset _dataset;
 
 	public:
+		/**
+		 * @brief File
+		 */
 		File(void);
+
+		/**
+		 * @brief File
+		 * @param file
+		 */
 		File(const File& file);
+
+		/**
+		 * @brief ~File
+		 */
 		virtual ~File(void);
 
+		/**
+		 * @brief operator =
+		 * @param file
+		 * @return
+		 */
 		File& operator=(const File& file);
 
+		/**
+		 * @brief load
+		 * @param filename
+		 * @param readXfer
+		 * @param groupLength
+		 * @param maxReadLength
+		 * @param readMode
+		 * @return
+		 */
 		Status load(const String& filename,
 					const E_TransferSyntax readXfer = EXS_Unknown,
 					const E_GrpLenEncoding groupLength = EGL_noChange,
 					const Uint32 maxReadLength = DCM_MaxReadLength,
 					const E_FileReadMode readMode = ERM_autoDetect);
+
+		/**
+		 * @brief save
+		 * @param strFilename
+		 * @param writeXfer
+		 * @param encodingType
+		 * @param groupLength
+		 * @param padEncoding
+		 * @param padLength
+		 * @param subPadLength
+		 * @param fileWriteMode
+		 * @return
+		 */
 		Status save(const String& strFilename,
 					const E_TransferSyntax writeXfer = EXS_Unknown,
 					const E_EncodingType encodingType = EET_UndefinedLength,
@@ -1418,21 +2819,72 @@ namespace dcm {
 					const Uint32 padLength = 0,
 					const Uint32 subPadLength = 0,
 					const E_FileWriteMode fileWriteMode = EWM_fileformat);
+
+		/**
+		 * @brief clear
+		 * @return
+		 */
 		Status clear(void);
 
+		/**
+		 * @brief print
+		 * @param filename
+		 * @return
+		 */
 		Status print(const String& filename);
+
+		/**
+		 * @brief printXML
+		 * @param filename
+		 * @return
+		 */
 		Status printXML(const String& filename);
 
+		/**
+		 * @brief metaInfo
+		 * @return
+		 */
 		MetaInfo& metaInfo(void);
+
+		/**
+		 * @brief dataset
+		 * @return
+		 */
 		Dataset& dataset(void);
 
+		/**
+		 * @brief getMetaInfo
+		 * @return
+		 */
 		MetaInfo* getMetaInfo(void);
+
+		/**
+		 * @brief getDataset
+		 * @return
+		 */
 		Dataset* getDataset(void);
 
+		/**
+		 * @brief getMetaInfo
+		 * @return
+		 */
 		const MetaInfo* getMetaInfo(void) const;
+
+		/**
+		 * @brief getDataset
+		 * @return
+		 */
 		const Dataset* getDataset(void) const;
 
+		/**
+		 * @brief getDcmFileFormat
+		 * @return
+		 */
 		DcmFileFormat* getDcmFileFormat(void) const;
+
+		/**
+		 * @brief operator DcmFileFormat *
+		 */
 		operator DcmFileFormat*(void) const;
 	};
 
@@ -1447,23 +2899,91 @@ namespace dcm {
 		String _fileId;
 
 	public:
+		/**
+		 * @brief DirRecord
+		 */
 		DirRecord(void);
+
+		/**
+		 * @brief DirRecord
+		 * @param dcmDirRecord
+		 */
 		DirRecord(DcmDirectoryRecord* dcmDirRecord);
+
+		/**
+		 * @brief DirRecord
+		 * @param dirRecord
+		 */
 		DirRecord(const DirRecord& dirRecord);
+
+		/**
+		 * @brief ~DirRecord
+		 */
 		virtual ~DirRecord(void);
 
+		/**
+		 * @brief setFileId
+		 * @param fileId
+		 * @return
+		 */
 		Status setFileId(const String& fileId);
+
+		/**
+		 * @brief getFileId
+		 * @param fileId
+		 * @return
+		 */
 		Status getFileId(String& fileId) const;
+
+		/**
+		 * @brief fileId
+		 * @return
+		 */
 		String fileId(void) const;
 
+		/**
+		 * @brief putRecord
+		 * @param recordType
+		 * @param fileId
+		 * @param subRecord
+		 * @return
+		 */
 		Status putRecord(const E_DirRecType recordType, const String& fileId, DirRecord& subRecord);
+
+		/**
+		 * @brief getRecord
+		 * @param recordType
+		 * @param file
+		 * @param subRecord
+		 * @return
+		 */
 		Status getRecord(const E_DirRecType recordType, const File &file, DirRecord& subRecord);
 
+		/**
+		 * @brief copyValue
+		 * @param file
+		 * @return
+		 */
 		Status copyValue(const File &file);
 
+		/**
+		 * @brief getRecordType
+		 * @return
+		 */
 		E_DirRecType getRecordType(void);
 
+		/**
+		 * @brief getRecordTypeFromSOPClass
+		 * @param sopClassUID
+		 * @return
+		 */
 		static E_DirRecType getRecordTypeFromSOPClass(const String& sopClassUID);
+
+		/**
+		 * @brief getRecordTypeName
+		 * @param recordType
+		 * @return
+		 */
 		static String getRecordTypeName(const E_DirRecType recordType);
 	};
 
@@ -1481,17 +3001,55 @@ namespace dcm {
 		StringList _targetFileList;
 
 	public:
+		/**
+		 * @brief Dir
+		 */
 		Dir(void);
+
+		/**
+		 * @brief Dir
+		 * @param dicomdir
+		 */
 		Dir(const String& dicomdir);
+
+		/**
+		 * @brief ~Dir
+		 */
 		virtual ~Dir(void);
 
+		/**
+		 * @brief getRootRecord
+		 * @param rootRecord
+		 * @return
+		 */
 		Status getRootRecord(DirRecord& rootRecord);
+
+		/**
+		 * @brief addFile
+		 * @param filename
+		 * @return
+		 */
 		OFCondition addFile(const String &filename);
 
+		/**
+		 * @brief save
+		 * @param encodingType
+		 * @param groupLength
+		 * @return
+		 */
 		OFCondition save(const E_EncodingType encodingType = EET_UndefinedLength, const E_GrpLenEncoding groupLength = EGL_withoutGL);
 
+		/**
+		 * @brief print
+		 * @param filename
+		 * @return
+		 */
 		Status print(const String& filename);
 
+		/**
+		 * @brief generateFileId
+		 * @return
+		 */
 		String generateFileId(void);
 	};
 
@@ -1508,16 +3066,65 @@ namespace dcm {
 		String _uidRoot;
 
 	public:
+		/**
+		 * @brief UIDHelper
+		 * @param uidRoot
+		 */
 		UIDHelper(const String& uidRoot);
 
+		/**
+		 * @brief generateUID
+		 * @return
+		 */
 		String generateUID(void);
 
+		/**
+		 * @brief getSOPClassName
+		 * @param sopClassUID
+		 * @return
+		 */
 		static String getSOPClassName(const String& sopClassUID);
+
+		/**
+		 * @brief getSOPClassUID
+		 * @param sopClassName
+		 * @return
+		 */
 		static String getSOPClassUID(const String& sopClassName);
+
+		/**
+		 * @brief isStorageSOPClassUID
+		 * @param sopClassUID
+		 * @return
+		 */
 		static bool isStorageSOPClassUID(const String& sopClassUID);
+
+		/**
+		 * @brief isImageSOPClassUID
+		 * @param strSOPClassUID
+		 * @return
+		 */
 		static bool isImageSOPClassUID(const String& strSOPClassUID);
+
+		/**
+		 * @brief generateUID
+		 * @param uidRoot
+		 * @return
+		 */
 		static String generateUID(const String& uidRoot);
+
+		/**
+		 * @brief getModality
+		 * @param sopClassUID
+		 * @return
+		 */
 		static String getModality(const String& sopClassUID);
+
+		/**
+		 * @brief getDataSize
+		 * @param sopClassUID
+		 * @return
+		 */
 		static Uint32 getDataSize(const String& sopClassUID);
 	};
 }
