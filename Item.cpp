@@ -38,8 +38,9 @@ Item::Item(DcmItem* dcmItemPtr)
 	int nNLS;
 	Status dcmStat;
 	dcmStat = getNLS(nNLS);
-	if (nNLS > 0)
+	if (nNLS > 0) {
 		dcmStat = setAutoNLS(nNLS);		// FIXME?
+	}
 }
 
 Item::Item(const Item& dcmItem)
@@ -55,8 +56,7 @@ Item::Item(const Item& dcmItem)
 
 Item::~Item(void)
 {
-	if (_created)
-	{
+	if (_created) {
 		delete _dcmItem;
 		_dcmItem = NULL;
 	}
@@ -1041,6 +1041,366 @@ Status Item::getTagList(TagList& tagList) const
 		tagList.push_back(tag);
 	}
 
+	return EC_Normal;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Item::exportToXML(const String xmlFilename) const
+{
+	// TODO
+	return EC_InternalError;
+}
+
+Status Item::exportToXML(const QString xmlFilename) const
+{
+	// TODO
+	return EC_InternalError;
+}
+
+Status Item::exportToXML(QDomNode& xml) const
+{
+	// TODO
+	return EC_InternalError;
+}
+
+Status Item::importFromXML(const String xmlFilename)
+{
+	// TODO
+	return EC_InternalError;
+}
+
+Status Item::importFromXML(const QString xmlFilename)
+{
+	// TODO
+	return EC_InternalError;
+}
+
+Status Item::importFromXML(const QDomNode& xml)
+{
+	// TODO
+	return EC_InternalError;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Item::exportToJSON(const String jsonFilename) const
+{
+	return exportToJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status Item::exportToJSON(const QString jsonFilename) const
+{
+	QJsonObject jsonObject;
+	Status stat = exportToJSON(jsonObject);
+
+	QJsonDocument jsonDocument(jsonObject);
+	QByteArray jsonByteArray = jsonDocument.toJson();
+
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::WriteOnly)) {
+		jsonFile.write(jsonByteArray);
+		jsonFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::exportToJSON(QJsonObject& jsonObject) const
+{
+	Status stat;
+
+	TagList tagList;
+	stat = getTagList(tagList);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	for(Tag tag : tagList) {
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+
+		char attrTag[100];
+		sprintf(attrTag, "%04X%04X", tag.getGroup(), tag.getElement());
+
+		QJsonObject attrValue;
+		QString attrVR = tag.isUnknownVR() ? "UN" : tag.getVR().getVRName();
+		attrValue.insert("vr", attrVR);
+
+		DcmEVR vr = tag.getEVR();
+		switch(vr) {
+		case EVR_OB :
+		case EVR_OF :
+		case EVR_OW :
+		case EVR_UN :
+		case EVR_UNKNOWN :
+		case EVR_UNKNOWN2B :
+			{
+				if (tag == DCM_PixelData) {
+					stat = exportPixelDataToJSON(tag, attrValue);
+				} else {
+					const Uint8* byteValue;
+					Ulong length;
+					stat = getValue(tag, byteValue, &length);
+					if (length > 0) {
+						QByteArray byteArray((const char*) byteValue, (int) length);
+						QByteArray base64Binary = byteArray.toBase64();
+						attrValue.insert("InlineBinary", base64Binary.constData());
+					}
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				QJsonArray seqArray;
+				Sint32 itemCount = getItemCount(tag);
+				for(int i = 0; i < itemCount; i++) {
+					Item item;
+					stat = getItem(tag, item, i);
+
+					QJsonObject itemObject;
+					stat = item.exportToJSON(itemObject);
+					if (stat.good()) {
+						seqArray.append(itemObject);
+					}
+				}
+				if (seqArray.size() > 0) {
+					attrValue.insert("Value", seqArray);
+				}
+		}
+			break;
+		case EVR_PN :
+			{
+				QJsonArray valueArray;
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+					QJsonObject pnameObject;
+					QStringList subValueList = value.split("=");
+					if (subValueList.size() > 0) {
+						pnameObject.insert("Alphabetic", subValueList.at(0));
+					}
+					if (subValueList.size() > 1) {
+						pnameObject.insert("Ideographic", subValueList.at(1));
+					}
+					if (subValueList.size() > 2) {
+						pnameObject.insert("Phonetic", subValueList.at(2));
+					}
+					valueArray.append(pnameObject);
+				}
+				if (valueArray.size() > 0) {
+					attrValue.insert("Value", valueArray);
+				}
+			}
+			break;
+		default :
+			{
+				QJsonArray valueArray;
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+					valueArray.append(value);
+				}
+				if (valueArray.size() > 0) {
+					attrValue.insert("Value", valueArray);
+				}
+			}
+			break;
+		}
+
+		jsonObject.insert(attrTag, attrValue);
+	}
+
+}
+
+Status Item::exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const
+{
+	return EC_Normal;
+}
+
+Status Item::importFromJSON(const String jsonFilename)
+{
+	return importFromJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status Item::importFromJSON(const QString jsonFilename)
+{
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::ReadOnly)) {
+		QByteArray jsonByteArray = jsonFile.readAll();
+		jsonFile.close();
+
+		QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonByteArray);
+		QJsonObject jsonObject = jsonDocument.object();
+		return importFromJSON(jsonObject);
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::importFromJSON(const QJsonObject& jsonObject)
+{
+	Status stat;
+
+	for(QJsonObject::ConstIterator it = jsonObject.constBegin(); it != jsonObject.constEnd(); it++) {
+		QString attrKey = it.key();
+		if (!it.value().isObject()) {
+			continue;
+		}
+
+		bool isValidTag;
+		Uint32 tagGE = attrKey.toInt(&isValidTag, 16);
+		if (!isValidTag) {
+			continue;
+		}
+		Uint16 group = (tagGE & 0xFFFF0000) >> 16;
+		Uint16 element = (tagGE & 0x0000FFFF);
+		Tag tag(group, element);
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+
+		if (!checkValidTag(tag)) {
+			continue;
+		}
+
+		QJsonObject attrValue = it.value().toObject();
+		QString attrVR = attrValue.value("vr").toString();
+		DcmVR vr(QSTR_TO_CSTR(attrVR));
+		tag.setVR(vr);
+
+		if (tag.isPrivate() && (tag.getElement() & 0xFF00)) {
+			Uint16 privateCreatorElement = (tag.getElement() & 0xFF00) >> 8;
+			Tag privateCreatorTag(group, privateCreatorElement);
+			QString privateCreator;
+			stat = getString(privateCreatorTag, privateCreator);
+			tag.setPrivateCreator(QSTR_TO_CSTR(privateCreator));
+		}
+
+		switch(vr.getEVR()) {
+		case EVR_OB :
+		case EVR_UN :
+			{
+				QJsonValue inlineBinary = attrValue.value("InlineBinary");
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint8*) byteArray.constData(), (Uint32) byteArray.size());
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_OF :
+			{
+				QJsonValue inlineBinary = attrValue.value("InlineBinary");
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Float32*) byteArray.constData(), (Uint32) byteArray.size()/4);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_OW :
+			{
+				QJsonValue inlineBinary = attrValue.value("InlineBinary");
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint16*) byteArray.constData(), (Uint32) byteArray.size()/2);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				QJsonArray seqArray = attrValue.value("Value").toArray();
+				for(int i = 0; i < seqArray.size(); i++) {
+					if (!seqArray.at(i).isObject()) {
+						continue;
+					}
+
+					QJsonObject itemObject = seqArray.at(i).toObject();
+					Item item;
+					stat = putItem(tag, item);
+					stat = item.importFromJSON(itemObject);
+				}
+			}
+			break;
+		case EVR_PN :
+			{
+				QJsonArray valueArray = attrValue.value("Value").toArray();
+				QString values;
+				for(int i = 0; i < valueArray.size(); i++) {
+					if (!valueArray.at(i).isObject()) {
+						continue;
+					}
+
+					QJsonObject pnameObject = valueArray.at(i).toObject();
+					QString alphabetic = pnameObject.value("Alphabetic").toString();
+					QString ideographic = pnameObject.value("Ideographic").toString();
+					QString phonetic = pnameObject.value("Phonetic").toString();
+					QString pname = alphabetic + "=" + ideographic + "=" + phonetic;
+					if (i == 0) {
+						values = pname;
+					} else {
+						values += "\\" + pname;
+					}
+				}
+				stat = putString(tag, values);
+			}
+			break;
+		default :
+			{
+				QJsonArray valueArray = attrValue.value("Value").toArray();
+				QString values;
+				for(int i = 0; i < valueArray.size(); i++) {
+					if (!valueArray.at(i).isString()) {
+						continue;
+					}
+
+					QString valueComponent = valueArray.at(i).toString();
+					if (i == 0) {
+						values = valueComponent;
+					} else {
+						values += "\\" + valueComponent;
+					}
+				}
+				stat = putString(tag, values);
+
+				if (tag == DCM_SpecificCharacterSet) {
+					int nls;
+					if (getNLS(nls).good()) {
+						setAutoNLS(nls);
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return EC_Normal;
+}
+
+bool Item::checkValidTag(const DcmTagKey& tag)
+{
+	return true;
+}
+
+Status Item::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue)
+{
 	return EC_Normal;
 }
 

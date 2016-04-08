@@ -4,10 +4,11 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT		+= xml
+QT		-= gui
 
 TARGET = DTK
-VERSION = 1.1.0
+VERSION = 1.2.0
 TEMPLATE = lib
 
 DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
@@ -46,16 +47,16 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.1.0-macos/lib_debug -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib_debug -ldcmtk
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.1.0-macos/lib -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib -ldcmtk
 	}
 }
 unix:!macx {
@@ -66,11 +67,11 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-armv7/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib_debug -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-linux/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib_debug -ldcmtk
 		}
 	} else {
 		target.path = /usr/lib
@@ -79,22 +80,22 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-armv7/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-linux/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib -ldcmtk
 		}
 	}
 }
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
 	}
 }
