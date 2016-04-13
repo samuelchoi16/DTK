@@ -659,6 +659,100 @@ Status Dataset::getPixelData(const DcmTagKey& tag, PixelDataConsumer* consumer)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool Dataset::isValidTag(const DcmTagKey& tag)
+{
+	return (tag >= Tag(0x0008, 0x0000)) ? true : false;
+}
+
+Status Dataset::exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const
+{
+	Status stat;
+	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItem);
+	assert(dcmDatasetPtr != NULL);
+
+	DcmElement* dcmElementPtr = NULL;
+	stat = dcmDatasetPtr->findAndGetElement(tag, dcmElementPtr);
+	if (stat.bad())
+		return stat;
+
+	DcmPixelData* dcmPixelDataPtr = dynamic_cast<DcmPixelData*>(dcmElementPtr);
+	E_TransferSyntax transferSyntax = getTransferSyntax();
+	if (DcmXfer(transferSyntax).isEncapsulated()) {
+		DcmPixelSequence* dcmPixelSeqPtr = NULL;
+		stat = dcmPixelDataPtr->getEncapsulatedRepresentation(transferSyntax, NULL, dcmPixelSeqPtr);
+		if (stat.bad())
+			return EC_InvalidStream;
+
+		Ulong fragmentCount = dcmPixelSeqPtr->card();
+		for(Uint fragmentIndex = 0; fragmentIndex < fragmentCount; fragmentIndex++) {
+			DcmPixelItem* dcmPixelItemPtr = NULL;
+			stat = dcmPixelSeqPtr->getItem(dcmPixelItemPtr, fragmentIndex);
+			if (stat.bad())
+				return EC_InvalidStream;
+
+			Uint32 fragmentSize = dcmPixelItemPtr->getLength();
+			Uint8* fragmentDataPtr = NULL;
+			stat = dcmPixelItemPtr->getUint8Array(fragmentDataPtr);
+			if (stat.bad())
+				return EC_InvalidStream;
+
+			QByteArray byteArray((const char*) fragmentDataPtr, (int) fragmentSize);
+			QByteArray base64Binary = byteArray.toBase64();
+
+			QDomElement fragmentElement = dcmElement.ownerDocument().createElement("DataFragment");
+			QDomElement binaryElement = dcmElement.ownerDocument().createElement("InlineBinary");
+			binaryElement.appendChild(dcmElement.ownerDocument().createTextNode(base64Binary.constData()));
+			fragmentElement.appendChild(binaryElement);
+			dcmElement.appendChild(fragmentElement);
+		}
+	} else {
+		const Uint8* byteValue;
+		Ulong length;
+		stat = getValue(tag, byteValue, &length);
+		if (length > 0) {
+			QByteArray byteArray((const char*) byteValue, (int) length);
+			QByteArray base64Binary = byteArray.toBase64();
+
+			QDomElement binaryElement = dcmElement.ownerDocument().createElement(L_INLINE_BINARY);
+			binaryElement.appendChild(dcmElement.ownerDocument().createTextNode(base64Binary.constData()));
+			dcmElement.appendChild(binaryElement);
+		}
+	}
+
+	return EC_Normal;
+}
+
+Status Dataset::importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement)
+{
+	Status stat = EC_InvalidStream;
+	DcmDataset* dcmDatasetPtr = dynamic_cast<DcmDataset*>(_dcmItem);
+	assert(dcmDatasetPtr != NULL);
+
+	E_TransferSyntax transferSyntax = getTransferSyntax();
+	if (DcmXfer(transferSyntax).isEncapsulated()) {
+		DcmPixelData* dcmPixelData = new DcmPixelData(tag);
+		DcmPixelSequence *dcmPixelSeq = new DcmPixelSequence(DcmTag(DCM_PixelData, EVR_OB));
+
+		for(QDomElement fragmentItem = dcmElement.firstChildElement(L_DATA_FRAGMENT); !fragmentItem.isNull(); fragmentItem = fragmentItem.nextSiblingElement(L_DATA_FRAGMENT)) {
+			QDomElement binaryElement = fragmentItem.firstChildElement(L_INLINE_BINARY);
+			if (!binaryElement.isNull()) {
+				QByteArray base64Binary;
+				base64Binary.append(binaryElement.text());
+				QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+
+				DcmPixelItem* dcmPixelItem = new DcmPixelItem(DCM_Item);
+				stat = dcmPixelItem->putUint8Array((const Uint8*) byteArray.constData(), (Uint32) byteArray.size());
+				stat = dcmPixelSeq->insert(dcmPixelItem);
+			}
+		}
+
+		dcmPixelData->putOriginalRepresentation(transferSyntax, NULL, dcmPixelSeq);
+		stat = dcmDatasetPtr->insert(dcmPixelData, true);
+	}
+
+	return stat;
+}
+
 Status Dataset::exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const
 {
 	Status stat;
@@ -696,12 +790,12 @@ Status Dataset::exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrVal
 			QByteArray base64Binary = byteArray.toBase64();
 
 			QJsonObject fragmentItem;
-			fragmentItem.insert("InlineBinary", base64Binary.constData());
+			fragmentItem.insert(L_INLINE_BINARY, base64Binary.constData());
 
 			fragmentArray.append(fragmentItem);
 		}
 		if (fragmentArray.size() > 0) {
-			attrValue.insert("DataFragment", fragmentArray);
+			attrValue.insert(L_DATA_FRAGMENT, fragmentArray);
 		}
 	} else {
 		const Uint8* byteValue;
@@ -710,16 +804,11 @@ Status Dataset::exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrVal
 		if (length > 0) {
 			QByteArray byteArray((const char*) byteValue, (int) length);
 			QByteArray base64Binary = byteArray.toBase64();
-			attrValue.insert("InlineBinary", base64Binary.constData());
+			attrValue.insert(L_INLINE_BINARY, base64Binary.constData());
 		}
 	}
 
 	return EC_Normal;
-}
-
-bool Dataset::checkValidTag(const DcmTagKey& tag)
-{
-	return (tag >= Tag(0x0008, 0x0000)) ? true : false;
 }
 
 Status Dataset::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue)
@@ -733,7 +822,7 @@ Status Dataset::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject&
 		DcmPixelData* dcmPixelData = new DcmPixelData(tag);
 		DcmPixelSequence *dcmPixelSeq = new DcmPixelSequence(DcmTag(DCM_PixelData, EVR_OB));
 
-		QJsonValue fragmentObject = attrValue.value("DataFragment");
+		QJsonValue fragmentObject = attrValue.value(L_DATA_FRAGMENT);
 		if (fragmentObject.isArray()) {
 			QJsonArray fragmentArray = fragmentObject.toArray();
 			for(int i = 0; i < fragmentArray.size(); i++) {
@@ -742,7 +831,7 @@ Status Dataset::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject&
 				}
 
 				QJsonObject fragmentItem = fragmentArray.at(i).toObject();
-				QJsonValue inlineBinary = fragmentItem.value("InlineBinary");
+				QJsonValue inlineBinary = fragmentItem.value(L_INLINE_BINARY);
 				if (inlineBinary.isString()) {
 					QByteArray base64Binary;
 					base64Binary.append(inlineBinary.toString());

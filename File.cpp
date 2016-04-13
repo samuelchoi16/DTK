@@ -170,38 +170,84 @@ File::operator DcmFileFormat*(void) const
 
 Status File::exportToXML(const String xmlFilename) const
 {
-	// TODO
-	return EC_InternalError;
+	return exportToXML(DSTR_TO_QSTR(xmlFilename));
 }
 
 Status File::exportToXML(const QString xmlFilename) const
 {
-	// TODO
-	return EC_InternalError;
+	QDomDocument xmlDocument;
+	QDomElement xmlElement = xmlDocument.createElement(L_NATIVE_DICOM_MODEL);
+	Status stat = exportToXML(xmlElement);
+	if (stat.bad()) {
+		return stat;
+	}
+	xmlDocument.appendChild(xmlElement);
+
+	QByteArray xmlByteArray = xmlDocument.toByteArray(4);
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::WriteOnly)) {
+		xmlFile.write(xmlByteArray);
+		xmlFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
 }
 
-Status File::exportToXML(QDomNode& xml) const
+Status File::exportToXML(QDomElement& parentElement) const
 {
-	// TODO
-	return EC_InternalError;
+	Status stat;
+
+	stat = _metaInfo.exportToXML(parentElement);
+	if (stat.bad())
+		return stat;
+
+	stat = _dataset.exportToXML(parentElement);
+	if (stat.bad())
+		return stat;
+
+	return EC_Normal;
 }
 
 Status File::importFromXML(const String xmlFilename)
 {
-	// TODO
-	return EC_InternalError;
+	return importFromXML(DSTR_TO_QSTR(xmlFilename));
 }
 
 Status File::importFromXML(const QString xmlFilename)
 {
-	// TODO
-	return EC_InternalError;
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::ReadOnly)) {
+		QDomDocument xmlDocument;
+		xmlDocument.setContent(&xmlFile);
+		xmlFile.close();
+
+		return importFromXML(xmlDocument.documentElement());
+	} else {
+		return EC_InvalidFilename;
+	}
 }
 
-Status File::importFromXML(const QDomNode& xml)
+Status File::importFromXML(const QDomElement& parentElement)
 {
-	// TODO
-	return EC_InternalError;
+	Status stat;
+
+	stat = _metaInfo.importFromXML(parentElement);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	String transferSyntaxUID;
+	stat = _metaInfo.getString(DCM_TransferSyntaxUID, transferSyntaxUID);
+	TransferSyntax transferSyntax = DcmXfer(transferSyntaxUID.c_str()).getXfer();
+	stat = _dataset.setTransferSyntax(transferSyntax);
+
+	stat = _dataset.importFromXML(parentElement);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	return EC_Normal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

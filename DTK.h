@@ -2413,15 +2413,19 @@ namespace dcm {
 		 */
 		Status getTagList(TagList& tagList) const;
 
+		virtual bool isValidTag(const DcmTagKey& tag);
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Status exportToXML(const String xmlFilename) const;
 		Status exportToXML(const QString xmlFilename) const;
-		Status exportToXML(QDomNode& xml) const;
+		Status exportToXML(QDomElement& parentElement) const;
+		virtual Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
 
 		Status importFromXML(const String xmlFilename);
 		Status importFromXML(const QString xmlFilename);
-		Status importFromXML(const QDomNode& xml);
+		Status importFromXML(const QDomElement& parentElement);
+		virtual Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2488,9 +2492,6 @@ namespace dcm {
 		 * @brief operator DcmItem *
 		 */
 		operator DcmItem*(void) const;
-
-	protected:
-		virtual bool checkValidTag(const DcmTagKey& tag);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2656,6 +2657,13 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		bool isValidTag(const DcmTagKey& tag);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
+		Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
+
 		Status exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const;
 		Status importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue);
 
@@ -2737,9 +2745,6 @@ namespace dcm {
 		 * @return status
 		 */
 		Status prepareStorageCommitmentFromCompositeIOD(const Dataset* dataset);			// Prepare Storage Commitment from Composite IOD
-
-	protected:
-		bool checkValidTag(const DcmTagKey& tag);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2779,8 +2784,9 @@ namespace dcm {
 		 */
 		MetaInfo& operator=(const MetaInfo& metaInfo);
 
-	protected:
-		bool checkValidTag(const DcmTagKey& tag);
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		bool isValidTag(const DcmTagKey& tag);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2925,11 +2931,11 @@ namespace dcm {
 
 		Status exportToXML(const String xmlFilename) const;
 		Status exportToXML(const QString xmlFilename) const;
-		Status exportToXML(QDomNode& xml) const;
+		Status exportToXML(QDomElement& parentElement) const;
 
 		Status importFromXML(const String xmlFilename);
 		Status importFromXML(const QString xmlFilename);
-		Status importFromXML(const QDomNode& xml);
+		Status importFromXML(const QDomElement& parentElement);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

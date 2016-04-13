@@ -38,6 +38,21 @@
 
 #define	DTK_DEFAULT_UID_ROOT				("1.2.410.200055")
 
+#define	L_NATIVE_DICOM_MODEL				("NativeDicomModel")
+#define	L_DICOM_ATTRIBUTE					("DicomAttribute")
+#define	L_VALUE								("Value")
+#define	L_PERSON_NAME						("PersonName")
+#define	L_ALPHABETIC						("Alphabetic")
+#define	L_IDEOGRAPHIC						("Ideographic")
+#define	L_PHONETIC							("Phonetic")
+#define	L_ITEM								("Item")
+#define	L_INLINE_BINARY						("InlineBinary")
+#define	L_DATA_FRAGMENT						("DataFragment")
+#define	L_NUMBER							("number")
+#define	L_TAG								("tag")
+#define	L_KEYWORD							("keyword")
+#define	L_VR								("vr")
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace dcm;

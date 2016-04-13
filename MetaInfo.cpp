@@ -58,7 +58,7 @@ MetaInfo& MetaInfo::operator=(const MetaInfo& metaInfo)
 	return *this;
 }
 
-bool MetaInfo::checkValidTag(const DcmTagKey& tag)
+bool MetaInfo::isValidTag(const DcmTagKey& tag)
 {
 	return (tag >= Tag(0x0002, 0x0000) && tag < Tag(0x0008, 0x0000)) ? true : false;
 }
