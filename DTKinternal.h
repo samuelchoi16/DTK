@@ -34,6 +34,9 @@
 #include "dcmtk/dcmjpeg/dipijpeg.h"			/* for dcmimage JPEG plugin */
 #include "dcmtk/dcmjpeg/djrplol.h"
 
+#include "dcmj2k/dj2kencode.h"
+#include "dcmj2k/dj2kdecode.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define	DTK_DEFAULT_UID_ROOT				("1.2.410.200055")

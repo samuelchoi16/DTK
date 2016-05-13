@@ -47,16 +47,16 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib_debug -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../dcmj2k
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib_debug -ldcmtk -L$$PWD/../build-dcmj2k/Debug -ldcmj2k
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../dcmj2k
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib -ldcmtk -L$$PWD/../build-dcmj2k/Release -ldcmj2k
 	}
 }
 unix:!macx {
