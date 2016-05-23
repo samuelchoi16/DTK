@@ -25,5 +25,4 @@
 #  define DTKSHARED_EXPORT Q_DECL_IMPORT
 #endif
 
-
 #endif // DTK_GLOBAL_H

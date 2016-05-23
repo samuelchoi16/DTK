@@ -34,8 +34,8 @@
 #include "dcmtk/dcmjpeg/dipijpeg.h"			/* for dcmimage JPEG plugin */
 #include "dcmtk/dcmjpeg/djrplol.h"
 
-#include "dcmj2k/dj2kencode.h"
-#include "dcmj2k/dj2kdecode.h"
+#include "dcmjp2k/djp2kencode.h"
+#include "dcmjp2k/djp2kdecode.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
