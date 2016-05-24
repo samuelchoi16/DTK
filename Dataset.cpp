@@ -438,12 +438,12 @@ void Dataset::registerCodecs()
 	DcmRLEEncoderRegistration::registerCodecs();
 	DJEncoderRegistration::registerCodecs();
 	DJLSEncoderRegistration::registerCodecs();
-	DJ2KEncoderRegistration::registerCodecs();
+	DJP2KEncoderRegistration::registerCodecs();
 
 	DcmRLEDecoderRegistration::registerCodecs();
 	DJDecoderRegistration::registerCodecs();
 	DJLSDecoderRegistration::registerCodecs();
-	DJ2KDecoderRegistration::registerCodecs();
+	DJP2KDecoderRegistration::registerCodecs();
 }
 
 void Dataset::unregisterCodecs()
@@ -451,12 +451,12 @@ void Dataset::unregisterCodecs()
 	DcmRLEEncoderRegistration::cleanup();
 	DJEncoderRegistration::cleanup();
 	DJLSEncoderRegistration::cleanup();
-	DJ2KEncoderRegistration::cleanup();
+	DJP2KEncoderRegistration::cleanup();
 
 	DcmRLEDecoderRegistration::cleanup();
 	DJDecoderRegistration::cleanup();
 	DJLSDecoderRegistration::cleanup();
-	DJ2KDecoderRegistration::cleanup();
+	DJP2KDecoderRegistration::cleanup();
 }
 
 Status Dataset::setTransferSyntax(E_TransferSyntax transferSyntax, DcmRepresentationParameter* dcmRepParam)

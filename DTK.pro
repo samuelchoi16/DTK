@@ -31,11 +31,27 @@ SOURCES += \
     NLS.cpp \
     DirRecord.cpp \
     Dir.cpp \
-    ServiceList.cpp
+    ServiceList.cpp \
+    dcmjp2k/djp2kcodecd.cpp \
+    dcmjp2k/djp2kcodece.cpp \
+    dcmjp2k/djp2kcparam.cpp \
+    dcmjp2k/djp2kdecode.cpp \
+    dcmjp2k/djp2kencode.cpp \
+    dcmjp2k/djp2krparam.cpp \
+    dcmjp2k/djp2kutils.cpp
 
 HEADERS += DTK.h\
     DTKinternal.h \
-    DTK_global.h
+    DTK_global.h \
+    dcmjp2k/djp2kcodecd.h \
+    dcmjp2k/djp2kcodece.h \
+    dcmjp2k/djp2kcparam.h \
+    dcmjp2k/djp2kdecode.h \
+    dcmjp2k/djp2kdefine.h \
+    dcmjp2k/djp2kencode.h \
+    dcmjp2k/djp2kerror.h \
+    dcmjp2k/djp2krparam.h \
+    dcmjp2k/djp2kutil.h
 
 macx {
 	DEFINES += DCMTK_LOG4CPLUS_HAVE_C99_VARIADIC_MACROS
@@ -47,16 +63,16 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../dcmj2k
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib_debug -ldcmtk -L$$PWD/../build-dcmj2k/Debug -ldcmj2k
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib_debug -ldcmtk -L$$PWD/../openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../dcmj2k
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib -ldcmtk -L$$PWD/../build-dcmj2k/Release -ldcmj2k
+		INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-macos/include $$PWD/../openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.2.0-macos/lib -ldcmtk -L$$PWD/../openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
 	}
 }
 unix:!macx {
