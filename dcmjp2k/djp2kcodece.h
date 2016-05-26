@@ -235,60 +235,6 @@ private:
 	unsigned long &compressedSize,
 	const DJP2KCodecParameter *djcp) const;
 
-#ifdef	NEVER
-  /** encoder that moves Overlays to (60xx,3000) and only
-   *  compresses the stored bits of the pixel cell.
-   *  @param pixelData pointer to the uncompressed image data in OW format
-   *    and local byte order
-   *  @param length of the pixel data field in bytes
-   *  @param dataset pointer to dataset containing image pixel module
-   *  @param djrp representation parameter
-   *  @param pixSeq pixel sequence to write to
-   *  @param djcp codec parameter
-   *  @param compressionRatio compression ratio returned upon success
-   *  @param nearLosslessDeviation maximum deviation for near-lossless encoding
-   *  @return EC_Normal if successful, an error code otherwise.
-   */
-  OFCondition encodeWithOverlays(
-    const Uint16 * pixelData,
-    const Uint32 length,
-    DcmItem *dataset,
-    const DJP2KRepresentationParameter *djrp,
-    DcmPixelSequence * & pixSeq,
-    const DJP2KCodecParameter *djcp,
-    double& compressionRatio,
-    Uint16 nearLosslessDeviation) const;
-
-  /** for all overlay groups create (60xx,3000) Overlay Data.
-   *  @param dataset dataset to be modified
-   *  @param image DicomImage object for this dataset
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  OFCondition adjustOverlays(
-    DcmItem *dataset,
-    DicomImage& image) const;
-
-  /** perform the lossless cooked compression of a single frame
-   *  @param pixelSequence object in which the compressed frame is stored
-   *  @param dimage DicomImage instance used to process frame
-   *  @param photometricInterpretation photometric interpretation of the DICOM dataset
-   *  @param offsetList list of frame offsets updated in this parameter
-   *  @param compressedSize size of compressed frame returned in this parameter
-   *  @param djcp parameters for the codec
-   *  @param frame frame index
-   *  @param nearLosslessDeviation maximum deviation for near-lossless encoding
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  OFCondition encodeFrameWithOverlays(
-    DcmPixelSequence *pixelSequence,
-    DicomImage *dimage,
-    const OFString& photometricInterpretation,
-    DcmOffsetList &offsetList,
-    unsigned long &compressedSize,
-    const DJP2KCodecParameter *djcp,
-    Uint32 frame,
-    Uint16 nearLosslessDeviation) const;
-#endif
   /** create Lossy Image Compression and Lossy Image Compression Ratio.
    *  @param dataset dataset to be modified
    *  @param ratio image compression ratio > 1. This is the real effective ratio

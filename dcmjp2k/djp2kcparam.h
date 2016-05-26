@@ -64,22 +64,12 @@ public:
    *  @param jplsInterleaveMode        flag describing which interleave the JPEG 2000 datastream should use
    */
    DJP2KCodecParameter(
-	/*
-     OFBool jpls_optionsEnabled,
-     Uint16 jpls_t1 = 3, // these are the defaults for 8bpp in lossless mode
-     Uint16 jpls_t2 = 7,
-     Uint16 jpls_t3 = 21,
-     Uint16 jpls_reset = 64,
-     Uint16 jpls_limit = 0,
-	 OFBool preferCookedEncoding = OFFalse,
-	*/
      Uint32 fragmentSize = 0,
      OFBool createOffsetTable = OFTrue,
      JP2K_UIDCreation uidCreation = EJ2KUC_default,
      OFBool convertToSC = OFFalse,
 	 JP2K_PlanarConfiguration planarConfiguration = EJ2KPC_restore,
-	 OFBool ignoreOffsetTable = OFFalse//,
-/*     interleaveMode jplsInterleaveMode = interleaveLine*/);
+	 OFBool ignoreOffsetTable = OFFalse);
 
   /** constructor, for use with decoders. Initializes all encoder options to defaults.
    *  @param uidCreation               mode for SOP Instance UID creation (used both for encoding and decoding)
@@ -140,17 +130,6 @@ public:
     return planarConfiguration_;
   }
 
-  /** returns flag indicating whether or not the "cooked" lossless encoder
-   *  should be preferred over the "raw" one
-   *  @return raw/cooked lossless encoding flag
-   */
-  /*
-  OFBool cookedEncodingPreferred() const
-  {
-    return preferCookedEncoding_;
-  }
-  */
-
   /** returns maximum fragment size (in kbytes) for compression, 0 for unlimited.
    *  @return maximum fragment size for compression
    */
@@ -158,66 +137,6 @@ public:
   {
     return fragmentSize_;
   }
-
-  /** returns JPEG 2000 parameter T1
-   *  @return JPEG 2000 parameter T1
-   */
-  /*
-  Uint16 getT1() const
-  {
-    return jpls_t1_;
-  }
-  */
-
-  /** returns JPEG 2000 parameter T2
-   *  @return JPEG 2000 parameter T2
-   */
-  /*
-  Uint16 getT2() const
-  {
-    return jpls_t2_;
-  }
-  */
-
-  /** returns JPEG 2000 parameter T3
-   *  @return JPEG 2000 parameter T3
-   */
-  /*
-  Uint16 getT3() const
-  {
-    return jpls_t3_;
-  }
-  */
-
-  /** returns JPEG 2000 parameter RESET
-   *  @return JPEG 2000 parameter RESET
-   */
-  /*
-  Uint16 getReset() const
-  {
-    return jpls_reset_;
-  }
-  */
-
-  /** returns JPEG 2000 parameter LIMIT
-   *  @return JPEG 2000 parameter LIMIT
-   */
-  /*
-  Uint16 getLimit() const
-  {
-    return jpls_t1_;
-  }
-  */
-  
-  /** returns true if JPEG 2000 parameters T1-T3, RESET and LIMIT are enabled, false otherwise
-   *  @return true if JPEG 2000 parameters T1-T3, RESET and LIMIT are enabled, false otherwise
-   */
-  /*
-  OFBool getUseCustomOptions() const
-  {
-    return jpls_optionsEnabled_;
-  }
-  */
 
   /** returns true if the offset table should be ignored when decompressing multiframe images
    *  @return true if the offset table should be ignored when decompressing multiframe images
@@ -227,16 +146,6 @@ public:
     return ignoreOffsetTable_;
   }
 
-  /** returns the interleave mode which the encoder should use
-   *  @return the interleave mode which the encoder should use
-   */
-  /*
-  interleaveMode getJplsInterleaveMode() const
-  {
-    return jplsInterleaveMode_;
-  }
-  */
-
 private:
 
   /// private undefined copy assignment operator
@@ -244,43 +153,19 @@ private:
 
   // ****************************************************
   // **** Parameters describing the encoding process ****
-/*
-  /// enable/disable use of all five JPEG 2000 parameters
-  OFBool jpls_optionsEnabled_;
 
-  /// JPEG 2000 parameter "Threshold 1" (used for quantization)
-  Uint16 jpls_t1_;
-
-  /// JPEG 2000 parameter "Threshold 2"
-  Uint16 jpls_t2_;
-
-  /// JPEG 2000 parameter "Threshold 3"
-  Uint16 jpls_t3_;
-
-  /// JPEG 2000 parameter "RESET", i.e., value at which the counters A, B, and N are halved.
-  Uint16 jpls_reset_;
-
-  /// JPEG 2000 parameter "LIMIT"
-  Uint16 jpls_limit_;
-*/
   /// maximum fragment size (in kbytes) for compression, 0 for unlimited.
   Uint32 fragmentSize_;
 
   /// create offset table during image compression
   OFBool createOffsetTable_;
-/*
-  /// Flag indicating if the "cooked" lossless encoder should be preferred over the "raw" one
-  OFBool preferCookedEncoding_;
-*/
+
   /// mode for SOP Instance UID creation (used both for encoding and decoding)
   JP2K_UIDCreation uidCreation_;
 
   /// flag indicating whether image should be converted to Secondary Capture upon compression
   OFBool convertToSC_;
-/*
-  /// Flag describing the interleave mode which the encoder will use
-  interleaveMode jplsInterleaveMode_;
-*/
+
   // ****************************************************
   // **** Parameters describing the decoding process ****
 
@@ -289,8 +174,6 @@ private:
 
   /// flag indicating if temporary files should be kept, false if they should be deleted after use
   OFBool ignoreOffsetTable_;
-
 };
-
 
 #endif
