@@ -24,7 +24,6 @@
 
 #include "dcmtk/config/osconfig.h"
 #include "djp2kutil.h" /* For the OFCondition codes */
-//#include "intrface.h" /* CharLS include */
 
 /** Helper class for converting between dcmj2k and CharLS error codes
  */

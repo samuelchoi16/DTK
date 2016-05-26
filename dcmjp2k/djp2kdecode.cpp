@@ -25,6 +25,8 @@
 #include "dcmjp2k/djp2kcparam.h"
 #include "dcmjp2k/djp2kcodecd.h"
 
+#include "openjpeg.h"
+
 // initialization of static members
 OFBool DJP2KDecoderRegistration::registered_ = OFFalse;
 DJP2KCodecParameter *DJP2KDecoderRegistration::cp_ = NULL;
@@ -72,5 +74,5 @@ void DJP2KDecoderRegistration::cleanup()
 
 OFString DJP2KDecoderRegistration::getLibraryVersionString()
 {
-	return DCMJ2K_VERSION_STRING;
+	return opj_version();
 }

@@ -55,6 +55,7 @@ public:
    *  @param jplsInterleaveMode        flag describing which interleave the JPEG 2000 datastream should use
    */
   static void registerCodecs(
+	/*
     OFBool jpls_optionsEnabled = OFFalse,
     Uint16 jpls_t1 = 3,
     Uint16 jpls_t2 = 7,
@@ -62,11 +63,12 @@ public:
     Uint16 jpls_reset = 64,
     Uint16 jpls_limit = 0,
     OFBool preferCookedEncoding = OFTrue,
+	*/
     Uint32 fragmentSize = 0,
     OFBool createOffsetTable = OFTrue,
     JP2K_UIDCreation uidCreation = EJ2KUC_default,
-    OFBool convertToSC = OFFalse,
-    DJP2KCodecParameter::interleaveMode jplsInterleaveMode = DJP2KCodecParameter::interleaveDefault);
+	OFBool convertToSC = OFFalse//,
+/*    DJP2KCodecParameter::interleaveMode jplsInterleaveMode = DJP2KCodecParameter::interleaveDefault*/);
 
   /** deregisters encoders.
    *  Attention: Must not be called while other threads might still use

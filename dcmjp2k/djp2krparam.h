@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef DCMJ2K_DJ2KRPARAM_H
-#define DCMJ2K_DJ2KRPARAM_H
+#ifndef DCMJP2K_DJP2KRPARAM_H
+#define DCMJP2K_DJP2KRPARAM_H
 
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcpixel.h" /* for class DcmRepresentationParameter */
@@ -37,8 +37,8 @@ public:
    *  @param losslessProcess true if lossless process is requested
    */
   DJP2KRepresentationParameter(
-    Uint16 nearlosslessDeviation = 2,
-    OFBool losslessProcess = OFTrue);
+	Uint16 compressionRatio = 5,
+	OFBool losslessProcess = OFFalse);
 
   /// copy constructor
   DJP2KRepresentationParameter(const DJP2KRepresentationParameter& arg);
@@ -64,12 +64,12 @@ public:
    */
   virtual OFBool operator==(const DcmRepresentationParameter &arg) const;
 
-  /** returns the desired NEAR parameter
-   *  @return return desired NEAR-Parameter
+  /** returns the desired compression ratio
+   *  @return return desired compression ratio
    */
-  Uint16 getnearlosslessDeviation() const
+  Uint16 getCompressionRatio() const
   {
-    return nearlosslessDeviation_;
+	return compressionRatio_;
   }
 
   /** returns true if lossless compression is desired
@@ -86,12 +86,11 @@ private:
    *  Default is 0 (lossless compression).
    *  Ignored during lossless compression.
    */
-  Uint16 nearlosslessDeviation_;
+  Uint16 compressionRatio_;
 
   /// true if lossless process should be used even in lossy transfer syntax
   OFBool losslessProcess_;
 
 };
-
 
 #endif

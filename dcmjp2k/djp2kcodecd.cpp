@@ -54,7 +54,6 @@ E_TransferSyntax DJP2KLossyDecoder::supportedTransferSyntax() const
 // --------------------------------------------------------------------------
 
 DJP2KDecoderBase::DJP2KDecoderBase()
-	: DcmCodec()
 {
 }
 
@@ -62,7 +61,6 @@ DJP2KDecoderBase::DJP2KDecoderBase()
 DJP2KDecoderBase::~DJP2KDecoderBase()
 {
 }
-
 
 OFBool DJP2KDecoderBase::canChangeCoding(
 	const E_TransferSyntax oldRepType,
@@ -77,7 +75,6 @@ OFBool DJP2KDecoderBase::canChangeCoding(
 
 	return OFFalse;
 }
-
 
 OFCondition DJP2KDecoderBase::decode(
 	const DcmRepresentationParameter * /* fromRepParam */,
@@ -208,7 +205,6 @@ OFCondition DJP2KDecoderBase::decode(
 	return result;
 }
 
-
 OFCondition DJP2KDecoderBase::decodeFrame(
 	const DcmRepresentationParameter * /* fromParam */,
 	DcmPixelSequence *fromPixSeq,
@@ -292,6 +288,21 @@ OFCondition DJP2KDecoderBase::decodeFrame(
 	}
 
 	return result;
+}
+
+static void error_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[ERROR] %s", msg);
+}
+
+static void warning_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[WARNING] %s", msg);
+}
+
+static void info_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[INFO] %s", msg);
 }
 
 typedef struct buffer_info {
@@ -489,44 +500,48 @@ OFCondition DJP2KDecoderBase::decodeFrame(
 	if (result.good()) {
 		l_stream = stream_create_buffer_stream(&bufinfo, j2kSize, OPJ_TRUE);
 		if (l_stream == NULL) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
 	if (result.good()) {
 		l_codec = opj_create_decompress(OPJ_CODEC_J2K);
 		if (l_codec == NULL) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
+	opj_set_info_handler(l_codec, info_callback, 00);
+	opj_set_warning_handler(l_codec, warning_callback, 00);
+	opj_set_error_handler(l_codec, error_callback, 00);
+
 	if (result.good()) {
 		if (!opj_setup_decoder(l_codec, &l_param)) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
 	if (result.good()) {
 		if (!opj_read_header(l_stream, l_codec, &l_image)) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
 	if (result.good()) {
 		if (!opj_set_decode_area(l_codec, l_image, l_param.DA_x0, l_param.DA_y0, l_param.DA_x1, l_param.DA_y1)) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
 	if (result.good()) {
 		if( !opj_decode(l_codec, l_stream, l_image)) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
 	if (result.good()) {
 		if (!opj_end_decompress(l_codec, l_stream)) {
-			result = EC_JP2KInvalidCompressedData;
+			result = EC_InternalError;
 		}
 	}
 
@@ -551,7 +566,7 @@ OFCondition DJP2KDecoderBase::decodeFrame(
 
 			result = dataset->putAndInsertString(DCM_PhotometricInterpretation, "RGB");
 			if (imagePlanarConfiguration == 1) {
-				result = createPlanarConfiguration1Byte(outputBuffer, imageColumns, imageRows);
+				result = convertToPlanarConfiguration1Byte(outputBuffer, imageColumns, imageRows);
 			}
 		} else {
 			Sint32* iPos = l_image->comps[0].data;
@@ -771,122 +786,3 @@ OFBool DJP2KDecoderBase::isJPEG2000StartOfImage(Uint8 *fragmentData)
 	return OFTrue;
 }
 
-OFCondition DJP2KDecoderBase::createPlanarConfiguration1Byte(
-	Uint8 *imageFrame,
-	Uint16 columns,
-	Uint16 rows)
-{
-	if (imageFrame == NULL) return EC_IllegalCall;
-
-	unsigned long numPixels = columns * rows;
-	if (numPixels == 0) return EC_IllegalCall;
-
-	Uint8 *buf = new Uint8[3 * numPixels + 3];
-	if (buf)
-	{
-		memcpy(buf, imageFrame, (size_t)(3 * numPixels));
-		Uint8 *s = buf;                        // source
-		Uint8 *r = imageFrame;                 // red plane
-		Uint8 *g = imageFrame + numPixels;     // green plane
-		Uint8 *b = imageFrame + (2 * numPixels); // blue plane
-		for (unsigned long i = numPixels; i; i--)
-		{
-			*r++ = *s++;
-			*g++ = *s++;
-			*b++ = *s++;
-		}
-		delete[] buf;
-	}
-	else return EC_MemoryExhausted;
-	return EC_Normal;
-}
-
-OFCondition DJP2KDecoderBase::createPlanarConfiguration1Word(
-	Uint16 *imageFrame,
-	Uint16 columns,
-	Uint16 rows)
-{
-	if (imageFrame == NULL) return EC_IllegalCall;
-
-	unsigned long numPixels = columns * rows;
-	if (numPixels == 0) return EC_IllegalCall;
-
-	Uint16 *buf = new Uint16[3 * numPixels + 3];
-	if (buf)
-	{
-		memcpy(buf, imageFrame, (size_t)(3 * numPixels*sizeof(Uint16)));
-		Uint16 *s = buf;                        // source
-		Uint16 *r = imageFrame;                 // red plane
-		Uint16 *g = imageFrame + numPixels;     // green plane
-		Uint16 *b = imageFrame + (2 * numPixels); // blue plane
-		for (unsigned long i = numPixels; i; i--)
-		{
-			*r++ = *s++;
-			*g++ = *s++;
-			*b++ = *s++;
-		}
-		delete[] buf;
-	}
-	else return EC_MemoryExhausted;
-	return EC_Normal;
-}
-
-OFCondition DJP2KDecoderBase::createPlanarConfiguration0Byte(
-	Uint8 *imageFrame,
-	Uint16 columns,
-	Uint16 rows)
-{
-	if (imageFrame == NULL) return EC_IllegalCall;
-
-	unsigned long numPixels = columns * rows;
-	if (numPixels == 0) return EC_IllegalCall;
-
-	Uint8 *buf = new Uint8[3 * numPixels + 3];
-	if (buf)
-	{
-		memcpy(buf, imageFrame, (size_t)(3 * numPixels));
-		Uint8 *t = imageFrame;          // target
-		Uint8 *r = buf;                 // red plane
-		Uint8 *g = buf + numPixels;     // green plane
-		Uint8 *b = buf + (2 * numPixels); // blue plane
-		for (unsigned long i = numPixels; i; i--)
-		{
-			*t++ = *r++;
-			*t++ = *g++;
-			*t++ = *b++;
-		}
-		delete[] buf;
-	}
-	else return EC_MemoryExhausted;
-	return EC_Normal;
-}
-
-OFCondition DJP2KDecoderBase::createPlanarConfiguration0Word(
-	Uint16 *imageFrame,
-	Uint16 columns,
-	Uint16 rows)
-{
-	if (imageFrame == NULL) return EC_IllegalCall;
-
-	unsigned long numPixels = columns * rows;
-	if (numPixels == 0) return EC_IllegalCall;
-
-	Uint16 *buf = new Uint16[3 * numPixels + 3];
-	if (buf)
-	{
-		memcpy(buf, imageFrame, (size_t)(3 * numPixels*sizeof(Uint16)));
-		Uint16 *t = imageFrame;          // target
-		Uint16 *r = buf;                 // red plane
-		Uint16 *g = buf + numPixels;     // green plane
-		Uint16 *b = buf + (2 * numPixels); // blue plane
-		for (unsigned long i = numPixels; i; i--)
-		{
-			*t++ = *r++;
-			*t++ = *g++;
-			*t++ = *b++;
-		}
-		delete[] buf;
-	}
-	else return EC_MemoryExhausted;
-	return EC_Normal;
-}

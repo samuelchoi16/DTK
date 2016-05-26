@@ -27,8 +27,6 @@
 #include "dcmtk/oflog/oflog.h"
 #include "djp2kdefine.h"
 
-#define DCMJ2K_VERSION_STRING "OpenJPEG, Version 2.1"
-
 #define J2K_CODESTREAM_MAGIC "\xff\x4f\xff\x51"
 
 // global definitions for logging mechanism provided by the oflog module
@@ -42,13 +40,11 @@ extern DCMJP2K_EXPORT OFLogger DCM_dcmj2kLogger;
 #define DCMJP2K_ERROR(msg) OFLOG_ERROR(DCM_dcmj2kLogger, msg)
 #define DCMJP2K_FATAL(msg) OFLOG_FATAL(DCM_dcmj2kLogger, msg)
 
-
 // include this file in doxygen documentation
 
 /** @file dj2kutil.h
  *  @brief enumerations, error constants and helper functions for the dcmj2k module
  */
-
 
 /** describes the condition under which a compressed or decompressed image
  *  receives a new SOP instance UID.
@@ -106,7 +102,6 @@ enum JP2K_CompressionBitDepth
    */
   EJ2KBD_force
 };
-
 
 // CONDITION CONSTANTS
 

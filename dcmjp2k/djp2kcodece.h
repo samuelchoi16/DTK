@@ -27,6 +27,7 @@
 #include "dcmtk/dcmdata/dcofsetl.h" /* for struct DcmOffsetList */
 #include "dcmtk/ofstd/ofstring.h"   /* for class OFString */
 #include "djp2kdefine.h"
+#include "djp2kcodecb.h"
 
 class DJP2KRepresentationParameter;
 class DJP2KCodecParameter;
@@ -38,7 +39,7 @@ class DicomImage;
  *  This class only supports compression, it neither implements
  *  decoding nor transcoding.
  */
-class DCMJP2K_EXPORT DJP2KEncoderBase : public DcmCodec
+class DCMJP2K_EXPORT DJP2KEncoderBase : public DJP2KCodecBase
 {
 public:
 
@@ -185,7 +186,7 @@ private:
    */
   virtual E_TransferSyntax supportedTransferSyntax() const = 0;
 
-  /** lossless encoder that compresses the complete pixel cell
+  /** encoder that compresses the complete pixel cell
    *  (very much like the RLE encoder in module dcmdata).
    *  @param pixelData pointer to the uncompressed image data in OW format
    *    and local byte order
@@ -197,7 +198,7 @@ private:
    *  @param compressionRatio compression ratio returned upon success
    *  @return EC_Normal if successful, an error code otherwise.
    */
-  OFCondition losslessRawEncode(
+  OFCondition encode(
     const Uint16 *pixelData,
     const Uint32 length,
     DcmItem *dataset,
@@ -206,7 +207,36 @@ private:
     const DJP2KCodecParameter *djcp,
     double& compressionRatio) const;
 
-  /** lossless encoder that moves Overlays to (60xx,3000) and only
+  /** perform the lossless raw compression of a single frame
+   *  @param framePointer pointer to start of frame
+   *  @param bitsAllocated number of bits allocated per pixel
+   *  @param columns frame width
+   *  @param rows frame height
+   *  @param samplesPerPixel image samples per pixel
+   *  @param planarConfiguration image planar configuration
+   *  @param photometricInterpretation photometric interpretation of the DICOM dataset
+   *  @param pixelSequence object in which the compressed frame is stored
+   *  @param offsetList list of frame offsets updated in this parameter
+   *  @param compressedSize size of compressed frame returned in this parameter
+   *  @param djcp parameters for the codec
+   *  @return EC_Normal if successful, an error code otherwise
+   */
+  OFCondition encodeFrame(const Uint8 *framePointer,
+	Uint16 bitsAllocated,
+	Uint16 columns,
+	Uint16 rows,
+	Uint16 samplesPerPixel,
+	Uint16 pixelRepresentation,
+	Uint16 planarConfiguration,
+	const OFString& photometricInterpretation,
+	const DJP2KRepresentationParameter* djrp,
+	DcmPixelSequence *pixelSequence,
+	DcmOffsetList &offsetList,
+	unsigned long &compressedSize,
+	const DJP2KCodecParameter *djcp) const;
+
+#ifdef	NEVER
+  /** encoder that moves Overlays to (60xx,3000) and only
    *  compresses the stored bits of the pixel cell.
    *  @param pixelData pointer to the uncompressed image data in OW format
    *    and local byte order
@@ -219,7 +249,7 @@ private:
    *  @param nearLosslessDeviation maximum deviation for near-lossless encoding
    *  @return EC_Normal if successful, an error code otherwise.
    */
-  OFCondition losslessCookedEncode(
+  OFCondition encodeWithOverlays(
     const Uint16 * pixelData,
     const Uint32 length,
     DcmItem *dataset,
@@ -238,57 +268,6 @@ private:
     DcmItem *dataset,
     DicomImage& image) const;
 
-  /** create Lossy Image Compression and Lossy Image Compression Ratio.
-   *  @param dataset dataset to be modified
-   *  @param ratio image compression ratio > 1. This is the real effective ratio
-   *    between compressed and uncompressed image,
-   *    i. e. 30 means a 30:1 lossy compression.
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  OFCondition updateLossyCompressionRatio(
-    DcmItem *dataset,
-    double ratio) const;
-
-  /** create Derivation Description.
-   *  @param dataset dataset to be modified
-   *  @param djrp representation parameter passed to encode()
-   *  @param ratio image compression ratio > 1. This is the real effective ratio
-   *    between compressed and uncompressed image,
-   *    i. e. 30 means a 30:1 lossy compression.
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  OFCondition updateDerivationDescription(
-    DcmItem *dataset,
-    const DJP2KRepresentationParameter *djrp,
-    double ratio) const;
-
-  /** perform the lossless raw compression of a single frame
-   *  @param framePointer pointer to start of frame
-   *  @param bitsAllocated number of bits allocated per pixel
-   *  @param columns frame width
-   *  @param rows frame height
-   *  @param samplesPerPixel image samples per pixel
-   *  @param planarConfiguration image planar configuration
-   *  @param photometricInterpretation photometric interpretation of the DICOM dataset
-   *  @param pixelSequence object in which the compressed frame is stored
-   *  @param offsetList list of frame offsets updated in this parameter
-   *  @param compressedSize size of compressed frame returned in this parameter
-   *  @param djcp parameters for the codec
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  OFCondition compressRawFrame(
-    const Uint8 *framePointer,
-    Uint16 bitsAllocated,
-    Uint16 columns,
-    Uint16 rows,
-    Uint16 samplesPerPixel,
-    Uint16 planarConfiguration,
-    const OFString& photometricInterpretation,
-    DcmPixelSequence *pixelSequence,
-    DcmOffsetList &offsetList,
-    unsigned long &compressedSize,
-    const DJP2KCodecParameter *djcp) const;
-
   /** perform the lossless cooked compression of a single frame
    *  @param pixelSequence object in which the compressed frame is stored
    *  @param dimage DicomImage instance used to process frame
@@ -300,7 +279,7 @@ private:
    *  @param nearLosslessDeviation maximum deviation for near-lossless encoding
    *  @return EC_Normal if successful, an error code otherwise
    */
-  OFCondition compressCookedFrame(
+  OFCondition encodeFrameWithOverlays(
     DcmPixelSequence *pixelSequence,
     DicomImage *dimage,
     const OFString& photometricInterpretation,
@@ -309,42 +288,31 @@ private:
     const DJP2KCodecParameter *djcp,
     Uint32 frame,
     Uint16 nearLosslessDeviation) const;
-
-  /** Convert an image from sample interleaved to uninterleaved.
-   *  @param target A buffer where the converted image will be stored
-   *  @param source The image buffer to be converted
-   *  @param components Color components used in the image
-   *  @param width The width of the image
-   *  @param height The height of the image
-   *  @param bitsAllocated The number of bits allocated in the image.
-   *  @return EC_Normal if succesful, an error code otherwise
+#endif
+  /** create Lossy Image Compression and Lossy Image Compression Ratio.
+   *  @param dataset dataset to be modified
+   *  @param ratio image compression ratio > 1. This is the real effective ratio
+   *    between compressed and uncompressed image,
+   *    i. e. 30 means a 30:1 lossy compression.
+   *  @return EC_Normal if successful, an error code otherwise
    */
-  OFCondition convertToUninterleaved(
-    Uint8 *target,
-    const Uint8 *source,
-    Uint16 components,
-    Uint32 width,
-    Uint32 height,
-    Uint16 bitsAllocated) const;
+  OFCondition updateLossyCompressionRatio(
+	DcmItem *dataset,
+	double ratio) const;
 
-  /** Convert an image from uninterleaved to sample interleaved.
-   *  @param target A buffer where the converted image will be stored
-   *  @param source The image buffer to be converted
-   *  @param components Color components used in the image
-   *  @param width The width of the image.
-   *  @param height The height of the image.
-   *  @param bitsAllocated The number of bits allocated in the image.
-   *  @return EC_Normal if succesful, an error code otherwise
+  /** create Derivation Description.
+   *  @param dataset dataset to be modified
+   *  @param djrp representation parameter passed to encode()
+   *  @param ratio image compression ratio > 1. This is the real effective ratio
+   *    between compressed and uncompressed image,
+   *    i. e. 30 means a 30:1 lossy compression.
+   *  @return EC_Normal if successful, an error code otherwise
    */
-  OFCondition convertToSampleInterleaved(
-    Uint8 *target,
-    const Uint8 *source,
-    Uint16 components,
-    Uint32 width,
-    Uint32 height,
-    Uint16 bitsAllocated) const;
+  OFCondition updateDerivationDescription(
+	DcmItem *dataset,
+	const DJP2KRepresentationParameter *djrp,
+	double ratio) const;
 };
-
 
 /** codec class for JPEG 2000 lossless only TS encoding
  */

@@ -25,6 +25,8 @@
 #include "dcmjp2k/djp2kcparam.h"
 #include "dcmjp2k/djp2kcodece.h"
 
+#include "openjpeg.h"
+
 // initialization of static members
 OFBool DJP2KEncoderRegistration::registered_ = OFFalse;
 DJP2KCodecParameter *DJP2KEncoderRegistration::cp_ = NULL;
@@ -32,6 +34,7 @@ DJP2KLosslessEncoder *DJP2KEncoderRegistration::losslessencoder_ = NULL;
 DJP2KLossyEncoder *DJP2KEncoderRegistration::lossyencoder_ = NULL;
 
 void DJP2KEncoderRegistration::registerCodecs(
+	/*
 	OFBool jpls_optionsEnabled,
 	Uint16 jpls_t1,
 	Uint16 jpls_t2,
@@ -39,17 +42,18 @@ void DJP2KEncoderRegistration::registerCodecs(
 	Uint16 jpls_reset,
 	Uint16 jpls_limit,
 	OFBool preferCookedEncoding,
+	*/
 	Uint32 fragmentSize,
 	OFBool createOffsetTable,
 	JP2K_UIDCreation uidCreation,
-	OFBool convertToSC,
-	DJP2KCodecParameter::interleaveMode jplsInterleaveMode)
+	OFBool convertToSC//,
+/*	DJP2KCodecParameter::interleaveMode jplsInterleaveMode*/)
 {
 	if (!registered_)
 	{
-		cp_ = new DJP2KCodecParameter(jpls_optionsEnabled, jpls_t1, jpls_t2, jpls_t3, jpls_reset,
-			jpls_limit, preferCookedEncoding, fragmentSize, createOffsetTable, uidCreation,
-			convertToSC, EJ2KPC_restore, OFFalse, jplsInterleaveMode);
+		cp_ = new DJP2KCodecParameter(/*jpls_optionsEnabled, jpls_t1, jpls_t2, jpls_t3, jpls_reset,
+			jpls_limit, preferCookedEncoding,*/ fragmentSize, createOffsetTable, uidCreation,
+			convertToSC, EJ2KPC_restore, OFFalse/*, jplsInterleaveMode*/);
 
 		if (cp_)
 		{
@@ -83,5 +87,5 @@ void DJP2KEncoderRegistration::cleanup()
 
 OFString DJP2KEncoderRegistration::getLibraryVersionString()
 {
-	return DCMJ2K_VERSION_STRING;
+	return opj_version();
 }

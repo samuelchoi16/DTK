@@ -57,7 +57,7 @@ public:
    */
   static void cleanup();
 
-  /** get version information of the CharLS library.
+  /** get version information of the JPEG 2000 library.
    *  Typical output format: "CharLS, Revision 55020 (modified)"
    *  @return name and version number of the CharLS library
    */

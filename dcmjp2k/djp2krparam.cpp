@@ -23,18 +23,17 @@
 #include "dcmjp2k/djp2krparam.h"
 #include "dcmtk/ofstd/ofstd.h"
 
-DJP2KRepresentationParameter::DJP2KRepresentationParameter(
-	Uint16 nearlosslessDeviation,
+DJP2KRepresentationParameter::DJP2KRepresentationParameter(Uint16 compressionRatio,
 	OFBool losslessProcess)
 	: DcmRepresentationParameter()
-	, nearlosslessDeviation_(nearlosslessDeviation)
+	, compressionRatio_(compressionRatio)
 	, losslessProcess_(losslessProcess)
 {
 }
 
 DJP2KRepresentationParameter::DJP2KRepresentationParameter(const DJP2KRepresentationParameter& arg)
 	: DcmRepresentationParameter(arg)
-	, nearlosslessDeviation_(arg.nearlosslessDeviation_)
+	, compressionRatio_(arg.compressionRatio_)
 	, losslessProcess_(arg.losslessProcess_)
 {
 }
@@ -50,7 +49,7 @@ DcmRepresentationParameter *DJP2KRepresentationParameter::clone() const
 
 const char *DJP2KRepresentationParameter::className() const
 {
-	return "DJLSRepresentationParameter";
+	return "DJP2KRepresentationParameter";
 }
 
 OFBool DJP2KRepresentationParameter::operator==(const DcmRepresentationParameter &arg) const
@@ -64,7 +63,7 @@ OFBool DJP2KRepresentationParameter::operator==(const DcmRepresentationParameter
 			const DJP2KRepresentationParameter& argll = OFreinterpret_cast(const DJP2KRepresentationParameter &, arg);
 			if (losslessProcess_ && argll.losslessProcess_) return OFTrue;
 			else if (losslessProcess_ != argll.losslessProcess_) return OFFalse;
-			else if (nearlosslessDeviation_ != argll.nearlosslessDeviation_) return OFFalse;
+			else if (compressionRatio_ != argll.compressionRatio_) return OFFalse;
 			return OFTrue;
 		}
 	}

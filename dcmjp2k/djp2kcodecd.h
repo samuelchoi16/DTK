@@ -26,6 +26,7 @@
 #include "dcmtk/dcmdata/dccodec.h"  /* for class DcmCodec */
 #include "dcmtk/ofstd/ofstring.h"
 #include "djp2kdefine.h"
+#include "djp2kcodecb.h"
 
 /* forward declaration */
 class DJP2KCodecParameter;
@@ -36,10 +37,9 @@ class DJP2KCodecParameter;
  *  This class only supports decompression, it neither implements
  *  encoding nor transcoding.
  */
-class DCMJP2K_EXPORT DJP2KDecoderBase : public DcmCodec
+class DCMJP2K_EXPORT DJP2KDecoderBase : public DJP2KCodecBase
 {
 public:
-
   /// default constructor
   DJP2KDecoderBase();
 
@@ -256,58 +256,6 @@ private:
    *     an SOI marker followed by SOF, COM or APPn.
    */
   static OFBool isJPEG2000StartOfImage(Uint8 *fragmentData);
-
-  /** converts an RGB or YBR frame with 8 bits/sample from
-   *  color-by-pixel to color-by-plane planar configuration.
-   *  @param imageFrame pointer to image frame, must contain
-   *    at least 3*columns*rows bytes of pixel data.
-   *  @param columns columns
-   *  @param rows rows
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  static OFCondition createPlanarConfiguration1Byte(
-    Uint8 *imageFrame,
-    Uint16 columns,
-    Uint16 rows);
-
-  /** converts an RGB or YBR frame with 16 bits/sample from
-   *  color-by-pixel to color-by-plane planar configuration.
-   *  @param imageFrame pointer to image frame, must contain
-   *    at least 3*columns*rows words of pixel data.
-   *  @param columns columns
-   *  @param rows rows
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  static OFCondition createPlanarConfiguration1Word(
-    Uint16 *imageFrame,
-    Uint16 columns,
-    Uint16 rows);
-
-  /** converts an RGB or YBR frame with 8 bits/sample from
-   *  color-by-plane to color-by-pixel planar configuration.
-   *  @param imageFrame pointer to image frame, must contain
-   *    at least 3*columns*rows bytes of pixel data.
-   *  @param columns columns
-   *  @param rows rows
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  static OFCondition createPlanarConfiguration0Byte(
-    Uint8 *imageFrame,
-    Uint16 columns,
-    Uint16 rows);
-
-  /** converts an RGB or YBR frame with 16 bits/sample from
-   *  color-by-plane to color-by-pixel planar configuration.
-   *  @param imageFrame pointer to image frame, must contain
-   *    at least 3*columns*rows words of pixel data.
-   *  @param columns columns
-   *  @param rows rows
-   *  @return EC_Normal if successful, an error code otherwise
-   */
-  static OFCondition createPlanarConfiguration0Word(
-    Uint16 *imageFrame,
-    Uint16 columns,
-    Uint16 rows);
 };
 
 /** codec class for JPEG 2000 lossless only TS decoding
