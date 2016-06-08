@@ -218,12 +218,10 @@ Library.
 #include <QString>
 #include <QDateTime>
 #include <QMutex>
+#include <QtXml>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-#define	QSTR_TO_CSTR(s)					((s).toStdString().c_str())
-*/
 #define	QSTR_TO_CSTR(s)					((s).toLocal8Bit().constData())
 #define	QSTR_TO_DSTR(s)					(dcm::String(QSTR_TO_CSTR((s))))
 #define	DSTR_TO_CSTR(s)					((s).c_str())
@@ -2415,6 +2413,32 @@ namespace dcm {
 		 */
 		Status getTagList(TagList& tagList) const;
 
+		virtual bool isValidTag(const DcmTagKey& tag);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportToXML(const String xmlFilename) const;
+		Status exportToXML(const QString xmlFilename) const;
+		Status exportToXML(QDomElement& parentElement) const;
+		virtual Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
+
+		Status importFromXML(const String xmlFilename);
+		Status importFromXML(const QString xmlFilename);
+		Status importFromXML(const QDomElement& parentElement);
+		virtual Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportToJSON(const String jsonFilename) const;
+		Status exportToJSON(const QString jsonFilename) const;
+		Status exportToJSON(QJsonObject& jsonObject) const;
+		virtual Status exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const;
+
+		Status importFromJSON(const String jsonFilename);
+		Status importFromJSON(const QString jsonFilename);
+		Status importFromJSON(const QJsonObject& jsonObject);
+		virtual Status importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue);
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		/**
@@ -2633,6 +2657,18 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		bool isValidTag(const DcmTagKey& tag);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
+		Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
+
+		Status exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const;
+		Status importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		/**
 		 * @brief deidentify de-identifies patient identity according to DICOM PS 3.15 Attribute Confidentiality Profiles
 		 * @return status
@@ -2747,6 +2783,10 @@ namespace dcm {
 		 * @return
 		 */
 		MetaInfo& operator=(const MetaInfo& metaInfo);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		bool isValidTag(const DcmTagKey& tag);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2886,6 +2926,26 @@ namespace dcm {
 		 * @brief operator DcmFileFormat *
 		 */
 		operator DcmFileFormat*(void) const;
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportToXML(const String xmlFilename) const;
+		Status exportToXML(const QString xmlFilename) const;
+		Status exportToXML(QDomElement& parentElement) const;
+
+		Status importFromXML(const String xmlFilename);
+		Status importFromXML(const QString xmlFilename);
+		Status importFromXML(const QDomElement& parentElement);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Status exportToJSON(const String jsonFilename) const;
+		Status exportToJSON(const QString jsonFilename) const;
+		Status exportToJSON(QJsonObject& jsonObject) const;
+
+		Status importFromJSON(const String jsonFilename);
+		Status importFromJSON(const QString jsonFilename);
+		Status importFromJSON(const QJsonObject& jsonObject);
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////

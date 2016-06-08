@@ -165,3 +165,169 @@ File::operator DcmFileFormat*(void) const
 {
 	return _dcmFileFormatPtr;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status File::exportToXML(const String xmlFilename) const
+{
+	return exportToXML(DSTR_TO_QSTR(xmlFilename));
+}
+
+Status File::exportToXML(const QString xmlFilename) const
+{
+	QDomDocument xmlDocument;
+	QDomElement xmlElement = xmlDocument.createElement(L_NATIVE_DICOM_MODEL);
+	Status stat = exportToXML(xmlElement);
+	if (stat.bad()) {
+		return stat;
+	}
+	xmlDocument.appendChild(xmlElement);
+
+	QByteArray xmlByteArray = xmlDocument.toByteArray(4);
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::WriteOnly)) {
+		xmlFile.write(xmlByteArray);
+		xmlFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status File::exportToXML(QDomElement& parentElement) const
+{
+	Status stat;
+
+	stat = _metaInfo.exportToXML(parentElement);
+	if (stat.bad())
+		return stat;
+
+	stat = _dataset.exportToXML(parentElement);
+	if (stat.bad())
+		return stat;
+
+	return EC_Normal;
+}
+
+Status File::importFromXML(const String xmlFilename)
+{
+	return importFromXML(DSTR_TO_QSTR(xmlFilename));
+}
+
+Status File::importFromXML(const QString xmlFilename)
+{
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::ReadOnly)) {
+		QDomDocument xmlDocument;
+		xmlDocument.setContent(&xmlFile);
+		xmlFile.close();
+
+		return importFromXML(xmlDocument.documentElement());
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status File::importFromXML(const QDomElement& parentElement)
+{
+	Status stat;
+
+	stat = _metaInfo.importFromXML(parentElement);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	String transferSyntaxUID;
+	stat = _metaInfo.getString(DCM_TransferSyntaxUID, transferSyntaxUID);
+	TransferSyntax transferSyntax = DcmXfer(transferSyntaxUID.c_str()).getXfer();
+	stat = _dataset.setTransferSyntax(transferSyntax);
+
+	stat = _dataset.importFromXML(parentElement);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	return EC_Normal;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status File::exportToJSON(const String jsonFilename) const
+{
+	return exportToJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status File::exportToJSON(const QString jsonFilename) const
+{
+	QJsonObject jsonObject;
+	Status stat = exportToJSON(jsonObject);
+
+	QJsonDocument jsonDocument(jsonObject);
+	QByteArray jsonByteArray = jsonDocument.toJson();
+
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::WriteOnly)) {
+		jsonFile.write(jsonByteArray);
+		jsonFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status File::exportToJSON(QJsonObject& jsonObject) const
+{
+	Status stat;
+
+	stat = _metaInfo.exportToJSON(jsonObject);
+	if (stat.bad())
+		return stat;
+
+	stat = _dataset.exportToJSON(jsonObject);
+	if (stat.bad())
+		return stat;
+
+	return EC_Normal;
+}
+
+Status File::importFromJSON(const String jsonFilename)
+{
+	return importFromJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status File::importFromJSON(const QString jsonFilename)
+{
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::ReadOnly)) {
+		QByteArray jsonByteArray = jsonFile.readAll();
+		jsonFile.close();
+
+		QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonByteArray);
+		QJsonObject jsonObject = jsonDocument.object();
+		return importFromJSON(jsonObject);
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status File::importFromJSON(const QJsonObject& jsonObject)
+{
+	Status stat;
+
+	stat = _metaInfo.importFromJSON(jsonObject);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	String transferSyntaxUID;
+	stat = _metaInfo.getString(DCM_TransferSyntaxUID, transferSyntaxUID);
+	TransferSyntax transferSyntax = DcmXfer(transferSyntaxUID.c_str()).getXfer();
+	stat = _dataset.setTransferSyntax(transferSyntax);
+
+	stat = _dataset.importFromJSON(jsonObject);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	return EC_Normal;
+}

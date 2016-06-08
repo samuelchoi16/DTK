@@ -38,8 +38,9 @@ Item::Item(DcmItem* dcmItemPtr)
 	int nNLS;
 	Status dcmStat;
 	dcmStat = getNLS(nNLS);
-	if (nNLS > 0)
+	if (nNLS > 0) {
 		dcmStat = setAutoNLS(nNLS);		// FIXME?
+	}
 }
 
 Item::Item(const Item& dcmItem)
@@ -55,8 +56,7 @@ Item::Item(const Item& dcmItem)
 
 Item::~Item(void)
 {
-	if (_created)
-	{
+	if (_created) {
 		delete _dcmItem;
 		_dcmItem = NULL;
 	}
@@ -1041,6 +1041,660 @@ Status Item::getTagList(TagList& tagList) const
 		tagList.push_back(tag);
 	}
 
+	return EC_Normal;
+}
+
+bool Item::isValidTag(const DcmTagKey& tag)
+{
+	Q_UNUSED(tag);
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Item::exportToXML(const String xmlFilename) const
+{
+	return exportToXML(DSTR_TO_QSTR(xmlFilename));
+}
+
+Status Item::exportToXML(const QString xmlFilename) const
+{
+	QDomDocument xmlDocument;
+	QDomElement xmlElement = xmlDocument.createElement(L_NATIVE_DICOM_MODEL);
+	Status stat = exportToXML(xmlElement);
+	if (stat.bad()) {
+		return stat;
+	}
+	xmlDocument.appendChild(xmlElement);
+
+	QByteArray xmlByteArray = xmlDocument.toByteArray(4);
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::WriteOnly)) {
+		xmlFile.write(xmlByteArray);
+		xmlFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::exportToXML(QDomElement& parentElement) const
+{
+	// TODO
+	Status stat;
+
+	TagList tagList;
+	stat = getTagList(tagList);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	for(Tag tag : tagList) {
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+		if (tag.isPrivate()) {
+			// TODO: we skip private tags.
+			continue;
+		}
+
+		char attrTag[100];
+		sprintf(attrTag, "%04X%04X", tag.getGroup(), tag.getElement());
+		QString attrVR = tag.isUnknownVR() ? "UN" : tag.getVR().getVRName();
+
+		QDomElement dcmElement = parentElement.ownerDocument().createElement(L_DICOM_ATTRIBUTE);
+		dcmElement.setAttribute(L_TAG, attrTag);
+		dcmElement.setAttribute(L_KEYWORD, tag.getTagName());
+		dcmElement.setAttribute(L_VR, attrVR);
+
+		DcmEVR vr = tag.getEVR();
+		switch(vr) {
+		case EVR_OB :
+		case EVR_OF :
+		case EVR_OW :
+		case EVR_UN :
+		case EVR_UNKNOWN :
+		case EVR_UNKNOWN2B :
+			{
+				if (tag == DCM_PixelData) {
+					stat = exportPixelDataToXML(tag, dcmElement);
+				} else {
+					const Uint8* byteValue;
+					Ulong length;
+					stat = getValue(tag, byteValue, &length);
+					if (length > 0) {
+						QByteArray byteArray((const char*) byteValue, (int) length);
+						QByteArray base64Binary = byteArray.toBase64();
+
+						QDomElement binaryElement = dcmElement.ownerDocument().createElement(L_INLINE_BINARY);
+						binaryElement.appendChild(dcmElement.ownerDocument().createTextNode(base64Binary.constData()));
+						dcmElement.appendChild(binaryElement);
+					}
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				Sint32 itemCount = getItemCount(tag);
+				for(int i = 0; i < itemCount; i++) {
+					Item item;
+					stat = getItem(tag, item, i);
+
+					QDomElement itemElement = dcmElement.ownerDocument().createElement(L_ITEM);
+					itemElement.setAttribute(L_NUMBER, i+1);
+					stat = item.exportToXML(itemElement);
+					if (stat.good()) {
+						dcmElement.appendChild(itemElement);
+					}
+				}
+			}
+			break;
+		case EVR_PN :
+			{
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+
+					QDomElement pnameElement = dcmElement.ownerDocument().createElement(L_PERSON_NAME);
+					pnameElement.setAttribute(L_NUMBER, i+1);
+					QStringList subValueList = value.split("=");
+					if (subValueList.size() > 0) {
+						QDomElement alphabeticName = dcmElement.ownerDocument().createElement(L_ALPHABETIC);
+						alphabeticName.appendChild(dcmElement.ownerDocument().createTextNode(subValueList.at(0)));
+						pnameElement.appendChild(alphabeticName);
+					}
+					if (subValueList.size() > 1) {
+						QDomElement ideographicName = dcmElement.ownerDocument().createElement(L_IDEOGRAPHIC);
+						ideographicName.appendChild(dcmElement.ownerDocument().createTextNode(subValueList.at(1)));
+						pnameElement.appendChild(ideographicName);
+					}
+					if (subValueList.size() > 2) {
+						QDomElement phoneticName = dcmElement.ownerDocument().createElement(L_PHONETIC);
+						phoneticName.appendChild(dcmElement.ownerDocument().createTextNode(subValueList.at(2)));
+						pnameElement.appendChild(phoneticName);
+					}
+					dcmElement.appendChild(pnameElement);
+				}
+			}
+			break;
+		default :
+			{
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+
+					QDomElement valueElement = dcmElement.ownerDocument().createElement(L_VALUE);
+					valueElement.setAttribute(L_NUMBER, i+1);
+					valueElement.appendChild(dcmElement.ownerDocument().createTextNode(value));
+					dcmElement.appendChild(valueElement);
+				}
+			}
+			break;
+		}
+
+		parentElement.appendChild(dcmElement);
+	}
+
+	return EC_Normal;
+}
+
+Status Item::exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const
+{
+	Q_UNUSED(tag);
+	Q_UNUSED(dcmElement);
+	return EC_Normal;
+}
+
+Status Item::importFromXML(const String xmlFilename)
+{
+	return importFromXML(DSTR_TO_QSTR(xmlFilename));
+}
+
+Status Item::importFromXML(const QString xmlFilename)
+{
+	QFile xmlFile(xmlFilename);
+	if (xmlFile.open(QIODevice::ReadOnly)) {
+		QDomDocument xmlDocument;
+		xmlDocument.setContent(&xmlFile);
+		xmlFile.close();
+
+		return importFromXML(xmlDocument.documentElement());
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::importFromXML(const QDomElement& parentElement)
+{
+	Status stat;
+
+	for(QDomElement dcmElement = parentElement.firstChildElement(L_DICOM_ATTRIBUTE); !dcmElement.isNull(); dcmElement = dcmElement.nextSiblingElement(L_DICOM_ATTRIBUTE)) {
+		QString attrKey = dcmElement.attribute(L_TAG);
+		bool tagParsed;
+		Uint32 tagGE = attrKey.toInt(&tagParsed, 16);
+		if (!tagParsed) {
+			continue;
+		}
+		Uint16 group = (tagGE & 0xFFFF0000) >> 16;
+		Uint16 element = (tagGE & 0x0000FFFF);
+		Tag tag(group, element);
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+
+		if (!isValidTag(tag)) {
+			continue;
+		}
+
+		QString attrVR = dcmElement.attribute(L_VR);
+		DcmVR vr(QSTR_TO_CSTR(attrVR));
+		tag.setVR(vr);
+
+		if (tag.isPrivate() && (tag.getElement() & 0xFF00)) {
+			Uint16 privateCreatorElement = (tag.getElement() & 0xFF00) >> 8;
+			Tag privateCreatorTag(group, privateCreatorElement);
+			QString privateCreator;
+			stat = getString(privateCreatorTag, privateCreator);
+			tag.setPrivateCreator(QSTR_TO_CSTR(privateCreator));
+		}
+
+		switch(vr.getEVR()) {
+		case EVR_OB :
+		case EVR_UN :
+			{
+				QDomElement binaryElement = dcmElement.firstChildElement(L_INLINE_BINARY);
+				if (!binaryElement.isNull()) {
+					QByteArray base64Binary;
+					base64Binary.append(binaryElement.text());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint8*) byteArray.constData(), (Uint32) byteArray.size());
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromXML(tag, dcmElement);
+				}
+			}
+			break;
+		case EVR_OF :
+			{
+				QDomElement binaryElement = dcmElement.firstChildElement(L_INLINE_BINARY);
+				if (!binaryElement.isNull()) {
+					QByteArray base64Binary;
+					base64Binary.append(binaryElement.text());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Float32*) byteArray.constData(), (Uint32) byteArray.size()/4);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromXML(tag, dcmElement);
+				}
+			}
+			break;
+		case EVR_OW :
+			{
+				QDomElement binaryElement = dcmElement.firstChildElement(L_INLINE_BINARY);
+				if (!binaryElement.isNull()) {
+					QByteArray base64Binary;
+					base64Binary.append(binaryElement.text());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint16*) byteArray.constData(), (Uint32) byteArray.size()/2);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromXML(tag, dcmElement);
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				for(QDomElement itemElement = dcmElement.firstChildElement(L_ITEM); !itemElement.isNull(); itemElement = itemElement.nextSiblingElement(L_ITEM)) {
+					Item item;
+					stat = putItem(tag, item);
+					stat = item.importFromXML(itemElement);
+				}
+			}
+			break;
+		case EVR_PN :
+			{
+				QString values;
+				int i = 0;
+				for(QDomElement pnameElement = dcmElement.firstChildElement(L_PERSON_NAME); !pnameElement.isNull(); pnameElement = pnameElement.nextSiblingElement(L_PERSON_NAME)) {
+					QString alphabetic = pnameElement.firstChildElement(L_ALPHABETIC).text();
+					QString ideographic = pnameElement.firstChildElement(L_IDEOGRAPHIC).text();
+					QString phonetic = pnameElement.firstChildElement(L_PHONETIC).text();
+					QString pname = alphabetic + "=" + ideographic + "=" + phonetic;
+					if (i++ == 0) {
+						values = pname;
+					} else {
+						values += "\\" + pname;
+					}
+				}
+				stat = putString(tag, values);
+			}
+			break;
+		default :
+			{
+				QString values;
+				int i = 0;
+				for(QDomElement valueElement = dcmElement.firstChildElement(L_VALUE); !valueElement.isNull(); valueElement = valueElement.nextSiblingElement(L_VALUE)) {
+					QString valueComponent = valueElement.text();
+					if (i++ == 0) {
+						values = valueComponent;
+					} else {
+						values += "\\" + valueComponent;
+					}
+				}
+				stat = putString(tag, values);
+
+				if (tag == DCM_SpecificCharacterSet) {
+					int nls;
+					if (getNLS(nls).good()) {
+						setAutoNLS(nls);
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return EC_Normal;
+}
+
+Status Item::importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement)
+{
+	Q_UNUSED(tag);
+	Q_UNUSED(dcmElement);
+	return EC_Normal;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Status Item::exportToJSON(const String jsonFilename) const
+{
+	return exportToJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status Item::exportToJSON(const QString jsonFilename) const
+{
+	QJsonObject jsonObject;
+	Status stat = exportToJSON(jsonObject);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	QJsonDocument jsonDocument(jsonObject);
+	QByteArray jsonByteArray = jsonDocument.toJson();
+
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::WriteOnly)) {
+		jsonFile.write(jsonByteArray);
+		jsonFile.close();
+		return EC_Normal;
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::exportToJSON(QJsonObject& jsonObject) const
+{
+	Status stat;
+
+	TagList tagList;
+	stat = getTagList(tagList);
+	if (stat.bad()) {
+		return stat;
+	}
+
+	for(Tag tag : tagList) {
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+		if (tag.isPrivate()) {
+			// TODO: we skip private tags.
+			continue;
+		}
+
+		char attrTag[100];
+		sprintf(attrTag, "%04X%04X", tag.getGroup(), tag.getElement());
+
+		QJsonObject attrValue;
+		QString attrVR = tag.isUnknownVR() ? "UN" : tag.getVR().getVRName();
+		attrValue.insert(L_VR, attrVR);
+
+		DcmEVR vr = tag.getEVR();
+		switch(vr) {
+		case EVR_OB :
+		case EVR_OF :
+		case EVR_OW :
+		case EVR_UN :
+		case EVR_UNKNOWN :
+		case EVR_UNKNOWN2B :
+			{
+				if (tag == DCM_PixelData) {
+					stat = exportPixelDataToJSON(tag, attrValue);
+				} else {
+					const Uint8* byteValue;
+					Ulong length;
+					stat = getValue(tag, byteValue, &length);
+					if (length > 0) {
+						QByteArray byteArray((const char*) byteValue, (int) length);
+						QByteArray base64Binary = byteArray.toBase64();
+						attrValue.insert(L_INLINE_BINARY, base64Binary.constData());
+					}
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				QJsonArray seqArray;
+				Sint32 itemCount = getItemCount(tag);
+				for(int i = 0; i < itemCount; i++) {
+					Item item;
+					stat = getItem(tag, item, i);
+
+					QJsonObject itemObject;
+					stat = item.exportToJSON(itemObject);
+					if (stat.good()) {
+						seqArray.append(itemObject);
+					}
+				}
+				if (seqArray.size() > 0) {
+					attrValue.insert(L_VALUE, seqArray);
+				}
+		}
+			break;
+		case EVR_PN :
+			{
+				QJsonArray valueArray;
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+					QJsonObject pnameObject;
+					QStringList subValueList = value.split("=");
+					if (subValueList.size() > 0) {
+						pnameObject.insert(L_ALPHABETIC, subValueList.at(0));
+					}
+					if (subValueList.size() > 1) {
+						pnameObject.insert(L_IDEOGRAPHIC, subValueList.at(1));
+					}
+					if (subValueList.size() > 2) {
+						pnameObject.insert(L_PHONETIC, subValueList.at(2));
+					}
+					valueArray.append(pnameObject);
+				}
+				if (valueArray.size() > 0) {
+					attrValue.insert(L_VALUE, valueArray);
+				}
+			}
+			break;
+		default :
+			{
+				QJsonArray valueArray;
+				Sint32 valueCount = getVM(tag);
+				for(int i = 0; i < valueCount; i++) {
+					QString value;
+					stat = getString(tag, value, i);
+					valueArray.append(value);
+				}
+				if (valueArray.size() > 0) {
+					attrValue.insert(L_VALUE, valueArray);
+				}
+			}
+			break;
+		}
+
+		jsonObject.insert(attrTag, attrValue);
+	}
+
+	return EC_Normal;
+}
+
+Status Item::exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const
+{
+	Q_UNUSED(tag);
+	Q_UNUSED(attrValue);
+	return EC_Normal;
+}
+
+Status Item::importFromJSON(const String jsonFilename)
+{
+	return importFromJSON(DSTR_TO_QSTR(jsonFilename));
+}
+
+Status Item::importFromJSON(const QString jsonFilename)
+{
+	QFile jsonFile(jsonFilename);
+	if (jsonFile.open(QIODevice::ReadOnly)) {
+		QByteArray jsonByteArray = jsonFile.readAll();
+		jsonFile.close();
+
+		QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonByteArray);
+		QJsonObject jsonObject = jsonDocument.object();
+		return importFromJSON(jsonObject);
+	} else {
+		return EC_InvalidFilename;
+	}
+}
+
+Status Item::importFromJSON(const QJsonObject& jsonObject)
+{
+	Status stat;
+
+	for(QJsonObject::ConstIterator it = jsonObject.constBegin(); it != jsonObject.constEnd(); it++) {
+		QString attrKey = it.key();
+		if (!it.value().isObject()) {
+			continue;
+		}
+
+		bool tagParsed;
+		Uint32 tagGE = attrKey.toInt(&tagParsed, 16);
+		if (!tagParsed) {
+			continue;
+		}
+		Uint16 group = (tagGE & 0xFFFF0000) >> 16;
+		Uint16 element = (tagGE & 0x0000FFFF);
+		Tag tag(group, element);
+		if (tag.getElement() == 0) {
+			// group length
+			continue;
+		}
+		if (tag.isPrivate()) {
+			// TODO: we skip private tags.
+			continue;
+		}
+
+		if (!isValidTag(tag)) {
+			continue;
+		}
+
+		QJsonObject attrValue = it.value().toObject();
+		QString attrVR = attrValue.value("vr").toString();
+		DcmVR vr(QSTR_TO_CSTR(attrVR));
+		tag.setVR(vr);
+
+		if (tag.isPrivate() && (tag.getElement() & 0xFF00)) {
+			Uint16 privateCreatorElement = (tag.getElement() & 0xFF00) >> 8;
+			Tag privateCreatorTag(group, privateCreatorElement);
+			QString privateCreator;
+			stat = getString(privateCreatorTag, privateCreator);
+			tag.setPrivateCreator(QSTR_TO_CSTR(privateCreator));
+		}
+
+		switch(vr.getEVR()) {
+		case EVR_OB :
+		case EVR_UN :
+			{
+				QJsonValue inlineBinary = attrValue.value(L_INLINE_BINARY);
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint8*) byteArray.constData(), (Uint32) byteArray.size());
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_OF :
+			{
+				QJsonValue inlineBinary = attrValue.value(L_INLINE_BINARY);
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Float32*) byteArray.constData(), (Uint32) byteArray.size()/4);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_OW :
+			{
+				QJsonValue inlineBinary = attrValue.value(L_INLINE_BINARY);
+				if (inlineBinary.isString()) {
+					QByteArray base64Binary;
+					base64Binary.append(inlineBinary.toString());
+					QByteArray byteArray = QByteArray::fromBase64(base64Binary);
+					stat = putValue(tag, (const Uint16*) byteArray.constData(), (Uint32) byteArray.size()/2);
+				} else if (tag == DCM_PixelData) {
+					stat = importPixelDataFromJSON(tag, attrValue);
+				}
+			}
+			break;
+		case EVR_SQ :
+			{
+				QJsonArray seqArray = attrValue.value(L_VALUE).toArray();
+				for(int i = 0; i < seqArray.size(); i++) {
+					if (!seqArray.at(i).isObject()) {
+						continue;
+					}
+
+					QJsonObject itemObject = seqArray.at(i).toObject();
+					Item item;
+					stat = putItem(tag, item);
+					stat = item.importFromJSON(itemObject);
+				}
+			}
+			break;
+		case EVR_PN :
+			{
+				QJsonArray valueArray = attrValue.value(L_VALUE).toArray();
+				QString values;
+				for(int i = 0; i < valueArray.size(); i++) {
+					if (!valueArray.at(i).isObject()) {
+						continue;
+					}
+
+					QJsonObject pnameObject = valueArray.at(i).toObject();
+					QString alphabetic = pnameObject.value(L_ALPHABETIC).toString();
+					QString ideographic = pnameObject.value(L_IDEOGRAPHIC).toString();
+					QString phonetic = pnameObject.value(L_PHONETIC).toString();
+					QString pname = alphabetic + "=" + ideographic + "=" + phonetic;
+					if (i == 0) {
+						values = pname;
+					} else {
+						values += "\\" + pname;
+					}
+				}
+				stat = putString(tag, values);
+			}
+			break;
+		default :
+			{
+				QJsonArray valueArray = attrValue.value(L_VALUE).toArray();
+				QString values;
+				for(int i = 0; i < valueArray.size(); i++) {
+					if (!valueArray.at(i).isString()) {
+						continue;
+					}
+
+					QString valueComponent = valueArray.at(i).toString();
+					if (i == 0) {
+						values = valueComponent;
+					} else {
+						values += "\\" + valueComponent;
+					}
+				}
+				stat = putString(tag, values);
+
+				if (tag == DCM_SpecificCharacterSet) {
+					int nls;
+					if (getNLS(nls).good()) {
+						setAutoNLS(nls);
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return EC_Normal;
+}
+
+Status Item::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue)
+{
+	Q_UNUSED(tag);
+	Q_UNUSED(attrValue);
 	return EC_Normal;
 }
 

@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT		+= xml
+QT		-= gui
 
 TARGET = DTK
 VERSION = 1.2.0
@@ -30,11 +31,29 @@ SOURCES += \
     NLS.cpp \
     DirRecord.cpp \
     Dir.cpp \
-    ServiceList.cpp
+    ServiceList.cpp \
+    dcmjp2k/djp2kcodecd.cpp \
+    dcmjp2k/djp2kcodece.cpp \
+    dcmjp2k/djp2kcparam.cpp \
+    dcmjp2k/djp2kdecode.cpp \
+    dcmjp2k/djp2kencode.cpp \
+    dcmjp2k/djp2krparam.cpp \
+    dcmjp2k/djp2kutils.cpp \
+    dcmjp2k/djp2kcodecb.cpp
 
 HEADERS += DTK.h\
     DTKinternal.h \
-    DTK_global.h
+    DTK_global.h \
+    dcmjp2k/djp2kcodecd.h \
+    dcmjp2k/djp2kcodece.h \
+    dcmjp2k/djp2kcparam.h \
+    dcmjp2k/djp2kdecode.h \
+    dcmjp2k/djp2kdefine.h \
+    dcmjp2k/djp2kencode.h \
+    dcmjp2k/djp2kerror.h \
+    dcmjp2k/djp2krparam.h \
+    dcmjp2k/djp2kutil.h \
+    dcmjp2k/djp2kcodecb.h
 
 macx {
 	DEFINES += DCMTK_LOG4CPLUS_HAVE_C99_VARIADIC_MACROS
@@ -46,16 +65,16 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.1.0-macos/lib_debug -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20160216-macos/include $$PWD/../lib/openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20160216-macos/lib_debug -ldcmtk -L$$PWD/../lib/openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-macos/include
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/DTK-1.1.0-macos/lib -ldcmtk
+		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20160216-macos/include $$PWD/../lib/openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20160216-macos/lib -ldcmtk -L$$PWD/../lib/openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
 	}
 }
 unix:!macx {
@@ -66,11 +85,11 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-armv7/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib_debug -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-linux/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib_debug -ldcmtk
 		}
 	} else {
 		target.path = /usr/lib
@@ -79,22 +98,22 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-armv7/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.1.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.1.0-linux/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib -ldcmtk
 		}
 	}
 }
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
 	}
 }
