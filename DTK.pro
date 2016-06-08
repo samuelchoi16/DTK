@@ -7,7 +7,7 @@
 QT       -= gui
 
 TARGET = DTK
-VERSION = 1.1.0
+VERSION = 1.2.0
 TEMPLATE = lib
 
 DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
@@ -90,11 +90,11 @@ unix:!macx {
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.1.0-win32\include"
-		LIBS += -L"$$PWD\..\lib\DTK-1.1.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib
 	}
 }

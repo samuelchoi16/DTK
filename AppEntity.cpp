@@ -30,8 +30,9 @@ AppEntity::AppEntity(void)
 
 AppEntity::~AppEntity(void)
 {
-	if (_ascNetwork)
+	if (_ascNetwork) {
 		exit();
+	}
 }
 
 Status AppEntity::init(const String& aetitle, const T_ASC_NetworkRole ascRole, const int listenerPort, const int timeout)

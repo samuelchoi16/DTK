@@ -293,6 +293,8 @@ void AssociationListenerWorker::run(void)
 	_masterListener->_counter--;
 	_masterListener->_masterMutex.unlock();
 
+	close();
+
 	delete this;
 
 	DCMTK_LOG4CPLUS_DEBUG(_logger, "run: ended.");

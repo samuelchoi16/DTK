@@ -43,7 +43,7 @@
 using namespace dcm;
 
 #ifdef  WIN32
-#define DTK_MAX(a, b)                       max(a, b)
+#define DTK_MAX(a, b)                       std::max(a, b)
 #define	DTK_SLEEP(n)						Sleep((n))
 #else
 #define DTK_MAX(a, b)                       std::max(a, b)
