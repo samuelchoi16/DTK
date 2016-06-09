@@ -418,8 +418,7 @@ OFCondition DJP2KEncoderBase::encodeFrame(
 	opj_image_t * l_image = NULL;
 	opj_image_cmptparm_t l_params [NUM_COMPS_MAX];
 	opj_stream_t * l_stream = NULL;
-	char output_file[1000];
-	tmpnam_s(output_file, sizeof(output_file)-1);
+	char* output_file = tmpnam(NULL);
 
 	opj_image_cmptparm_t * l_current_param_ptr;
 	OPJ_UINT32 i;
