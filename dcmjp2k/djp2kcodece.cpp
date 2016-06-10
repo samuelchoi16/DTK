@@ -57,6 +57,8 @@
 // JPEG 2000 library (OpenJPEG) includes
 #include "openjpeg.h"
 
+#include <QTemporaryFile>
+
 BEGIN_EXTERN_C
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>			 /* for O_RDONLY */
@@ -342,7 +344,7 @@ OFCondition DJP2KEncoderBase::encode(
 		for (unsigned long i = 0; (i<frameCount) && (result.good()); ++i) {
 			// compress frame
 			DCMJP2K_DEBUG("JPEG 2000 encoder processes frame " << (i + 1) << " of " << frameCount);
-			result = encodeFrame(framePointer, bitsAllocated, columns, rows,
+			result = encodeFrame(framePointer, bitsAllocated, bitsStored, columns, rows,
 				samplesPerPixel, pixelRepresentation, planarConfiguration, photometricInterpretation,
 				djrp, pixelSequence, offsetList, compressedFrameSize, djcp);
 
@@ -396,6 +398,7 @@ static void info_callback(const char *msg, void *client_data) {
 OFCondition DJP2KEncoderBase::encodeFrame(
 	const Uint8 *framePointer,
 	Uint16 bitsAllocated,
+	Uint16 bitsStored,
 	Uint16 width,
 	Uint16 height,
 	Uint16 samplesPerPixel,
@@ -418,7 +421,14 @@ OFCondition DJP2KEncoderBase::encodeFrame(
 	opj_image_t * l_image = NULL;
 	opj_image_cmptparm_t l_params [NUM_COMPS_MAX];
 	opj_stream_t * l_stream = NULL;
-	char* output_file = tmpnam(NULL);
+
+	QTemporaryFile tempFile;
+	if (!tempFile.open()) {
+		return EC_CouldNotCreateTemporaryFile;
+	}
+	QByteArray tempFilename = tempFile.fileName().toLocal8Bit();
+	const char* output_file = tempFilename.constData();
+	tempFile.close();
 
 	opj_image_cmptparm_t * l_current_param_ptr;
 	OPJ_UINT32 i;
@@ -492,7 +502,7 @@ OFCondition DJP2KEncoderBase::encodeFrame(
 		l_current_param_ptr->x0 = 0;
 		l_current_param_ptr->y0 = 0;
 
-		l_current_param_ptr->prec = bitsAllocated;
+		l_current_param_ptr->prec = bitsStored;
 		l_current_param_ptr->bpp = bitsAllocated;
 		l_current_param_ptr->sgnd = pixelRepresentation;
 

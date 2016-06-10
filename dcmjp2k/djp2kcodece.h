@@ -222,7 +222,7 @@ private:
    *  @return EC_Normal if successful, an error code otherwise
    */
   OFCondition encodeFrame(const Uint8 *framePointer,
-	Uint16 bitsAllocated,
+	Uint16 bitsAllocated, Uint16 bitsStored,
 	Uint16 columns,
 	Uint16 rows,
 	Uint16 samplesPerPixel,
