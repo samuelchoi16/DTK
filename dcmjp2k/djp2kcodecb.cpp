@@ -1,17 +1,18 @@
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcerror.h"
 #include "dcmjp2k/djp2kcodecb.h"
+#include "dcmjp2k/djp2kinternal.h"
 
-DJP2KCodecBase::DJP2KCodecBase()
+CodecBase::CodecBase()
 	: DcmCodec()
 {
 }
 
-DJP2KCodecBase::~DJP2KCodecBase()
+CodecBase::~CodecBase()
 {
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration1(
+OFCondition CodecBase::convertToPlanarConfiguration1(
 	Uint8 *target,
 	const Uint8 *source,
 	Uint16 components,
@@ -34,7 +35,7 @@ OFCondition DJP2KCodecBase::convertToPlanarConfiguration1(
 	return EC_Normal;
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration0(
+OFCondition CodecBase::convertToPlanarConfiguration0(
 	Uint8 *target,
 	const Uint8 *source,
 	Uint16 components,
@@ -57,7 +58,7 @@ OFCondition DJP2KCodecBase::convertToPlanarConfiguration0(
 	return EC_Normal;
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration1Byte(
+OFCondition CodecBase::convertToPlanarConfiguration1Byte(
 	Uint8 *imageFrame,
 	Uint16 columns,
 	Uint16 rows)
@@ -87,7 +88,7 @@ OFCondition DJP2KCodecBase::convertToPlanarConfiguration1Byte(
 	return EC_Normal;
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration1Word(
+OFCondition CodecBase::convertToPlanarConfiguration1Word(
 	Uint16 *imageFrame,
 	Uint16 columns,
 	Uint16 rows)
@@ -117,7 +118,7 @@ OFCondition DJP2KCodecBase::convertToPlanarConfiguration1Word(
 	return EC_Normal;
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration0Byte(
+OFCondition CodecBase::convertToPlanarConfiguration0Byte(
 	Uint8 *imageFrame,
 	Uint16 columns,
 	Uint16 rows)
@@ -147,7 +148,7 @@ OFCondition DJP2KCodecBase::convertToPlanarConfiguration0Byte(
 	return EC_Normal;
 }
 
-OFCondition DJP2KCodecBase::convertToPlanarConfiguration0Word(
+OFCondition CodecBase::convertToPlanarConfiguration0Word(
 	Uint16 *imageFrame,
 	Uint16 columns,
 	Uint16 rows)

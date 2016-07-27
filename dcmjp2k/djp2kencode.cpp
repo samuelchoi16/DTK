@@ -24,38 +24,39 @@
 #include "dcmtk/dcmdata/dccodec.h"  /* for DcmCodecStruct */
 #include "dcmjp2k/djp2kcparam.h"
 #include "dcmjp2k/djp2kcodece.h"
+#include "dcmjp2k/djp2kinternal.h"
 
 #include "openjpeg.h"
 
 // initialization of static members
-OFBool DJP2KEncoderRegistration::registered_ = OFFalse;
-DJP2KCodecParameter *DJP2KEncoderRegistration::cp_ = NULL;
-DJP2KLosslessEncoder *DJP2KEncoderRegistration::losslessencoder_ = NULL;
-DJP2KLossyEncoder *DJP2KEncoderRegistration::lossyencoder_ = NULL;
+OFBool EncoderRegistration::registered_ = OFFalse;
+CodecParameter *EncoderRegistration::cp_ = NULL;
+LosslessEncoder *EncoderRegistration::losslessencoder_ = NULL;
+LossyEncoder *EncoderRegistration::lossyencoder_ = NULL;
 
-void DJP2KEncoderRegistration::registerCodecs(
+void EncoderRegistration::registerCodecs(
 	OFBool jp2k_optionsEnabled,
 	Uint32 fragmentSize,
 	OFBool createOffsetTable,
-	JP2K_UIDCreation uidCreation,
+	UIDCreation uidCreation,
 	OFBool convertToSC)
 {
 	if (!registered_)
 	{
-		cp_ = new DJP2KCodecParameter(jp2k_optionsEnabled, fragmentSize, createOffsetTable, uidCreation, convertToSC, EJ2KPC_restore, OFFalse);
+		cp_ = new CodecParameter(jp2k_optionsEnabled, fragmentSize, createOffsetTable, uidCreation, convertToSC, EJ2KPC_restore, OFFalse);
 
 		if (cp_)
 		{
-			losslessencoder_ = new DJP2KLosslessEncoder();
+			losslessencoder_ = new LosslessEncoder();
 			if (losslessencoder_) DcmCodecList::registerCodec(losslessencoder_, NULL, cp_);
-			lossyencoder_ = new DJP2KLossyEncoder();
+			lossyencoder_ = new LossyEncoder();
 			if (lossyencoder_) DcmCodecList::registerCodec(lossyencoder_, NULL, cp_);
 			registered_ = OFTrue;
 		}
 	}
 }
 
-void DJP2KEncoderRegistration::cleanup()
+void EncoderRegistration::cleanup()
 {
 	if (registered_)
 	{
@@ -74,7 +75,7 @@ void DJP2KEncoderRegistration::cleanup()
 	}
 }
 
-OFString DJP2KEncoderRegistration::getLibraryVersionString()
+OFString EncoderRegistration::getLibraryVersionString()
 {
 	return opj_version();
 }

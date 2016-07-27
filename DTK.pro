@@ -53,7 +53,8 @@ HEADERS += DTK.h\
     dcmjp2k/djp2kerror.h \
     dcmjp2k/djp2krparam.h \
     dcmjp2k/djp2kutil.h \
-    dcmjp2k/djp2kcodecb.h
+    dcmjp2k/djp2kcodecb.h \
+    dcmjp2k/djp2kinternal.h
 
 macx {
 	DEFINES += DCMTK_LOG4CPLUS_HAVE_C99_VARIADIC_MACROS

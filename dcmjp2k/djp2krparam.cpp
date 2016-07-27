@@ -22,8 +22,9 @@
 #include "dcmtk/config/osconfig.h"
 #include "dcmjp2k/djp2krparam.h"
 #include "dcmtk/ofstd/ofstd.h"
+#include "dcmjp2k/djp2kinternal.h"
 
-DJP2KRepresentationParameter::DJP2KRepresentationParameter(Uint16 compressionRatio,
+RepresentationParameter::RepresentationParameter(Uint16 compressionRatio,
 	OFBool losslessProcess)
 	: DcmRepresentationParameter()
 	, compressionRatio_(compressionRatio)
@@ -31,28 +32,28 @@ DJP2KRepresentationParameter::DJP2KRepresentationParameter(Uint16 compressionRat
 {
 }
 
-DJP2KRepresentationParameter::DJP2KRepresentationParameter(const DJP2KRepresentationParameter& arg)
+RepresentationParameter::RepresentationParameter(const RepresentationParameter& arg)
 	: DcmRepresentationParameter(arg)
 	, compressionRatio_(arg.compressionRatio_)
 	, losslessProcess_(arg.losslessProcess_)
 {
 }
 
-DJP2KRepresentationParameter::~DJP2KRepresentationParameter()
+RepresentationParameter::~RepresentationParameter()
 {
 }
 
-DcmRepresentationParameter *DJP2KRepresentationParameter::clone() const
+DcmRepresentationParameter *RepresentationParameter::clone() const
 {
-	return new DJP2KRepresentationParameter(*this);
+	return new RepresentationParameter(*this);
 }
 
-const char *DJP2KRepresentationParameter::className() const
+const char *RepresentationParameter::className() const
 {
 	return "DJP2KRepresentationParameter";
 }
 
-OFBool DJP2KRepresentationParameter::operator==(const DcmRepresentationParameter &arg) const
+OFBool RepresentationParameter::operator==(const DcmRepresentationParameter &arg) const
 {
 	const char *argname = arg.className();
 	if (argname)
@@ -60,7 +61,7 @@ OFBool DJP2KRepresentationParameter::operator==(const DcmRepresentationParameter
 		OFString argstring(argname);
 		if (argstring == className())
 		{
-			const DJP2KRepresentationParameter& argll = OFreinterpret_cast(const DJP2KRepresentationParameter &, arg);
+			const RepresentationParameter& argll = OFreinterpret_cast(const RepresentationParameter &, arg);
 			if (losslessProcess_ && argll.losslessProcess_) return OFTrue;
 			else if (losslessProcess_ != argll.losslessProcess_) return OFFalse;
 			else if (compressionRatio_ != argll.compressionRatio_) return OFFalse;

@@ -26,9 +26,11 @@
 #include "dcmtk/dcmdata/dccodec.h" /* for DcmCodecParameter */
 #include "djp2kutil.h" /* for enums */
 
+namespace jp2k {
+
 /** codec parameter for JPEG 2000 codecs
  */
-class DCMJP2K_EXPORT DJP2KCodecParameter : public DcmCodecParameter
+class DCMJP2K_EXPORT CodecParameter : public DcmCodecParameter
 {
 public:
 
@@ -55,15 +57,14 @@ public:
    *  @param convertToSC               flag indicating whether image should be converted to Secondary Capture upon compression
    *  @param planarConfiguration       flag describing how planar configuration of decompressed color images should be handled
    *  @param ignoreOffsetTable         flag indicating whether to ignore the offset table when decompressing multiframe images
-   *  @param jplsInterleaveMode        flag describing which interleave the JPEG 2000 datastream should use
    */
-   DJP2KCodecParameter(
+   CodecParameter(
 	 OFBool jp2k_optionsEnabled,
 	 Uint32 fragmentSize = 0,
      OFBool createOffsetTable = OFTrue,
-     JP2K_UIDCreation uidCreation = EJ2KUC_default,
+     UIDCreation uidCreation = EJ2KUC_default,
      OFBool convertToSC = OFFalse,
-	 JP2K_PlanarConfiguration planarConfiguration = EJ2KPC_restore,
+	 PlanarConfiguration planarConfiguration = EJ2KPC_restore,
 	 OFBool ignoreOffsetTable = OFFalse);
 
   /** constructor, for use with decoders. Initializes all encoder options to defaults.
@@ -71,16 +72,16 @@ public:
    *  @param planarConfiguration       flag describing how planar configuration of decompressed color images should be handled
    *  @param ignoreOffsetTable         flag indicating whether to ignore the offset table when decompressing multiframe images
    */
-  DJP2KCodecParameter(
-    JP2K_UIDCreation uidCreation = EJ2KUC_default,
-	JP2K_PlanarConfiguration planarConfiguration = EJ2KPC_restore,
+  CodecParameter(
+    UIDCreation uidCreation = EJ2KUC_default,
+	PlanarConfiguration planarConfiguration = EJ2KPC_restore,
     OFBool ignoreOffsetTable = OFFalse);
 
   /// copy constructor
-  DJP2KCodecParameter(const DJP2KCodecParameter& arg);
+  CodecParameter(const CodecParameter& arg);
 
   /// destructor
-  virtual ~DJP2KCodecParameter();
+  virtual ~CodecParameter();
 
   /** this methods creates a copy of type DcmCodecParameter *
    *  it must be overweritten in every subclass.
@@ -112,7 +113,7 @@ public:
   /** returns mode for SOP Instance UID creation
    *  @return mode for SOP Instance UID creation
    */
-  JP2K_UIDCreation getUIDCreation() const
+  UIDCreation getUIDCreation() const
   {
     return uidCreation_;
   }
@@ -120,7 +121,7 @@ public:
   /** returns mode for handling planar configuration
    *  @return mode for handling planar configuration
    */
-  JP2K_PlanarConfiguration getPlanarConfiguration() const
+  PlanarConfiguration getPlanarConfiguration() const
   {
     return planarConfiguration_;
   }
@@ -144,7 +145,7 @@ public:
 private:
 
   /// private undefined copy assignment operator
-  DJP2KCodecParameter& operator=(const DJP2KCodecParameter&);
+  CodecParameter& operator=(const CodecParameter&);
 
   // ****************************************************
   // **** Parameters describing the encoding process ****
@@ -156,7 +157,7 @@ private:
   OFBool createOffsetTable_;
 
   /// mode for SOP Instance UID creation (used both for encoding and decoding)
-  JP2K_UIDCreation uidCreation_;
+  UIDCreation uidCreation_;
 
   /// flag indicating whether image should be converted to Secondary Capture upon compression
   OFBool convertToSC_;
@@ -165,10 +166,12 @@ private:
   // **** Parameters describing the decoding process ****
 
   /// flag describing how planar configuration of decompressed color images should be handled
-  JP2K_PlanarConfiguration planarConfiguration_;
+  PlanarConfiguration planarConfiguration_;
 
   /// flag indicating if temporary files should be kept, false if they should be deleted after use
   OFBool ignoreOffsetTable_;
 };
+
+}
 
 #endif

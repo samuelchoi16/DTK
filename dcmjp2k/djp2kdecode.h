@@ -26,13 +26,15 @@
 #include "dcmtk/ofstd/oftypes.h"      /* for OFBool */
 #include "djp2kutil.h"                 /* for enums */
 
-class DJP2KCodecParameter;
-class DJP2KLosslessDecoder;
-class DJP2KLossyDecoder;
+namespace jp2k {
+
+class CodecParameter;
+class LosslessDecoder;
+class LossyDecoder;
 
 /** singleton class that registers decoders for all supported JPEG 2000 processes.
  */
-class DCMJP2K_EXPORT DJP2KDecoderRegistration
+class DCMJP2K_EXPORT DecoderRegistration
 {
 public:
 
@@ -46,8 +48,8 @@ public:
    *  @param ignoreOffsetTable flag indicating whether to ignore the offset table when decompressing multiframe images
    */
   static void registerCodecs(
-    JP2K_UIDCreation uidcreation = EJ2KUC_default,
-    JP2K_PlanarConfiguration planarconfig = EJ2KPC_restore,
+    UIDCreation uidcreation = EJ2KUC_default,
+    PlanarConfiguration planarconfig = EJ2KPC_restore,
     OFBool ignoreOffsetTable = OFFalse);
 
   /** deregisters decoders.
@@ -69,14 +71,16 @@ private:
   static OFBool registered_;
 
   /// pointer to codec parameter shared by all decoders
-  static DJP2KCodecParameter *cp_;
+  static CodecParameter *cp_;
 
   /// pointer to decoder for lossless JPEG 2000
-  static DJP2KLosslessDecoder *losslessdecoder_;
+  static LosslessDecoder *losslessdecoder_;
 
   /// pointer to decoder for lossy JPEG 2000
-  static DJP2KLossyDecoder *lossydecoder_;
+  static LossyDecoder *lossydecoder_;
 
 };
+
+}
 
 #endif

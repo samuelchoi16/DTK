@@ -22,14 +22,15 @@
 #include "dcmtk/config/osconfig.h"
 #include "dcmjp2k/djp2kcparam.h"
 #include "dcmtk/ofstd/ofstd.h"
+#include "dcmjp2k/djp2kinternal.h"
 
-DJP2KCodecParameter::DJP2KCodecParameter(
+CodecParameter::CodecParameter(
 	OFBool jp2k_optionsEnabled,
 	Uint32 fragmentSize,
 	OFBool createOffsetTable,
-	JP2K_UIDCreation uidCreation,
+	UIDCreation uidCreation,
 	OFBool convertToSC,
-	JP2K_PlanarConfiguration planarConfiguration,
+	PlanarConfiguration planarConfiguration,
 	OFBool ignoreOffsetTble)
 	: DcmCodecParameter()
 	, fragmentSize_(fragmentSize)
@@ -41,9 +42,9 @@ DJP2KCodecParameter::DJP2KCodecParameter(
 {
 }
 
-DJP2KCodecParameter::DJP2KCodecParameter(
-	JP2K_UIDCreation uidCreation,
-	JP2K_PlanarConfiguration planarConfiguration,
+CodecParameter::CodecParameter(
+	UIDCreation uidCreation,
+	PlanarConfiguration planarConfiguration,
 	OFBool ignoreOffsetTble)
 	: DcmCodecParameter()
 	, fragmentSize_(0)
@@ -55,7 +56,7 @@ DJP2KCodecParameter::DJP2KCodecParameter(
 {
 }
 
-DJP2KCodecParameter::DJP2KCodecParameter(const DJP2KCodecParameter& arg)
+CodecParameter::CodecParameter(const CodecParameter& arg)
 	: DcmCodecParameter(arg)
 	, fragmentSize_(arg.fragmentSize_)
 	, createOffsetTable_(arg.createOffsetTable_)
@@ -66,16 +67,16 @@ DJP2KCodecParameter::DJP2KCodecParameter(const DJP2KCodecParameter& arg)
 {
 }
 
-DJP2KCodecParameter::~DJP2KCodecParameter()
+CodecParameter::~CodecParameter()
 {
 }
 
-DcmCodecParameter *DJP2KCodecParameter::clone() const
+DcmCodecParameter *CodecParameter::clone() const
 {
-	return new DJP2KCodecParameter(*this);
+	return new CodecParameter(*this);
 }
 
-const char *DJP2KCodecParameter::className() const
+const char *CodecParameter::className() const
 {
 	return "DJP2KCodecParameter";
 }

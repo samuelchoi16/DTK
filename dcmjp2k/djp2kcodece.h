@@ -29,8 +29,10 @@
 #include "djp2kdefine.h"
 #include "djp2kcodecb.h"
 
-class DJP2KRepresentationParameter;
-class DJP2KCodecParameter;
+namespace jp2k {
+
+class RepresentationParameter;
+class CodecParameter;
 class DicomImage;
 
 /** abstract codec class for JPEG 2000 encoders.
@@ -39,15 +41,15 @@ class DicomImage;
  *  This class only supports compression, it neither implements
  *  decoding nor transcoding.
  */
-class DCMJP2K_EXPORT DJP2KEncoderBase : public DJP2KCodecBase
+class DCMJP2K_EXPORT EncoderBase : public CodecBase
 {
 public:
 
   /// default constructor
-  DJP2KEncoderBase();
+  EncoderBase();
 
   /// destructor
-  virtual ~DJP2KEncoderBase();
+  virtual ~EncoderBase();
 
   /** decompresses the given pixel sequence and
    *  stores the result in the given uncompressedPixelData element.
@@ -202,24 +204,28 @@ private:
     const Uint16 *pixelData,
     const Uint32 length,
     DcmItem *dataset,
-    const DJP2KRepresentationParameter *djrp,
+	const RepresentationParameter *djrp,
     DcmPixelSequence * & pixSeq,
-    const DJP2KCodecParameter *djcp,
+    const CodecParameter *djcp,
     double& compressionRatio) const;
 
-  /** perform the lossless raw compression of a single frame
-   *  @param framePointer pointer to start of frame
-   *  @param bitsAllocated number of bits allocated per pixel
-   *  @param columns frame width
-   *  @param rows frame height
-   *  @param samplesPerPixel image samples per pixel
-   *  @param planarConfiguration image planar configuration
-   *  @param photometricInterpretation photometric interpretation of the DICOM dataset
-   *  @param pixelSequence object in which the compressed frame is stored
-   *  @param offsetList list of frame offsets updated in this parameter
-   *  @param compressedSize size of compressed frame returned in this parameter
-   *  @param djcp parameters for the codec
-   *  @return EC_Normal if successful, an error code otherwise
+  /**
+   * @brief encodeFrame
+   * @param framePointer pointer to start of frame
+   * @param bitsAllocated number of bits allocated per pixel
+   * @param bitsStored
+   * @param columns frame width
+   * @param rows frame height
+   * @param samplesPerPixel image samples per pixel
+   * @param pixelRepresentation
+   * @param planarConfiguration image planar configuration
+   * @param photometricInterpretation photometric interpretation of the DICOM dataset
+   * @param djrp
+   * @param pixelSequence object in which the compressed frame is stored
+   * @param offsetList list of frame offsets updated in this parameter
+   * @param compressedSize size of compressed frame returned in this parameter
+   * @param djcp parameters for the codec
+   * @return EC_Normal if successful, an error code otherwise
    */
   OFCondition encodeFrame(const Uint8 *framePointer,
 	Uint16 bitsAllocated, Uint16 bitsStored,
@@ -229,11 +235,11 @@ private:
 	Uint16 pixelRepresentation,
 	Uint16 planarConfiguration,
 	const OFString& photometricInterpretation,
-	const DJP2KRepresentationParameter* djrp,
+	const RepresentationParameter* djrp,
 	DcmPixelSequence *pixelSequence,
 	DcmOffsetList &offsetList,
 	unsigned long &compressedSize,
-	const DJP2KCodecParameter *djcp) const;
+	const CodecParameter *djcp) const;
 
   /** create Lossy Image Compression and Lossy Image Compression Ratio.
    *  @param dataset dataset to be modified
@@ -256,13 +262,13 @@ private:
    */
   OFCondition updateDerivationDescription(
 	DcmItem *dataset,
-	const DJP2KRepresentationParameter *djrp,
+	const RepresentationParameter *djrp,
 	double ratio) const;
 };
 
 /** codec class for JPEG 2000 lossless only TS encoding
  */
-class DCMJP2K_EXPORT DJP2KLosslessEncoder : public DJP2KEncoderBase
+class DCMJP2K_EXPORT LosslessEncoder : public EncoderBase
 {
   /** returns the transfer syntax that this particular codec
    *  is able to encode
@@ -273,7 +279,7 @@ class DCMJP2K_EXPORT DJP2KLosslessEncoder : public DJP2KEncoderBase
 
 /** codec class for JPEG 2000 lossy and lossless TS encoding
  */
-class DCMJP2K_EXPORT DJP2KLossyEncoder : public DJP2KEncoderBase
+class DCMJP2K_EXPORT LossyEncoder : public EncoderBase
 {
   /** returns the transfer syntax that this particular codec
    *  is able to encode
@@ -281,5 +287,7 @@ class DCMJP2K_EXPORT DJP2KLossyEncoder : public DJP2KEncoderBase
    */
   virtual E_TransferSyntax supportedTransferSyntax() const;
 };
+
+}
 
 #endif

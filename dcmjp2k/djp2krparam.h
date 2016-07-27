@@ -26,71 +26,74 @@
 #include "dcmtk/dcmdata/dcpixel.h" /* for class DcmRepresentationParameter */
 #include "djp2kdefine.h"
 
+namespace jp2k {
+
 /** representation parameter for JPEG 2000
  */
-class DCMJP2K_EXPORT DJP2KRepresentationParameter : public DcmRepresentationParameter
+class DCMJP2K_EXPORT RepresentationParameter : public DcmRepresentationParameter
 {
 public:
-
-  /** constructor
-   *  @param nearlosslessDeviation used as parameter NEAR in JPEG 2000 nearlossless-encoding process
-   *  @param losslessProcess true if lossless process is requested
+	/**
+   * @brief RepresentationParameter
+   * @param compressionRatio
+   * @param losslessProcess true if lossless process is requested
    */
-  DJP2KRepresentationParameter(
-	Uint16 compressionRatio = 5,
-	OFBool losslessProcess = OFFalse);
+	RepresentationParameter(
+		Uint16 compressionRatio = 5,
+		OFBool losslessProcess = OFFalse);
 
-  /// copy constructor
-  DJP2KRepresentationParameter(const DJP2KRepresentationParameter& arg);
+	/// copy constructor
+	RepresentationParameter(const RepresentationParameter& arg);
 
-  /// destructor
-  virtual ~DJP2KRepresentationParameter();
+	/// destructor
+	virtual ~RepresentationParameter();
 
-  /** this methods creates a copy of type DcmRepresentationParameter *
-   *  it must be overweritten in every subclass.
-   *  @return copy of this object
-   */
-  virtual DcmRepresentationParameter *clone() const;
+	/** this methods creates a copy of type DcmRepresentationParameter *
+	*  it must be overweritten in every subclass.
+	*  @return copy of this object
+	*/
+	virtual DcmRepresentationParameter *clone() const;
 
-  /** returns the class name as string.
-   *  can be used in operator== as poor man's RTTI replacement.
-   */
-  virtual const char *className() const;
+	/** returns the class name as string.
+	*  can be used in operator== as poor man's RTTI replacement.
+	*/
+	virtual const char *className() const;
 
-  /** compares an object to another DcmRepresentationParameter.
-   *  Implementation must make sure that classes are comparable.
-   *  @param arg representation parameter to compare with
-   *  @return true if equal, false otherwise.
-   */
-  virtual OFBool operator==(const DcmRepresentationParameter &arg) const;
+	/** compares an object to another DcmRepresentationParameter.
+	*  Implementation must make sure that classes are comparable.
+	*  @param arg representation parameter to compare with
+	*  @return true if equal, false otherwise.
+	*/
+	virtual OFBool operator==(const DcmRepresentationParameter &arg) const;
 
-  /** returns the desired compression ratio
-   *  @return return desired compression ratio
-   */
-  Uint16 getCompressionRatio() const
-  {
-	return compressionRatio_;
-  }
+	/** returns the desired compression ratio
+	*  @return return desired compression ratio
+	*/
+	Uint16 getCompressionRatio() const
+	{
+		return compressionRatio_;
+	}
 
-  /** returns true if lossless compression is desired
-   *  @return true if lossless compression is desired
-   */
-  OFBool useLosslessProcess() const
-  {
-    return losslessProcess_;
-  }
+	/** returns true if lossless compression is desired
+	*  @return true if lossless compression is desired
+	*/
+	OFBool useLosslessProcess() const
+	{
+		return losslessProcess_;
+	}
 
 private:
+	/** desired NEAR parameter
+	*  Default is 0 (lossless compression).
+	*  Ignored during lossless compression.
+	*/
+	Uint16 compressionRatio_;
 
-  /** desired NEAR parameter
-   *  Default is 0 (lossless compression).
-   *  Ignored during lossless compression.
-   */
-  Uint16 compressionRatio_;
-
-  /// true if lossless process should be used even in lossy transfer syntax
-  OFBool losslessProcess_;
+	/// true if lossless process should be used even in lossy transfer syntax
+	OFBool losslessProcess_;
 
 };
+
+}
 
 #endif

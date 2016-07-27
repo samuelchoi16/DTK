@@ -23,7 +23,6 @@
 #define D2KDEFINE_H
 
 #include "dcmtk/config/osconfig.h"
-
 #include "dcmtk/ofstd/ofdefine.h"
 
 #ifdef DTK_LIBRARY

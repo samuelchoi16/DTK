@@ -5,14 +5,16 @@
 #include "dcmtk/dcmdata/dccodec.h"  /* for class DcmCodec */
 #include "djp2kdefine.h"
 
-class DCMJP2K_EXPORT DJP2KCodecBase : public DcmCodec
+namespace jp2k {
+
+class DCMJP2K_EXPORT CodecBase : public DcmCodec
 {
 protected:
 	/// default constructor
-	DJP2KCodecBase();
+	CodecBase();
 
 	/// destructor
-	virtual ~DJP2KCodecBase();
+	virtual ~CodecBase();
 
 	/** Convert an image from sample interleaved to uninterleaved.
 	 *  @param target A buffer where the converted image will be stored
@@ -99,6 +101,8 @@ protected:
 	  Uint16 *imageFrame,
 	  Uint16 columns,
 	  Uint16 rows);
+};
+
 };
 
 #endif // DJP2KCODECB_H

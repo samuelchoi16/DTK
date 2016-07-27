@@ -229,8 +229,8 @@ Library.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define	DTK_VERSION_1_0_0				_T("1.0.0")
-#define	DTK_VERSION						DTK_VERSION_1_0_0
+#define	DTK_VERSION_1_2_0				_T("1.2.0")
+#define	DTK_VERSION						DTK_VERSION_1_2_0
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2417,26 +2417,122 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief exportToXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status exportToXML(const String xmlFilename) const;
+
+		/**
+		 * @brief exportToXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status exportToXML(const QString xmlFilename) const;
+
+		/**
+		 * @brief exportToXML
+		 * @param parentElement
+		 * @return
+		 */
 		Status exportToXML(QDomElement& parentElement) const;
+
+		/**
+		 * @brief exportPixelDataToXML
+		 * @param tag
+		 * @param dcmElement
+		 * @return
+		 */
 		virtual Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
 
+		/**
+		 * @brief importFromXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status importFromXML(const String xmlFilename);
+
+		/**
+		 * @brief importFromXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status importFromXML(const QString xmlFilename);
+
+		/**
+		 * @brief importFromXML
+		 * @param parentElement
+		 * @return
+		 */
 		Status importFromXML(const QDomElement& parentElement);
+
+		/**
+		 * @brief importPixelDataFromXML
+		 * @param tag
+		 * @param dcmElement
+		 * @return
+		 */
 		virtual Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief exportToJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status exportToJSON(const String jsonFilename) const;
+
+		/**
+		 * @brief exportToJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status exportToJSON(const QString jsonFilename) const;
+
+		/**
+		 * @brief exportToJSON
+		 * @param jsonObject
+		 * @return
+		 */
 		Status exportToJSON(QJsonObject& jsonObject) const;
+
+		/**
+		 * @brief exportPixelDataToJSON
+		 * @param tag
+		 * @param attrValue
+		 * @return
+		 */
 		virtual Status exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const;
 
+		/**
+		 * @brief importFromJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status importFromJSON(const String jsonFilename);
+
+		/**
+		 * @brief importFromJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status importFromJSON(const QString jsonFilename);
+
+		/**
+		 * @brief importFromJSON
+		 * @param jsonObject
+		 * @return
+		 */
 		Status importFromJSON(const QJsonObject& jsonObject);
+
+		/**
+		 * @brief importPixelDataFromJSON
+		 * @param tag
+		 * @param attrValue
+		 * @return
+		 */
 		virtual Status importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2503,6 +2599,11 @@ namespace dcm {
 		Uint32	_frameSize;
 		Uint8*	_frameData;
 
+		/**
+		 * @brief PixelDataFrame
+		 * @param size
+		 * @param data
+		 */
 		PixelDataFrame(Uint32 size, Uint8* data) {
 			_frameSize = size;
 			_frameData = data;
@@ -2510,7 +2611,6 @@ namespace dcm {
 	};
 
 	typedef std::list<PixelDataFrame>			PixelDataFrameListType;
-
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	PixelDataConsumer
@@ -2642,14 +2742,14 @@ namespace dcm {
 		/**
 		 * @brief putPixelData
 		 * @param tag pixel data tag: in most cases, DCM_PixelData is used
-		 * @param producer pixel data producer callback
+		 * @param pixelDataFrameList
 		 * @return status
 		 */
 		Status putPixelData(const DcmTagKey& tag, const PixelDataFrameListType& pixelDataFrameList);
 
 		/**
 		 * @brief getPixelData gets pixel data
-		 * @param tag pixel data tag: in most cases, DCM_PixelData is used
+		 * @param tag data tag: in most cases, DCM_PixelData is used
 		 * @param consumer pixel data consumer callback
 		 * @return status
 		 */
@@ -2657,14 +2757,45 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief isValidTag
+		 * @param tag
+		 * @return
+		 */
 		bool isValidTag(const DcmTagKey& tag);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief exportPixelDataToXML
+		 * @param tag
+		 * @param dcmElement
+		 * @return
+		 */
 		Status exportPixelDataToXML(const DcmTagKey& tag, QDomElement& dcmElement) const;
+
+		/**
+		 * @brief importPixelDataFromXML
+		 * @param tag
+		 * @param dcmElement
+		 * @return
+		 */
 		Status importPixelDataFromXML(const DcmTagKey& tag, const QDomElement& dcmElement);
 
+		/**
+		 * @brief exportPixelDataToJSON
+		 * @param tag
+		 * @param attrValue
+		 * @return
+		 */
 		Status exportPixelDataToJSON(const DcmTagKey& tag, QJsonObject& attrValue) const;
+
+		/**
+		 * @brief importPixelDataFromJSON
+		 * @param tag
+		 * @param attrValue
+		 * @return
+		 */
 		Status importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject& attrValue);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2929,22 +3060,90 @@ namespace dcm {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief exportToXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status exportToXML(const String xmlFilename) const;
+
+		/**
+		 * @brief exportToXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status exportToXML(const QString xmlFilename) const;
+
+		/**
+		 * @brief exportToXML
+		 * @param parentElement
+		 * @return
+		 */
 		Status exportToXML(QDomElement& parentElement) const;
 
+		/**
+		 * @brief importFromXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status importFromXML(const String xmlFilename);
+
+		/**
+		 * @brief importFromXML
+		 * @param xmlFilename
+		 * @return
+		 */
 		Status importFromXML(const QString xmlFilename);
+
+		/**
+		 * @brief importFromXML
+		 * @param parentElement
+		 * @return
+		 */
 		Status importFromXML(const QDomElement& parentElement);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @brief exportToJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status exportToJSON(const String jsonFilename) const;
+
+		/**
+		 * @brief exportToJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status exportToJSON(const QString jsonFilename) const;
+
+		/**
+		 * @brief exportToJSON
+		 * @param jsonObject
+		 * @return
+		 */
 		Status exportToJSON(QJsonObject& jsonObject) const;
 
+		/**
+		 * @brief importFromJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status importFromJSON(const String jsonFilename);
+
+		/**
+		 * @brief importFromJSON
+		 * @param jsonFilename
+		 * @return
+		 */
 		Status importFromJSON(const QString jsonFilename);
+
+		/**
+		 * @brief importFromJSON
+		 * @param jsonObject
+		 * @return
+		 */
 		Status importFromJSON(const QJsonObject& jsonObject);
 	};
 

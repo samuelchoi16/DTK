@@ -24,36 +24,37 @@
 #include "dcmtk/dcmdata/dccodec.h"  /* for DcmCodecStruct */
 #include "dcmjp2k/djp2kcparam.h"
 #include "dcmjp2k/djp2kcodecd.h"
+#include "dcmjp2k/djp2kinternal.h"
 
 #include "openjpeg.h"
 
 // initialization of static members
-OFBool DJP2KDecoderRegistration::registered_ = OFFalse;
-DJP2KCodecParameter *DJP2KDecoderRegistration::cp_ = NULL;
-DJP2KLosslessDecoder *DJP2KDecoderRegistration::losslessdecoder_ = NULL;
-DJP2KLossyDecoder *DJP2KDecoderRegistration::lossydecoder_ = NULL;
+OFBool DecoderRegistration::registered_ = OFFalse;
+CodecParameter *DecoderRegistration::cp_ = NULL;
+LosslessDecoder *DecoderRegistration::losslessdecoder_ = NULL;
+LossyDecoder *DecoderRegistration::lossydecoder_ = NULL;
 
-void DJP2KDecoderRegistration::registerCodecs(
-	JP2K_UIDCreation uidcreation,
-	JP2K_PlanarConfiguration planarconfig,
+void DecoderRegistration::registerCodecs(
+	UIDCreation uidcreation,
+	PlanarConfiguration planarconfig,
 	OFBool ignoreOffsetTable)
 {
 	if (!registered_)
 	{
-		cp_ = new DJP2KCodecParameter(uidcreation, planarconfig, ignoreOffsetTable);
+		cp_ = new CodecParameter(uidcreation, planarconfig, ignoreOffsetTable);
 		if (cp_)
 		{
-			losslessdecoder_ = new DJP2KLosslessDecoder();
+			losslessdecoder_ = new LosslessDecoder();
 			if (losslessdecoder_) DcmCodecList::registerCodec(losslessdecoder_, NULL, cp_);
 
-			lossydecoder_ = new DJP2KLossyDecoder();
+			lossydecoder_ = new LossyDecoder();
 			if (lossydecoder_) DcmCodecList::registerCodec(lossydecoder_, NULL, cp_);
 			registered_ = OFTrue;
 		}
 	}
 }
 
-void DJP2KDecoderRegistration::cleanup()
+void DecoderRegistration::cleanup()
 {
 	if (registered_)
 	{
@@ -72,7 +73,7 @@ void DJP2KDecoderRegistration::cleanup()
 	}
 }
 
-OFString DJP2KDecoderRegistration::getLibraryVersionString()
+OFString DecoderRegistration::getLibraryVersionString()
 {
 	return opj_version();
 }

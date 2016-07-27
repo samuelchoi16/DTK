@@ -42,6 +42,8 @@ extern DCMJP2K_EXPORT OFLogger DCM_dcmj2kLogger;
 
 // include this file in doxygen documentation
 
+namespace jp2k {
+
 /** @file dj2kutil.h
  *  @brief enumerations, error constants and helper functions for the dcmj2k module
  */
@@ -49,7 +51,7 @@ extern DCMJP2K_EXPORT OFLogger DCM_dcmj2kLogger;
 /** describes the condition under which a compressed or decompressed image
  *  receives a new SOP instance UID.
  */
-enum JP2K_UIDCreation
+enum UIDCreation
 {
   /** Upon compression, assign new SOP instance UID if compression is lossy.
    *  Upon decompression never assign new SOP instance UID.
@@ -66,7 +68,7 @@ enum JP2K_UIDCreation
 /** describes how the decoder should handle planar configuration of
  *  decompressed color images.
  */
-enum JP2K_PlanarConfiguration
+enum PlanarConfiguration
 {
   /// restore planar configuration as indicated in data set
   EJ2KPC_restore,
@@ -86,7 +88,7 @@ enum JP2K_PlanarConfiguration
 /** describes how the encoder handles the image bit depth
  *  upon lossy compression.
  */
-enum JP2K_CompressionBitDepth
+enum CompressionBitDepth
 {
   /// keep original bit depth
   EJ2KBD_original,
@@ -102,6 +104,8 @@ enum JP2K_CompressionBitDepth
    */
   EJ2KBD_force
 };
+
+}
 
 // CONDITION CONSTANTS
 

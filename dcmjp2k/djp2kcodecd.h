@@ -28,8 +28,10 @@
 #include "djp2kdefine.h"
 #include "djp2kcodecb.h"
 
+namespace jp2k {
+
 /* forward declaration */
-class DJP2KCodecParameter;
+class CodecParameter;
 
 /** abstract codec class for JPEG 2000 decoders.
  *  This abstract class contains most of the application logic
@@ -37,14 +39,14 @@ class DJP2KCodecParameter;
  *  This class only supports decompression, it neither implements
  *  encoding nor transcoding.
  */
-class DCMJP2K_EXPORT DJP2KDecoderBase : public DJP2KCodecBase
+class DCMJP2K_EXPORT DecoderBase : public CodecBase
 {
 public:
   /// default constructor
-  DJP2KDecoderBase();
+  DecoderBase();
 
   /// destructor
-  virtual ~DJP2KDecoderBase();
+  virtual ~DecoderBase();
 
   /** decompresses the given pixel sequence and
    *  stores the result in the given uncompressedPixelData element.
@@ -206,7 +208,7 @@ private:
    */
   static OFCondition decodeFrame(
     DcmPixelSequence * fromPixSeq,
-    const DJP2KCodecParameter *cp,
+	const CodecParameter *cp,
     DcmItem *dataset,
     Uint32 frameNo,
     Uint32& startFragment,
@@ -260,7 +262,7 @@ private:
 
 /** codec class for JPEG 2000 lossless only TS decoding
  */
-class DCMJP2K_EXPORT DJP2KLosslessDecoder : public DJP2KDecoderBase
+class DCMJP2K_EXPORT LosslessDecoder : public DecoderBase
 {
   /** returns the transfer syntax that this particular codec
    *  is able to Decode
@@ -271,7 +273,7 @@ class DCMJP2K_EXPORT DJP2KLosslessDecoder : public DJP2KDecoderBase
 
 /** codec class for JPEG 2000 lossy and lossless TS decoding
  */
-class DCMJP2K_EXPORT DJP2KLossyDecoder : public DJP2KDecoderBase
+class DCMJP2K_EXPORT LossyDecoder : public DecoderBase
 {
   /** returns the transfer syntax that this particular codec
    *  is able to encode
@@ -279,5 +281,7 @@ class DCMJP2K_EXPORT DJP2KLossyDecoder : public DJP2KDecoderBase
    */
   virtual E_TransferSyntax supportedTransferSyntax() const;
 };
+
+}
 
 #endif
