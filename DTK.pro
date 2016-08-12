@@ -8,7 +8,7 @@ QT		+= xml
 QT		-= gui
 
 TARGET = DTK
-VERSION = 1.2.0
+VERSION = 1.2.1
 TEMPLATE = lib
 
 DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
@@ -86,11 +86,11 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-armv7/lib_debug -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib_debug -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-linux/lib_debug -ldcmtk
 		}
 	} else {
 		target.path = /usr/lib
@@ -99,22 +99,22 @@ unix:!macx {
 		QMAKE_CXXFLAGS += -std=c++0x
 
 		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-armv7/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-armv7/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-armv7/lib -ldcmtk
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.0-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.0-linux/lib -ldcmtk
+			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-linux/include
+			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-linux/lib -ldcmtk
 		}
 	}
 }
 win32 {
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.1-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.1-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.0-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.1-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.2.1-win32\lib" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
 	}
 }

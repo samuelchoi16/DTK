@@ -502,6 +502,8 @@ String NLS::decode(const String& istr, int nls)
 			case ISO_IR_138 :
 			case ISO_IR_166 :
 			default :
+				if (i == istr.end())
+					break;
 				mb[0] = U8(*i++);
 				mb[1] = 0;
 				ostr += mb;
@@ -512,7 +514,11 @@ String NLS::decode(const String& istr, int nls)
 					currentNLS = ISO_IR_6;
 					continue;
 				}
+				if (i == istr.end())
+					break;
 				hb = U8(*i++);
+				if (i == istr.end())
+					break;
 				lb = U8(*i++);
 				if (lb) {
 					mb[0] = hb;
@@ -526,12 +532,19 @@ String NLS::decode(const String& istr, int nls)
 				break;
 			case ISO_IR_13 :		// JIS X 0201 at G1
 			case ISO_IR_14 :		// JIS X 0201 at G0
+				if (i == istr.end())
+					break;
 				mb[0] = U8(*i++);
 				mb[1] = 0;
 				ostr += mb;
 				break;
 			case ISO_IR_87 :		// JIS X 0208 at G0
+				// check buffer exhausted
+				if (i == istr.end())
+					break;
 				hb = U8(*i++);
+				if (i == istr.end())
+					break;
 				lb = U8(*i++);
 				if (lb) {
 					int row = hb < 0x5F ? 0x70 : 0xB0;
