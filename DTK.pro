@@ -8,7 +8,7 @@ QT		+= xml
 QT		-= gui
 
 TARGET = DTK
-VERSION = 1.2.1
+VERSION = 1.3.0
 TEMPLATE = lib
 
 DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
@@ -108,13 +108,19 @@ unix:!macx {
 	}
 }
 win32 {
+	DEFINES += _USING_V110_SDK71_
+
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.1-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.1-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.3.0-win32\include" "$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.3.0-win32\lib_debug" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\lib" -lopenjp2
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DTK-1.2.1-win32\include" "$$PWD\..\lib\openjpeg-2.1.0-win32-x86\include\openjpeg-2.1"
-		LIBS += -L"$$PWD\..\lib\DTK-1.2.1-win32\lib" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-2.1.0-win32-x86\lib" -lopenjp2
+		INCLUDEPATH += "$$PWD\..\lib\DTK-1.3.0-win32\include" "$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\include\openjpeg-2.1"
+		LIBS += -L"$$PWD\..\lib\DTK-1.3.0-win32\lib" -ldcmtk wsock32.lib netapi32.lib -L"$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\lib" -lopenjp2
 	}
 }
+
+DISTFILES += \
+    ../build-DTK/publish-msvc2013-debug.bat \
+    ../build-DTK/publish-msvc2013-release.bat
