@@ -699,32 +699,24 @@ Status Item::getDate(const DcmTagKey& tag, QDateTime& qdt) const
 
 Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const DateTime& dt)
 {
-	// DA
-	if (DcmTag(dtag).getEVR() == EVR_DA)
-		return putString(dtag, dt.format("%Y%m%d"));
-	else
+	if (DcmTag(dtag).getEVR() != EVR_DA || DcmTag(ttag).getEVR() != EVR_TM)
 		return EC_InvalidTag;
 
-	// TM
-	if (DcmTag(ttag).getEVR() == EVR_TM)
-		return putString(ttag, dt.format("%H%M%S"));
-	else
-		return EC_InvalidTag;
+	putString(dtag, dt.format("%Y%m%d"));
+	putString(ttag, dt.format("%H%M%S"));
+
+	return EC_Normal;
 }
 
 Status Item::putDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, const QDateTime& qdt)
 {
-	// DA
-	if (DcmTag(dtag).getEVR() == EVR_DA)
-		return putString(dtag, qdt.toString("yyyyMMdd"));
-	else
+	if (DcmTag(dtag).getEVR() != EVR_DA || DcmTag(ttag).getEVR() != EVR_TM)
 		return EC_InvalidTag;
 
-	// TM
-	if (DcmTag(ttag).getEVR() == EVR_TM)
-		return putString(ttag, qdt.toString("HHmmss"));
-	else
-		return EC_InvalidTag;
+	putString(dtag, qdt.toString("yyyyMMdd"));
+	putString(ttag, qdt.toString("HHmmss"));
+
+	return EC_Normal;
 }
 
 Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime& dt) const

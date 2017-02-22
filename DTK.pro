@@ -109,6 +109,8 @@ unix:!macx {
 }
 win32 {
 	DEFINES += _USING_V110_SDK71_
+	QMAKE_LFLAGS_CONSOLE = /SUBSYSTEM:CONSOLE,5.1
+	QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.1
 
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
