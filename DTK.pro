@@ -79,31 +79,36 @@ macx {
 	}
 }
 unix:!macx {
-	CONFIG(debug, debug|release) {
+	CONFIG(arm, arm|x86) {
+		INCLUDEPATH += $$PWD/../lib/DTK-1.3.0-armv7/include
+
 		target.path = /usr/lib
 		INSTALLS += target
 
-		QMAKE_CXXFLAGS += -std=c++0x -g -O0
+		CONFIG(debug, debug|release) {
+			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-armv7/lib_debug -ldcmtk
 
-		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-armv7/lib_debug -ldcmtk
+			QMAKE_CXXFLAGS += -std=c++0x -g -O0
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-linux/lib_debug -ldcmtk
+			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-armv7/lib -ldcmtk
+
+			QMAKE_CXXFLAGS += -std=c++0x
+
 		}
 	} else {
+		INCLUDEPATH += $$PWD/../lib/DTK-1.3.0-linux/include
+
 		target.path = /usr/lib
 		INSTALLS += target
 
-		QMAKE_CXXFLAGS += -std=c++0x
+		CONFIG(debug, debug|release) {
+			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-linux/lib_debug -ldcmtk
 
-		CONFIG(arm, arm|x86) {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-armv7/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-armv7/lib -ldcmtk
+			QMAKE_CXXFLAGS += -std=c++0x -g -O0
 		} else {
-			INCLUDEPATH += $$PWD/../lib/DTK-1.2.1-linux/include
-			LIBS += -v -L$$PWD/../lib/DTK-1.2.1-linux/lib -ldcmtk
+			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-linux/lib -ldcmtk
+
+			QMAKE_CXXFLAGS += -std=c++0x
 		}
 	}
 }
