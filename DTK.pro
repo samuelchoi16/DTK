@@ -66,16 +66,16 @@ macx {
 
 		QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0
 
-		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20160216-macos/include $$PWD/../lib/openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20160216-macos/lib_debug -ldcmtk -L$$PWD/../lib/openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
+		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-debug/include $$PWD/../lib/openjpeg-v2.1.2-osx-x86_64/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20161102-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-osx-x86_64/lib -lopenjp2
 	} else {
 		target.path = /usr/lib
 		INSTALLS += target
 
 		QMAKE_CXXFLAGS += -stdlib=libc++
 
-		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20160216-macos/include $$PWD/../lib/openjpeg-2.1.0-Darwin-i386/include/openjpeg-2.1
-		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20160216-macos/lib -ldcmtk -L$$PWD/../lib/openjpeg-2.1.0-Darwin-i386/lib -lopenjp2
+		INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-release/include $$PWD/../lib/openjpeg-v2.1.2-osx-x86_64/include/openjpeg-2.1
+		LIBS += -v -stdlib=libc++ -L$$PWD/../lib/dcmtk-3.6.1_20161102-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-osx-x86_64/lib -lopenjp2
 	}
 }
 unix:!macx {
