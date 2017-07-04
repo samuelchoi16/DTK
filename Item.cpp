@@ -730,7 +730,7 @@ Status Item::getDateTime(const DcmTagKey& dtag, const DcmTagKey& ttag, DateTime&
 		status = getString(dtag, str);
 		if (str.length() < 8)
 			return EC_InvalidStream;
-		dt.tm_year = atoi(str.substr(0, 4).c_str());
+		dt.tm_year = atoi(str.substr(0, 4).c_str()) - 1900;
 		dt.tm_mon = atoi(str.substr(4, 2).c_str()) - 1;
 		dt.tm_mday = atoi(str.substr(6, 2).c_str());
 		ok = true;
