@@ -39,13 +39,11 @@ Status AssociationListener::listen(int timeout)
 	if (!ASC_associationWaiting(ascNetworkPtr, timeout))
 		return DUL_NOASSOCIATIONREQUEST;
 
-	DCMTK_LOG4CPLUS_DEBUG(_logger, "1b");
 	if (timeout == -1)
 		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssoc, _maxPDUSize, NULL, NULL, 0, DUL_BLOCK);
 	else
 		cond = ASC_receiveAssociation(ascNetworkPtr, &_ascAssoc, _maxPDUSize, NULL, NULL, 0, DUL_NOBLOCK, timeout);
 
-	DCMTK_LOG4CPLUS_DEBUG(_logger, "1c");
 	if (cond.bad() /*&& cond == DUL_NOASSOCIATIONREQUEST*/) {
 		cond = ASC_dropSCPAssociation(_ascAssoc);
 		cond = ASC_destroyAssociation(&_ascAssoc);
