@@ -58,7 +58,7 @@ HEADERS += DTK.h\
 
 macx {
 	DEFINES += DCMTK_LOG4CPLUS_HAVE_C99_VARIADIC_MACROS
-	QMAKE_MAC_SDK = macosx10.11
+	QMAKE_MAC_SDK = macosx10.12
 
 	CONFIG(debug, debug|release) {
 		target.path = /usr/lib
