@@ -375,12 +375,9 @@ Status Dataset::copyFrom(const Dataset* sourceDataset)
 
 	clear();
 
-	TagList tagList;
-	if (sourceDataset->getTagList(tagList).good()) {
-		for(TagList::iterator ti = tagList.begin(); ti != tagList.end(); ti++) {
-			copyValueFrom(*ti, sourceDataset);
-		}
-
+	DcmDataset* dcmDataset = sourceDataset->_getDcmDataset();
+	Status stat = _dcmItem->copyFrom(*dcmDataset);
+	if (stat.good()) {
 		int nls;
 		if (sourceDataset->getAutoNLS(nls).good()) {
 			setAutoNLS(nls);
@@ -388,11 +385,8 @@ Status Dataset::copyFrom(const Dataset* sourceDataset)
 		if (sourceDataset->getNLS(nls).good()) {
 			setNLS(nls);
 		}
-
-		return EC_Normal;
-	} else {
-		return EC_TagNotFound;
 	}
+	return stat;
 }
 
 Status Dataset::load(const String& filename,
