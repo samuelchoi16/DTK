@@ -96,20 +96,20 @@ unix:!macx {
 
 		}
 	} else {
-		INCLUDEPATH += $$PWD/../lib/DTK-1.3.0-linux/include
-
 		target.path = /usr/lib
 		INSTALLS += target
 
 		CONFIG(debug, debug|release) {
-			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-linux/lib_debug -ldcmtk
+            QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
-			QMAKE_CXXFLAGS += -std=c++0x -g -O0
-		} else {
-			LIBS += -v -L$$PWD/../lib/DTK-1.3.0-linux/lib -ldcmtk
+            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-debug/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
+            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.1_20161102-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+        } else {
+            QMAKE_CXXFLAGS += -std=c++0x
 
-			QMAKE_CXXFLAGS += -std=c++0x
-		}
+            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-release/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
+            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.1_20161102-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+        }
 	}
 }
 win32 {
