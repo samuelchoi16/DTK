@@ -2806,6 +2806,12 @@ namespace dcm {
 		 */
 		Status deidentify(void);
 
+		/**
+		 * @brief deidentify de-identifies patient identity according to DICOM PS 3.15 Attribute Confidentiality Profiles
+		 * @return status
+		 */
+		Status deidentify(TagList preservedTagList);
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		/**

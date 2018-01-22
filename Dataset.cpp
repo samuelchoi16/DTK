@@ -853,13 +853,21 @@ Status Dataset::importPixelDataFromJSON(const DcmTagKey& tag, const QJsonObject&
 
 Status Dataset::deidentify(void)
 {
+	return deidentify(TagList());
+}
+
+Status Dataset::deidentify(TagList preservedTagList)
+{
 	Status stat;
 
 	int count = sizeof(attributeConfidentialityList) / sizeof(AttributeConfidentiality);
 	for(int i = 0; i < count; i++) {
 		DcmTagKey tag = attributeConfidentialityList[i].tag;
-		int action = attributeConfidentialityList[i].basicProfileAction;
+		if (std::find(preservedTagList.begin(), preservedTagList.end(), tag) != preservedTagList.end()) {
+			continue;
+		}
 
+		int action = attributeConfidentialityList[i].basicProfileAction;
 		if (action & D) {
 			DcmEVR vr = DcmTag(tag).getEVR();
 			switch(vr) {
@@ -885,8 +893,20 @@ Status Dataset::deidentify(void)
 	if (stat.good()) {
 		for(TagList::iterator i = tagList.begin(); i != tagList.end(); i++) {
 			DcmTagKey tag = *i;
-			if (tag.getGroup() % 2 != 0)
+			if (std::find(preservedTagList.begin(), preservedTagList.end(), tag) != preservedTagList.end()) {
+				continue;
+			}
+
+			if (tag.getGroup() % 2 != 0) {	// private tags
+				DcmTagKey preservedGroupTag;
+				preservedGroupTag.setGroup(tag.getGroup());
+				preservedGroupTag.setElement(0);
+				if (std::find(preservedTagList.begin(), preservedTagList.end(), preservedGroupTag) != preservedTagList.end()) {
+					continue;
+				}
+
 				stat = removeValue(tag);
+			}
 		}
 	}
 
