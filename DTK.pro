@@ -8,10 +8,11 @@ QT		+= xml
 QT		-= gui
 
 TARGET = DTK
-VERSION = 1.4.0
+VERSION = 1.5.0
 TEMPLATE = lib
 
-DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
+#DEFINES += DTK_LIBRARY HAVE_STL HAVE_STD_STRING
+DEFINES += DTK_LIBRARY
 DEFINES -= UNICODE
 
 SOURCES += \
@@ -102,13 +103,13 @@ unix:!macx {
 		CONFIG(debug, debug|release) {
             QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
-            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-debug/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
-            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.1_20161102-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.3-debug/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
+            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
         } else {
             QMAKE_CXXFLAGS += -std=c++0x
 
-            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.1_20161102-release/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
-            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.1_20161102-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+            INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.3-release/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
+            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
         }
 	}
 }
