@@ -135,4 +135,5 @@ win32 {
 
 DISTFILES += \
     ../build-DTK/publish-msvc2013-debug.bat \
-    ../build-DTK/publish-msvc2013-release.bat
+    ../build-DTK/publish-msvc2013-release.bat \
+    Memo.txt
