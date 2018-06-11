@@ -104,12 +104,12 @@ unix:!macx {
             QMAKE_CXXFLAGS += -std=c++0x -g -O0
 
             INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.3-debug/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
-            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+			LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-debug/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/lib -lopenjp2
         } else {
             QMAKE_CXXFLAGS += -std=c++0x
 
             INCLUDEPATH += $$PWD/../lib/dcmtk-3.6.3-release/include $$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/include/openjpeg-2.1
-            LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64//lib -lopenjp2
+			LIBS += -v -L$$PWD/../lib/dcmtk-3.6.3-release/lib -ldcmtk -L$$PWD/../lib/openjpeg-v2.1.2-linux-x86_64/lib -lopenjp2
         }
 	}
 }
@@ -120,15 +120,15 @@ win32 {
 
 	CONFIG(debug, debug|release) {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DCMTKlib-3.6.1_20161102-VS12_MD_Debug\include" "$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\include\openjpeg-2.3"
-		LIBS += -L"$$PWD\..\lib\DCMTKlib-3.6.1_20161102-VS12_MD_Debug\lib" -ldcmtk \
-			-L"$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\lib" -lopenjp2 \
+		INCLUDEPATH += "$$PWD\..\lib\DCMTKlib-3.6.3-VS12_MD_Debug\include" "$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\include\openjpeg-2.3"
+		LIBS += -L"$$PWD\..\lib\DCMTKlib-3.6.3-VS12_MD_Debug\lib" -ldcmtk \
+			-L"$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\lib" -lopenjp2 \
 			wsock32.lib netapi32.lib
 	} else {
 		CONFIG += warn_off dll
-		INCLUDEPATH += "$$PWD\..\lib\DCMTKlib-3.6.1_20161102-VS12_MD_Release\include" "$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\include\openjpeg-2.3"
-		LIBS += -L"$$PWD\..\lib\DCMTKlib-3.6.1_20161102-VS12_MD_Release\lib" -ldcmtk \
-			-L"$$PWD\..\lib\openjpeg-v2.1.2-windows-x86\lib" -lopenjp2 \
+		INCLUDEPATH += "$$PWD\..\lib\DCMTKlib-3.6.3-VS12_MD_Release\include" "$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\include\openjpeg-2.3"
+		LIBS += -L"$$PWD\..\lib\DCMTKlib-3.6.3-VS12_MD_Release\lib" -ldcmtk \
+			-L"$$PWD\..\lib\openjpeg-v2.3.0-windows-x86\lib" -lopenjp2 \
 			wsock32.lib netapi32.lib
 	}
 }

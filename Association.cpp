@@ -270,6 +270,8 @@ Status Association::verify(const String& localAETitle, const String& aetitle, co
 	CEchoRQ req;
 	Message rsp;
 
+	dcmConnectionTimeout.set(timeout);
+
 	dcmStat = dcmAppEntity.init(localAETitle, NET_REQUESTOR, 0, timeout);
 	if (!dcmStat.good())
 		goto on_exit;
@@ -282,7 +284,7 @@ Status Association::verify(const String& localAETitle, const String& aetitle, co
 	if (!dcmStat.good())
 		goto on_exit;
 
-	dcmStat = dcmRequestor.receiveMessage(rsp, 10);
+	dcmStat = dcmRequestor.receiveMessage(rsp, timeout);
 	if (!dcmStat.good())
 		goto on_exit;
 
@@ -310,4 +312,14 @@ static void ProgressCallback(void *callbackContext, Ulong byteCount)
 {
 	Message* messagePtr = reinterpret_cast<Message*>(callbackContext);
 	messagePtr->onProgress(byteCount);
+}
+
+void Association::setConnectionTimeout(Sint32 timeout)
+{
+	dcmConnectionTimeout.set(timeout);
+}
+
+Sint32 Association::getConnectionTimeout(void)
+{
+	return dcmConnectionTimeout.get();
 }

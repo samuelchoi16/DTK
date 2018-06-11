@@ -1428,6 +1428,20 @@ namespace dcm {
 		 */
 		static Status verify(const QString& localAETitle, const QString& aetitle, const QString& hostname, const Uint16 port, const Uint16 timeout = 15);
 
+		/**
+		 * @brief setConnectionTimeout sets connection timeout
+		 * @param timeout
+		 * @return
+		 */
+		static void setConnectionTimeout(Sint32 timeout);
+
+		/**
+		 * @brief getConnectionTimeout gets connection timeout
+		 * @param timeout
+		 * @return
+		 */
+		static Sint32 getConnectionTimeout(void);
+
 	private:
 		Association(const Association&);					// do not allow pass-by-value
 		const Association& operator=(const Association&);	// do not allow assignment
