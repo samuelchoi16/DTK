@@ -40,7 +40,9 @@ SOURCES += \
     dcmjp2k/djp2kencode.cpp \
     dcmjp2k/djp2krparam.cpp \
     dcmjp2k/djp2kutils.cpp \
-    dcmjp2k/djp2kcodecb.cpp
+    dcmjp2k/djp2kcodecb.cpp \
+    AssociationListenerWorker.cpp \
+    AssociationListenerMaster.cpp
 
 HEADERS += DTK.h\
     DTKinternal.h \
