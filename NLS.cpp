@@ -59,34 +59,34 @@ const NLS::CharacterSet NLS::_characterSets[] =
 		"\x1B\x2D\x44",		// ISO 2022 IR 110: ESC - D
 	},
 	{
-		// 5: Latin5
-		"ISO_IR 148",
-		"ISO 2022 IR 148",
-		"\x1B\x2D\x4D",		// ISO 2022 IR 148: ESC - M
-	},
-	{
-		// 6: Cyrillic
+		// 5: Cyrillic
 		"ISO_IR 144",
 		"ISO 2022 IR 144",
 		"\x1B\x2D\x4C",		// ISO 2022 IR 144: ESC - L
 	},
 	{
-		// 7: Arabic
+		// 6: Arabic
 		"ISO_IR 127",
 		"ISO 2022 IR 127",
 		"\x1B\x2D\x47",		// ISO 2022 IR 127: ESC - G
 	},
 	{
-		// 8: Greek
+		// 7: Greek
 		"ISO_IR 126",
 		"ISO 2022 IR 126",
 		"\x1B\x2D\x46",		// ISO 2022 IR 126: ESC - F
 	},
 	{
-		// 9: Hebrew
+		// 8: Hebrew
 		"ISO_IR 138",
 		"ISO 2022 IR 138",
 		"\x1B\x2D\x48",		// ISO 2022 IR 138: ESC - H
+	},
+	{
+		// 9: Latin5
+		"ISO_IR 148",
+		"ISO 2022 IR 148",
+		"\x1B\x2D\x4D",		// ISO 2022 IR 148: ESC - M
 	},
 	{
 		// 10: Thai
